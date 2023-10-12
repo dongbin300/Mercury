@@ -1,0 +1,37 @@
+﻿namespace Albedo.Enums
+{
+    public enum PairQuoteAsset
+    {
+        None,
+        KRW,
+        USDT,
+        TUSD,
+        BUSD,
+        BNB,
+        BTC,
+        ETH,
+        DAI,
+        USDC,
+        VAI,
+        XRP,
+        TRX,
+        DOGE,
+        DOT,
+        AUD,
+        BIDR,
+        BRL,
+        EUR,
+        GBP,
+        RUB,
+        TRY,
+        UAH,
+        ZAR,
+        IDRT,
+        NGN,
+        PLN,
+        RON,
+        ARS,
+        USD,
+        SOL
+    }
+}

@@ -1,0 +1,117 @@
+﻿<Window x:Class="Albedo.Trades.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Albedo Trades" Height="800" Width="400" Loaded="Window_Loaded" Background="#121212">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.5*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <ComboBox Grid.Row="0" x:Name="SymbolComboBox" SelectedValuePath="Name" DisplayMemberPath="Name" SelectionChanged="SymbolComboBox_SelectionChanged"></ComboBox>
+            <StackPanel Grid.Row="1" Orientation="Vertical">
+                <TextBlock Style="{StaticResource Description}">AMOUNT FILTER+</TextBlock>
+                <TextBox x:Name="AmountFilterTextBox">100</TextBox>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Orientation="Vertical">
+                <TextBlock Style="{StaticResource Description}">HIGHLIGHT FILTER+</TextBlock>
+                <TextBox x:Name="HighlightFilterTextBox">10000</TextBox>
+            </StackPanel>
+
+            <Grid Grid.Row="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="AskPriceText1" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="AskPriceText2" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="AskPriceText3" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="AskPriceText4" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="4" Grid.Column="1" x:Name="AskPriceText5" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="5" Grid.Column="1" x:Name="AskPriceText6" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="6" Grid.Column="1" x:Name="AskPriceText7" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="7" Grid.Column="1" x:Name="AskPriceText8" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="8" Grid.Column="1" x:Name="AskPriceText9" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="9" Grid.Column="1" x:Name="AskPriceText10" Style="{StaticResource AskPrice}"/>
+                <TextBlock Grid.Row="10" Grid.Column="1" x:Name="BidPriceText1" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="11" Grid.Column="1" x:Name="BidPriceText2" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="12" Grid.Column="1" x:Name="BidPriceText3" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="13" Grid.Column="1" x:Name="BidPriceText4" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="14" Grid.Column="1" x:Name="BidPriceText5" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="15" Grid.Column="1" x:Name="BidPriceText6" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="16" Grid.Column="1" x:Name="BidPriceText7" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="17" Grid.Column="1" x:Name="BidPriceText8" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="18" Grid.Column="1" x:Name="BidPriceText9" Style="{StaticResource BidPrice}"/>
+                <TextBlock Grid.Row="19" Grid.Column="1" x:Name="BidPriceText10" Style="{StaticResource BidPrice}"/>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <DataGrid x:Name="TradesDataGrid" AutoGenerateColumns="False" IsReadOnly="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <!--<DataGridTextColumn Header="Time" Binding="{Binding Time}" Width="1*"/>-->
+                    <DataGridTextColumn Header="Price" Binding="{Binding Price}" Width="1*"/>
+                    <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" Width="1*">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="FontFamily" Value="Meiryo UI"/>
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="FontWeight" Value="Normal" />
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="Foreground" Value="#EEE"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding BuyerIsMaker}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource Short}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding BuyerIsMaker}" Value="False">
+                                        <Setter Property="Foreground" Value="{StaticResource Long}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsBigHand}" Value="True">
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsBigHand}" Value="False">
+                                        <Setter Property="FontWeight" Value="Normal"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Window>

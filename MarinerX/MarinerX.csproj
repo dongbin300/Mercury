@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="EPPlus" Version="6.2.10" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,82 @@
+﻿<UserControl x:Class="Albedo.Views.PairControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="200" Background="Transparent">
+
+    <Grid Grid.Row="0" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="1"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.Column="0">
+                <!--<Image Height="14" Source="{Binding Pair.FavoritesImage}" MouseLeftButtonDown="FavoritesImage_MouseLeftButtonDown"/>-->
+                <TextBlock Padding="3" FontWeight="Bold" Text="{Binding Pair.SymbolKorean}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Top" Orientation="Horizontal">
+                <Image Margin="3,0,0,0" Height="14" Source="{Binding Pair.MarketIcon}"/>
+                <TextBlock Padding="3" Text="{Binding Pair.MarketKorean}"/>
+                <TextBlock Padding="3" Text="{Binding Pair.MarketTypeKorean}" FontSize="11" Foreground="#777"/>
+            </StackPanel>
+            <TextBlock x:Name="PriceText" Grid.Row="0" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding Pair.PriceString}" FontFamily="Meiryo UI">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Long}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource Short}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="True">
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="False">
+                                <Setter Property="FontWeight" Value="Medium" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <TextBlock x:Name="DiffText" Grid.Row="1" Grid.Column="1" Padding="3" HorizontalAlignment="Right" Text="{Binding Pair.PriceChangePercentString}" FontFamily="Meiryo UI">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Long}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pair.IsBullish}" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource Short}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="True">
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Pair.IsSelected}" Value="False">
+                                <Setter Property="FontWeight" Value="Medium" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+
+        <Rectangle Grid.Row="1" Height="1" Fill="{StaticResource Separator}"/>
+    </Grid>
+</UserControl>

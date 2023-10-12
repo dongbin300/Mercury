@@ -1,0 +1,20 @@
+﻿<Window x:Class="MarinerX.Views.BalanceMonitorView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" ShowInTaskbar="False" WindowStyle="None" ResizeMode="NoResize"
+        MouseDown="Window_MouseDown" Background="Transparent" AllowsTransparency="True"
+        KeyDown="Window_KeyDown"
+        Title="MonitorView" Height="36" Width="150" Topmost="True" Deactivated="Window_Deactivated">
+    <Grid Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" FontSize="11" FontFamily="Verdana" HorizontalAlignment="Left" x:Name="BalanceText"/>
+        <TextBlock Grid.Row="1" FontSize="11" FontFamily="Verdana" HorizontalAlignment="Left" x:Name="IncomeText"/>
+        <TextBlock Grid.Row="2" FontSize="11" FontFamily="Verdana" HorizontalAlignment="Left" x:Name="IncomePerDaysText"/>
+    </Grid>
+</Window>

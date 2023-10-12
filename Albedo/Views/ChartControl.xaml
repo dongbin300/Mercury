@@ -1,0 +1,177 @@
+﻿<UserControl x:Class="Albedo.Views.ChartControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Albedo.ViewModels"
+             xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="Transparent"
+             PreviewMouseWheel="UserControl_PreviewMouseWheel"
+             MouseMove="UserControl_MouseMove"
+             >
+    <UserControl.DataContext>
+        <vm:ChartControlViewModel x:Name="viewModel"/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <Style TargetType="{x:Type RadioButton}">
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+            <Setter Property="Padding" Value="2,0,0,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <TextBlock Name="_text" Text="{TemplateBinding Content}" />
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="_text" Property="FontWeight" Value="Bold"/>
+                                <Setter TargetName="_text" Property="Foreground" Value="{StaticResource Long}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="_text" Property="Foreground" Value="{StaticResource Long}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Name="MainGrid" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="160"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+
+            <Image Grid.Column="0" Width="25" Source="{Binding FavoritesImage}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseLeftButtonDown">
+                        <i:InvokeCommandAction Command="{Binding FavoritesImageClick}"/>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Image>
+            <TextBlock Grid.Column="1" Text="{Binding Pair.SymbolKorean}" VerticalAlignment="Center" Margin="10" FontWeight="Bold" FontSize="20"/>
+
+            <StackPanel Grid.Column="3" Orientation="Vertical">
+                <TextBlock Text="{Binding Pair.PriceString}" FontWeight="Bold" FontSize="16">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Pair.IsBullish}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource Long}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Pair.IsBullish}" Value="False">
+                                    <Setter Property="Foreground" Value="{StaticResource Short}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="{Binding Pair.PriceChangePercentString}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Pair.IsBullish}" Value="True">
+                                    <Setter Property="Foreground" Value="{StaticResource Long}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Pair.IsBullish}" Value="False">
+                                    <Setter Property="Foreground" Value="{StaticResource Short}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Column="4" Orientation="Horizontal" Margin="0,10">
+                <Image Width="20" Source="{Binding MarketImage}"/>
+                <TextBlock Text="{Binding Pair.MarketKorean}"/>
+                <TextBlock Text=" "/>
+                <TextBlock Text="{Binding Pair.MarketTypeKorean}" Foreground="Silver"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Name="IntervalGrid" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                    <RowDefinition Height="25"/>
+                </Grid.RowDefinitions>
+                <!--
+                바이낸스: 1초, 1, 3, 5, 15, 30분, 1, 2, 4, 6, 8, 12시간, 1, 3일, 1주, 1월
+                업비트: 1, 3, 5, 15, 10, 30분, 1, 4시간, 1일, 1주, 1월
+                빗썸: 1, 3, 5, 10, 30분, 1, 6, 12시간, 1일, 1주, 1월
+                공통: 1, 3, 5, 30분, 1시간, 1일, 1주, 1월
+            -->
+                <RadioButton Grid.Row="0" Command="{Binding IntervalClick}" CommandParameter="1분" Content="1분"/>
+                <RadioButton Grid.Row="1" Command="{Binding IntervalClick}" CommandParameter="3분" Content="3분"/>
+                <RadioButton Grid.Row="2" Command="{Binding IntervalClick}" CommandParameter="5분" Content="5분"/>
+                <RadioButton Grid.Row="3" Command="{Binding IntervalClick}" CommandParameter="10분" Content="10분"/>
+                <RadioButton Grid.Row="4" Command="{Binding IntervalClick}" CommandParameter="15분" Content="15분"/>
+                <RadioButton Grid.Row="5" Command="{Binding IntervalClick}" CommandParameter="30분" Content="30분"/>
+                <RadioButton Grid.Row="6" Command="{Binding IntervalClick}" CommandParameter="1시간" Content="1시간"/>
+                <RadioButton Grid.Row="7" Command="{Binding IntervalClick}" CommandParameter="1일" Content="1일"/>
+                <RadioButton Grid.Row="8" Command="{Binding IntervalClick}" CommandParameter="1주" Content="1주"/>
+                <RadioButton Grid.Row="9" Command="{Binding IntervalClick}" CommandParameter="1월" Content="1개월"/>
+            </Grid>
+
+            <Grid Name="ChartGrid" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <!--<RowDefinition Height="32"/>-->
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="1"/>
+                    <RowDefinition Height="100"/>
+                </Grid.RowDefinitions>
+
+                <Grid Name="CandleChartGrid" Grid.Row="0" Grid.RowSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="75"/>
+                    </Grid.ColumnDefinitions>
+                    <skia:SKElement x:Name="CandleChart" Grid.Column="0" PaintSurface="CandleChart_PaintSurface"/>
+                    <skia:SKElement x:Name="CandleChartAxis" Grid.Column="1" PaintSurface="CandleChartAxis_PaintSurface"/>
+                </Grid>
+
+                <GridSplitter ResizeDirection="Rows" Grid.Row="1" Width="{Binding ActualWidth, ElementName=MainGrid}" Height="3" Background="{StaticResource ChartBackground}"/>
+
+                <Grid Name="VolumeChartGrid" Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="75"/>
+                    </Grid.ColumnDefinitions>
+                    <skia:SKElement x:Name="VolumeChart" Grid.Column="0" PaintSurface="VolumeChart_PaintSurface"/>
+                    <skia:SKElement x:Name="VolumeChartAxis" Grid.Column="1" PaintSurface="VolumeChartAxis_PaintSurface"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
+

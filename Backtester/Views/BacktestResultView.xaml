@@ -1,0 +1,23 @@
+﻿<Window x:Class="Backtester.Views.BacktestResultView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="BacktestResultView" Height="600" Width="1200">
+    <Grid>
+        <DataGrid x:Name="ResultDataGrid" AutoGenerateColumns="False" IsReadOnly="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="1.2*" Header="Entry Time" Binding="{Binding OpenTransaction.Time, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"/>
+                <DataGridTextColumn Width="1*" Header="Entry Price" Binding="{Binding OpenTransaction.Price, StringFormat={}{0:N4}}"/>
+                <DataGridTextColumn Width="1*" Header="Entry Quantity" Binding="{Binding OpenTransaction.Quantity, StringFormat={}{0:N4}}"/>
+                <DataGridTextColumn Width="1.2*" Header="Exit Time" Binding="{Binding CloseTransaction.Time, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"/>
+                <DataGridTextColumn Width="1*" Header="Exit Price" Binding="{Binding CloseTransaction.Price, StringFormat={}{0:N4}}"/>
+                <DataGridTextColumn Width="1*" Header="Exit Quantity" Binding="{Binding CloseTransaction.Quantity, StringFormat={}{0:N4}}"/>
+                <DataGridTextColumn Width="1*" Header="PNL" Binding="{Binding Income, StringFormat={}{0:N4}}"/>
+                <DataGridTextColumn Width="1*" Header="ROE" Binding="{Binding Roe, StringFormat={}{0:N2}%}"/>
+                <DataGridTextColumn Width="1*" Header="Fee" Binding="{Binding Fee, StringFormat={}{0:N4}}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

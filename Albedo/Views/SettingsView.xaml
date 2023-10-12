@@ -1,0 +1,54 @@
+﻿<Window x:Class="Albedo.Views.SettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        ResizeMode="NoResize"
+        Title="설정" Height="450" Width="800"
+        Closed="Window_Closed">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Background="{StaticResource Background}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <Rectangle x:Name="R1" Grid.Row="1" Grid.Column="0" Fill="{StaticResource Long}" />
+            <Rectangle x:Name="R2" Grid.Row="2" Grid.Column="0" Fill="{StaticResource Long}" />
+            <Rectangle x:Name="R3" Grid.Row="3" Grid.Column="0" Fill="{StaticResource Long}" />
+
+            <StackPanel x:Name="P1" Grid.Row="1" Grid.Column="1" Background="Transparent" MouseLeftButtonDown="SelectedMenuChanged">
+                <TextBlock x:Name="T1" Margin="10">거래소 접속</TextBlock>
+            </StackPanel>
+
+            <StackPanel x:Name="P2" Grid.Row="2" Grid.Column="1" Background="Transparent" MouseLeftButtonDown="SelectedMenuChanged">
+                <TextBlock x:Name="T2" Margin="10">코인 메뉴</TextBlock>
+            </StackPanel>
+
+            <StackPanel x:Name="P3" Grid.Row="3" Grid.Column="1" Background="Transparent" MouseLeftButtonDown="SelectedMenuChanged">
+                <TextBlock x:Name="T3" Margin="10">차트 화면</TextBlock>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Column="1" Background="{StaticResource ChartBackground}">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <ContentControl x:Name="MainContent" Margin="5"/>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

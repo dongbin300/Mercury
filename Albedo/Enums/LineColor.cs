@@ -1,0 +1,36 @@
+﻿namespace Albedo.Enums
+{
+    public enum LineColor
+    {
+        Red,
+        Green,
+        Blue,
+        Yellow,
+        Magenta,
+        Cyan,
+        Orange,
+        Purple,
+        Teal,
+        Maroon,
+        Olive,
+        Navy,
+        OliveGreen,
+        Gray,
+        Silver,
+        White,
+        Black,
+        Pink,
+        Peach,
+        Lime,
+        DeepPink,
+        GreenYellow,
+        LightYellow,
+        Moccasin,
+        NavajoWhite,
+        SandyBrown,
+        OrangeRed,
+        Orchid,
+        Khaki,
+        CornflowerBlue
+    }
+}

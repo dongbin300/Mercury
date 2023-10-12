@@ -1,0 +1,413 @@
+﻿<UserControl x:Class="Albedo.Views.Settings.SettingsChartControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             d:DesignHeight="1500" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type StackPanel}">
+            <Setter Property="Margin" Value="3,0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">기본 캔들 개수</TextBlock>
+                <TextBlock Style="{StaticResource Error}" x:Name="DefaultCandleCountErrorText">10 이상 1000 이하의 정수를 입력해 주세요.</TextBlock>
+            </StackPanel>
+            <TextBox x:Name="DefaultCandleCountText" TextChanged="DefaultCandleCountText_TextChanged"/>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">이동평균선 1</TextBlock>
+                <CheckBox x:Name="MaEnable1"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="MaPeriodText1"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">종류</TextBlock>
+                    <ComboBox x:Name="MaTypeCombo1" SelectedValuePath="Type" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
+                    <ComboBox x:Name="MaLineColorCombo1" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
+                    <ComboBox x:Name="MaLineWeightCombo1" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">이동평균선 2</TextBlock>
+                <CheckBox x:Name="MaEnable2"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="MaPeriodText2"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">종류</TextBlock>
+                    <ComboBox x:Name="MaTypeCombo2" SelectedValuePath="Type" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
+                    <ComboBox x:Name="MaLineColorCombo2" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
+                    <ComboBox x:Name="MaLineWeightCombo2" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">이동평균선 3</TextBlock>
+                <CheckBox x:Name="MaEnable3"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="MaPeriodText3"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">종류</TextBlock>
+                    <ComboBox x:Name="MaTypeCombo3" SelectedValuePath="Type" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
+                    <ComboBox x:Name="MaLineColorCombo3" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
+                    <ComboBox x:Name="MaLineWeightCombo3" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">이동평균선 4</TextBlock>
+                <CheckBox x:Name="MaEnable4"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="MaPeriodText4"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">종류</TextBlock>
+                    <ComboBox x:Name="MaTypeCombo4" SelectedValuePath="Type" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
+                    <ComboBox x:Name="MaLineColorCombo4" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
+                    <ComboBox x:Name="MaLineWeightCombo4" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">이동평균선 5</TextBlock>
+                <CheckBox x:Name="MaEnable5"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="MaPeriodText5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">종류</TextBlock>
+                    <ComboBox x:Name="MaTypeCombo5" SelectedValuePath="Type" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
+                    <ComboBox x:Name="MaLineColorCombo5" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
+                    <ComboBox x:Name="MaLineWeightCombo5" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">볼린저밴드 1</TextBlock>
+                <CheckBox x:Name="BbEnable1"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="BbPeriodText1"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">편차</TextBlock>
+                    <TextBox x:Name="BbDeviationText1"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색(중심)</TextBlock>
+                    <ComboBox x:Name="BbSmaLineColorCombo1" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께(중심)</TextBlock>
+                    <ComboBox x:Name="BbSmaLineWeightCombo1" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색(상한)</TextBlock>
+                    <ComboBox x:Name="BbUpperLineColorCombo1" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="5" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께(상한)</TextBlock>
+                    <ComboBox x:Name="BbUpperLineWeightCombo1" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="6" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색(하한)</TextBlock>
+                    <ComboBox x:Name="BbLowerLineColorCombo1" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="7" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께(하한)</TextBlock>
+                    <ComboBox x:Name="BbLowerLineWeightCombo1" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">일목균형표</TextBlock>
+                <CheckBox x:Name="IcEnable"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간(단기)</TextBlock>
+                    <TextBox x:Name="IcShortPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간(중기)</TextBlock>
+                    <TextBox x:Name="IcMidPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간(장기)</TextBlock>
+                    <TextBox x:Name="IcLongPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">구름대 표시</TextBlock>
+                    <CheckBox x:Name="IcCloudEnable"></CheckBox>
+                </StackPanel>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">전환선 라인색(단기)</TextBlock>
+                    <ComboBox x:Name="IcTenkanLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기준선 라인색(중기)</TextBlock>
+                    <ComboBox x:Name="IcKijunLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">후행스팬 라인색(중기)</TextBlock>
+                    <ComboBox x:Name="IcChikouLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬1 라인색(단기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou1LineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="4" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬2 라인색(장기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou2LineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">전환선 라인두께(단기)</TextBlock>
+                    <ComboBox x:Name="IcTenkanLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기준선 라인두께(중기)</TextBlock>
+                    <ComboBox x:Name="IcKijunLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">후행스팬 라인두께(중기)</TextBlock>
+                    <ComboBox x:Name="IcChikouLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬1 라인두께(단기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou1LineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+                <StackPanel Grid.Column="4" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">선행스팬2 라인두께(장기,중기)</TextBlock>
+                    <ComboBox x:Name="IcSenkou2LineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">RSI</TextBlock>
+                <CheckBox x:Name="RsiEnable"></CheckBox>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">기간</TextBlock>
+                    <TextBox x:Name="RsiPeriodText"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인색</TextBlock>
+                    <ComboBox x:Name="RsiLineColorCombo" SelectedValuePath="LineColor">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <Rectangle Fill="{Binding Color}" Width="60" Height="20"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical">
+                    <TextBlock Style="{StaticResource Description}">라인두께</TextBlock>
+                    <ComboBox x:Name="RsiLineWeightCombo" SelectedValuePath="LineWeight" DisplayMemberPath="Text"/>
+                </StackPanel>
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

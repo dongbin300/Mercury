@@ -1,0 +1,72 @@
+﻿<UserControl x:Class="Albedo.Views.Settings.SettingsMarketControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <!--<StackPanel Orientation="Horizontal">
+                <Image Width="20" Source="/Resources/binance.png"/>
+                <TextBlock Style="{StaticResource Description}">API KEY</TextBlock>
+            </StackPanel>
+            <TextBox x:Name="BinanceApiKeyText" />
+
+            <StackPanel Orientation="Horizontal">
+                <Image Width="20" Source="/Resources/binance.png"/>
+                <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="BinanceApiSecretKeyText" TextChanged="SecretKey_TextChanged"/>
+                <PasswordBox Grid.Column="0" x:Name="BinanceApiSecretKeyPassword" PasswordChanged="SecretKey_PasswordChanged"/>
+                <Image x:Name="BinanceEyeImage" Grid.Column="1" Width="30" Source="/Resources/eye.png" MouseLeftButtonDown="BinanceEyeImage_MouseLeftButtonDown"/>
+            </Grid>-->
+
+            <StackPanel Orientation="Horizontal">
+                <Image Width="20" Source="/Resources/upbit.png"/>
+                <TextBlock Style="{StaticResource Description}">API KEY (ACCESS)</TextBlock>
+            </StackPanel>
+            <TextBox x:Name="UpbitApiKeyText" />
+
+            <StackPanel Orientation="Horizontal">
+                <Image Width="20" Source="/Resources/upbit.png"/>
+                <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="UpbitApiSecretKeyText" TextChanged="SecretKey_TextChanged"/>
+                <PasswordBox Grid.Column="0" x:Name="UpbitApiSecretKeyPassword" PasswordChanged="SecretKey_PasswordChanged"/>
+                <Image x:Name="UpbitEyeImage" Grid.Column="1" Width="30" Source="/Resources/eye.png" MouseLeftButtonDown="UpbitEyeImage_MouseLeftButtonDown"/>
+            </Grid>
+
+            <!--<StackPanel Orientation="Horizontal">
+                <Image Width="20" Source="/Resources/bithumb.png"/>
+                <TextBlock Style="{StaticResource Description}">API KEY (CONNECT)</TextBlock>
+            </StackPanel>
+            <TextBox x:Name="BithumbApiKeyText" />
+
+            <StackPanel Orientation="Horizontal">
+                <Image Width="20" Source="/Resources/bithumb.png"/>
+                <TextBlock Style="{StaticResource Description}">API KEY (SECRET)</TextBlock>
+            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="BithumbApiSecretKeyText" TextChanged="SecretKey_TextChanged"/>
+                <PasswordBox Grid.Column="0" x:Name="BithumbApiSecretKeyPassword" PasswordChanged="SecretKey_PasswordChanged"/>
+                <Image x:Name="BithumbEyeImage" Grid.Column="1" Width="30" Source="/Resources/eye.png" MouseLeftButtonDown="BithumbEyeImage_MouseLeftButtonDown"/>
+            </Grid>-->
+        </StackPanel>
+    </Grid>
+</UserControl>

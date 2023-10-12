@@ -1,0 +1,31 @@
+﻿<Window x:Class="MarinerX.Views.RealTradeBotView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MarinerX.Views"
+        mc:Ignorable="d"
+        Title="Real Trade Bot" Height="450" Width="400" Loaded="Window_Loaded" Closing="Window_Closing">
+    <Grid>
+        <DataGrid x:Name="QuoteDataGrid" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Symbol" Width="1*" Binding="{Binding Symbol}"/>
+                <DataGridTextColumn Header="Price" Width="1*" Binding="{Binding CurrentPrice}"/>
+                <DataGridTextColumn Header="RSI" Width="1*" Binding="{Binding CurrentRsi}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding RsiColor, Converter={StaticResource stf}}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="RI" Width="1*" Binding="{Binding CurrentRi}">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="{Binding RiColor, Converter={StaticResource stf}}"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
