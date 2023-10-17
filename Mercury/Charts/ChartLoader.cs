@@ -112,7 +112,7 @@ namespace Mercury.Charts
                 var chartData = File.ReadAllLines(chartFileName);
                 var indicatorData = File.ReadAllLines(indicatorFileName);
 
-                for(int i=0;i<chartData.Length;i++)
+                for (int i = 0; i < chartData.Length; i++)
                 {
                     var e = chartData[i].Split(',');
                     var time = e[0].ToDateTime();
@@ -140,7 +140,7 @@ namespace Mercury.Charts
                         chartPack.AddChart(chart);
                     }
 
-                    if(time == endDate)
+                    if (time == endDate)
                     {
                         break;
                     }
@@ -200,6 +200,43 @@ namespace Mercury.Charts
                         break;
                     }
                 }
+                Charts.Add(chartPack);
+            }
+            catch (FileNotFoundException)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 분봉 초기화
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="interval"></param>
+        public static void InitChartsMByDate(string symbol, KlineInterval interval)
+        {
+            try
+            {
+                var chartPack = new ChartPack(interval);
+                var fileName = MercuryPath.BinanceFuturesData.Down(interval.ToIntervalString(), $"{symbol}.csv");
+                var data = File.ReadAllLines(fileName);
+
+                foreach (var d in data)
+                {
+                    var e = d.Split(',');
+                    var time = e[0].ToDateTime();
+                    var quote = new Quote
+                    {
+                        Date = time,
+                        Open = e[1].ToDecimal(),
+                        High = e[2].ToDecimal(),
+                        Low = e[3].ToDecimal(),
+                        Close = e[4].ToDecimal(),
+                        Volume = e[5].ToDecimal()
+                    };
+                    chartPack.AddChart(new ChartInfo(symbol, quote));
+                }
+
                 Charts.Add(chartPack);
             }
             catch (FileNotFoundException)
@@ -286,7 +323,7 @@ namespace Mercury.Charts
                             break;
                         }
                     }
-                    else if(d.StartsWith($"{startDate:yyyy-MM-dd HH:mm:ss}"))
+                    else if (d.StartsWith($"{startDate:yyyy-MM-dd HH:mm:ss}"))
                     {
                         isStart = true;
                     }

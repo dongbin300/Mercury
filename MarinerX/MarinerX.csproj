@@ -7,6 +7,34 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Resources\Images\chart.ico" />
+	  <None Remove="Resources\Images\chart.png" />
+	  <None Remove="Resources\Images\chart2.ico" />
+	  <None Remove="Resources\Images\chart2.png" />
+	  <None Remove="Resources\Images\chart3.ico" />
+	  <None Remove="Resources\Images\chart3.png" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Resources\Images\chart.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\Images\chart.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\Images\chart2.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\Images\chart2.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\Images\chart3.ico">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Resources\Images\chart3.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="EPPlus" Version="6.2.10" />

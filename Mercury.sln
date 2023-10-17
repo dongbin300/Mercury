@@ -5,27 +5,27 @@ VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mercury", "Mercury\Mercury.csproj", "{5FC41F55-E1F3-4E11-A532-E9B5DF849D60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryTradingModel", "MercuryTradingModel\MercuryTradingModel.csproj", "{E423E089-DDE1-4955-8442-C4D20956184B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercuryTradingModel", "MercuryTradingModel\MercuryTradingModel.csproj", "{E423E089-DDE1-4955-8442-C4D20956184B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MercuryEditor", "MercuryEditor\MercuryEditor.csproj", "{633E75B2-2E18-42D1-B161-20BAE42E1CF4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercuryEditor", "MercuryEditor\MercuryEditor.csproj", "{633E75B2-2E18-42D1-B161-20BAE42E1CF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lab", "Lab\Lab.csproj", "{55D6B738-93DD-4431-BEFD-CA3AC1933336}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lab", "Lab\Lab.csproj", "{55D6B738-93DD-4431-BEFD-CA3AC1933336}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Albedo", "Albedo\Albedo.csproj", "{A19092CD-B8BE-4469-9577-811FCAA30835}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Albedo", "Albedo\Albedo.csproj", "{A19092CD-B8BE-4469-9577-811FCAA30835}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Albedo.Trades", "Albedo.Trades\Albedo.Trades.csproj", "{F965B0C0-0FE7-46EB-B926-EDDEC526176A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Albedo.Trades", "Albedo.Trades\Albedo.Trades.csproj", "{F965B0C0-0FE7-46EB-B926-EDDEC526176A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarinerX", "MarinerX\MarinerX.csproj", "{9E49E45A-5051-4EFF-AD8A-27E65AC2F81C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MarinerX", "MarinerX\MarinerX.csproj", "{9E49E45A-5051-4EFF-AD8A-27E65AC2F81C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradeBot", "TradeBot\TradeBot.csproj", "{30BD92EC-9B8F-4552-BDC0-E257C4AA03ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeBot", "TradeBot\TradeBot.csproj", "{30BD92EC-9B8F-4552-BDC0-E257C4AA03ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChartViewer", "ChartViewer\ChartViewer.csproj", "{ACBAEBD7-6F29-4929-90D1-DFFAED6720DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartViewer", "ChartViewer\ChartViewer.csproj", "{ACBAEBD7-6F29-4929-90D1-DFFAED6720DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backtester", "Backtester\Backtester.csproj", "{9C151610-16BB-4767-A24F-E93A5B406D27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backtester", "Backtester\Backtester.csproj", "{9C151610-16BB-4767-A24F-E93A5B406D27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChartSimulator", "ChartSimulator\ChartSimulator.csproj", "{1CA517EF-D3A3-4F31-97A6-82B9D519718A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartSimulator", "ChartSimulator\ChartSimulator.csproj", "{1CA517EF-D3A3-4F31-97A6-82B9D519718A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Alphasquare", "Alphasquare\Alphasquare.csproj", "{DA6CCAAE-FE4E-448E-A6D9-CF1B4EF97542}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alphasquare", "Alphasquare\Alphasquare.csproj", "{DA6CCAAE-FE4E-448E-A6D9-CF1B4EF97542}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stock", "Stock", "{01F19263-E1D5-4CF0-92C4-3B1FFBA184E8}"
 EndProject
@@ -33,7 +33,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Crypto", "Crypto", "{AABA64
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiwoomManager", "KiwoomManager\KiwoomManager.csproj", "{3A1502EF-83F5-4869-9A90-4DFCA385B746}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MAll", "MAll\MAll.csproj", "{CB71AB89-917F-45F6-804F-7F03758C407F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MAll", "MAll\MAll.csproj", "{CB71AB89-917F-45F6-804F-7F03758C407F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoProphet", "CryptoProphet\CryptoProphet.csproj", "{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -97,6 +99,10 @@ Global
 		{CB71AB89-917F-45F6-804F-7F03758C407F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB71AB89-917F-45F6-804F-7F03758C407F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB71AB89-917F-45F6-804F-7F03758C407F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +114,7 @@ Global
 		{30BD92EC-9B8F-4552-BDC0-E257C4AA03ED} = {AABA6422-1D25-4379-A013-7804DB23AB9C}
 		{DA6CCAAE-FE4E-448E-A6D9-CF1B4EF97542} = {01F19263-E1D5-4CF0-92C4-3B1FFBA184E8}
 		{3A1502EF-83F5-4869-9A90-4DFCA385B746} = {01F19263-E1D5-4CF0-92C4-3B1FFBA184E8}
+		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD} = {AABA6422-1D25-4379-A013-7804DB23AB9C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {258428AA-3F08-46CA-A106-747AE0C89119}

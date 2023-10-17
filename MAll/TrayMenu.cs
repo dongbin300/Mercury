@@ -36,6 +36,19 @@ namespace MAll
             menuStrip.Items.Add(new ToolStripMenuItem("M_ALL By Gaten", iconImage));
             menuStrip.Items.Add(new ToolStripSeparator());
 
+            menuStrip.Items.Add(new ToolStripMenuItem("Mariner X", null, MarinerX));
+            menuStrip.Items.Add(new ToolStripMenuItem("Trade Bot", null, TradeBot));
+            menuStrip.Items.Add(new ToolStripSeparator());
+
+            menuStrip.Items.Add(new ToolStripMenuItem("Alphasquare", null, Alphasquare));
+            menuStrip.Items.Add(new ToolStripMenuItem("Kiwoom Manager", null, KiwoomManager));
+            menuStrip.Items.Add(new ToolStripSeparator());
+
+            menuStrip.Items.Add(new ToolStripMenuItem("Backtester", null, Backtester));
+            menuStrip.Items.Add(new ToolStripMenuItem("Chart Simulator", null, ChartSimulator));
+            menuStrip.Items.Add(new ToolStripMenuItem("Chart Viewer", null, ChartViewer));
+            menuStrip.Items.Add(new ToolStripSeparator());
+
             menuStrip.Items.Add(new ToolStripMenuItem("Albedo", null, Albedo));
             menuStrip.Items.Add(new ToolStripMenuItem("Albedo.Trades", null, AlbedoTrades));
             menuStrip.Items.Add(new ToolStripSeparator());
@@ -60,6 +73,90 @@ namespace MAll
             };
 
             Process.Start(info);
+        }
+
+        public void MarinerX(object? sender, EventArgs e)
+        {
+            try
+            {
+                ExecuteSmart("MarinerX");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void TradeBot(object? sender, EventArgs e)
+        {
+            try
+            {
+                ExecuteSmart("TradeBot");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void Alphasquare(object? sender, EventArgs e)
+        {
+            try
+            {
+                ExecuteSmart("Alphasquare");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void KiwoomManager(object? sender, EventArgs e)
+        {
+            try
+            {
+                ExecuteSmart("KiwoomManager");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void Backtester(object? sender, EventArgs e)
+        {
+            try
+            {
+                ExecuteSmart("Backtester");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void ChartSimulator(object? sender, EventArgs e)
+        {
+            try
+            {
+                ExecuteSmart("ChartSimulator");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void ChartViewer(object? sender, EventArgs e)
+        {
+            try
+            {
+                ExecuteSmart("ChartViewer");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void Albedo(object? sender, EventArgs e)

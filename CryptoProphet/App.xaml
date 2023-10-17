@@ -1,8 +1,8 @@
-﻿<Application x:Class="MAll.App"
+﻿<Application x:Class="CryptoProphet.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MAll"
-             Startup="Application_Startup">
+             xmlns:local="clr-namespace:CryptoProphet"
+             StartupUri="MainWindow.xaml">
     <Application.Resources>
          
     </Application.Resources>
