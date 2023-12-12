@@ -45,8 +45,10 @@ namespace ChartViewer
         private readonly SKFont CandleInfoFont = new(SKTypeface.FromFamilyName("Meiryo UI"), 11);
         private readonly SKPaint CandleInfoPaint = new() { Color = SKColors.White };
         private readonly SKPaint HorizontalLinePointerPaint = new() { Color = SKColors.Silver };
-        private readonly SKPaint LongPaint = new() { Color = new(59, 207, 134) };
-        private readonly SKPaint ShortPaint = new() { Color = new(237, 49, 97) };
+        private static readonly SKColor LongColor = new(59, 207, 134);
+        private static readonly SKColor ShortColor = new(237, 49, 97);
+        private readonly SKPaint LongPaint = new() { Color = LongColor };
+        private readonly SKPaint ShortPaint = new() { Color = ShortColor };
         private readonly SKPaint CandlePointerPaint = new() { Color = new SKColor(255, 255, 255, 32) };
         private readonly SKPaint CandleBuyPointerPaint = new() { Color = new SKColor(59, 207, 134, 64) };
         private readonly SKPaint CandleSellPointerPaint = new() { Color = new SKColor(237, 49, 97, 64) };
@@ -148,6 +150,14 @@ namespace ChartViewer
                     Charts[i].Ema3 = ema.ElementAt(i) == 0 ? -39909 : ema.ElementAt(i);
                 }
             }
+            if (Supertrend1CheckBox.IsChecked ?? true)
+            {
+                var st = quotes.GetSupertrend(Supertrend1PeriodText.Text.ToInt(), Supertrend1FactorText.Text.ToDouble()).Select(x => x.Supertrend);
+                for (int i = 0; i < Charts.Count; i++)
+                {
+                    Charts[i].Supertrend1 = st.ElementAt(i) == 0 ? -39909 : st.ElementAt(i);
+                }
+            }
 
             CandleChart.InvalidateVisual();
         }
@@ -166,6 +176,24 @@ namespace ChartViewer
                     new SKPoint(
                         LiveActualItemFullWidth * (viewIndex + 0.5f),
                         LiveActualHeight * (float)(1.0 - (value - min) / (max - min)) + CandleTopBottomMargin),
+                    new SKPaint() { Color = color }
+                    );
+        }
+
+        private void DrawSupertrend(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color)
+        {
+            if (preValue == -39909 || value == -39909 || (preValue < 0 && value >= 0) || (preValue >= 0 && value < 0))
+            {
+                return;
+            }
+
+            canvas.DrawLine(
+                    new SKPoint(
+                        LiveActualItemFullWidth * (viewIndex - 0.5f),
+                        LiveActualHeight * (float)(1.0 - (Math.Abs(preValue) - min) / (max - min)) + CandleTopBottomMargin),
+                    new SKPoint(
+                        LiveActualItemFullWidth * (viewIndex + 0.5f),
+                        LiveActualHeight * (float)(1.0 - (Math.Abs(value) - min) / (max - min)) + CandleTopBottomMargin),
                     new SKPaint() { Color = color }
                     );
         }
@@ -201,6 +229,11 @@ namespace ChartViewer
                 yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema3));
                 yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema3 != -39909).Min(x => x.Ema3));
             }
+            if (Supertrend1CheckBox.IsChecked ?? true)
+            {
+                yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend1 != -39909).Max(x => Math.Abs(x.Supertrend1)));
+                yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend1 != -39909).Min(x => Math.Abs(x.Supertrend1)));
+            }
 
             // Draw Quote and Indicator
             for (int i = 0; i < Charts.Count; i++)
@@ -218,6 +251,10 @@ namespace ChartViewer
                 if (Ema3CheckBox.IsChecked ?? true)
                 {
                     DrawIndicator(canvas, i, i == 0 ? Charts[i].Ema3 : Charts[i - 1].Ema3, Charts[i].Ema3, yMax, yMin, new SKColor(128, 128, 192));
+                }
+                if (Supertrend1CheckBox.IsChecked ?? true)
+                {
+                    DrawSupertrend(canvas, i, i == 0 ? Charts[i].Supertrend1 : Charts[i - 1].Supertrend1, Charts[i].Supertrend1, yMax, yMin, Charts[i].Supertrend1 > 0 ? LongColor : ShortColor);
                 }
 
                 #region Candle
