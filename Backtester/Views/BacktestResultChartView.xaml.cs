@@ -224,15 +224,15 @@ namespace Backtester.Views
                 //    );
 
                 // Supertrend
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(preEma) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(ema) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = ema > 0 ? SKColors.Green : SKColors.Red }
-                    );
+                //canvas.DrawLine(
+                //    new SKPoint(
+                //        actualItemFullWidth * (viewIndex - 0.5f),
+                //        actualHeight * (float)(1.0 - (Math.Abs(preEma) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                //    new SKPoint(
+                //        actualItemFullWidth * (viewIndex + 0.5f),
+                //        actualHeight * (float)(1.0 - (Math.Abs(ema) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                //    new SKPaint() { Color = ema > 0 ? SKColors.Green : SKColors.Red }
+                //    );
                 //canvas.DrawLine(
                 //    new SKPoint(
                 //        actualItemFullWidth * (viewIndex - 0.5f),

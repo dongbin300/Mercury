@@ -35,7 +35,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiwoomManager", "KiwoomMana
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MAll", "MAll\MAll.csproj", "{CB71AB89-917F-45F6-804F-7F03758C407F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoProphet", "CryptoProphet\CryptoProphet.csproj", "{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoProphet", "CryptoProphet\CryptoProphet.csproj", "{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradeBotConsole", "TradeBotConsole\TradeBotConsole.csproj", "{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +105,10 @@ Global
 		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -115,6 +121,7 @@ Global
 		{DA6CCAAE-FE4E-448E-A6D9-CF1B4EF97542} = {01F19263-E1D5-4CF0-92C4-3B1FFBA184E8}
 		{3A1502EF-83F5-4869-9A90-4DFCA385B746} = {01F19263-E1D5-4CF0-92C4-3B1FFBA184E8}
 		{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD} = {AABA6422-1D25-4379-A013-7804DB23AB9C}
+		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0} = {AABA6422-1D25-4379-A013-7804DB23AB9C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {258428AA-3F08-46CA-A106-747AE0C89119}

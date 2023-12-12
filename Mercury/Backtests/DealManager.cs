@@ -66,8 +66,8 @@ namespace Mercury.Backtests
         public void EvaluateEveryonesCoin(ChartInfo info, ChartInfo preInfo)
         {
             var q = info.Quote;
-            var rsi = info.Rsi;
-            var preRsi = preInfo.Rsi;
+            var rsi = info.Rsi1;
+            var preRsi = preInfo.Rsi1;
             var lsma10 = info.Lsma1;
             var preLsma10 = preInfo.Lsma1;
             var lsma30 = info.Lsma2;

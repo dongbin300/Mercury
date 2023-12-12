@@ -86,7 +86,7 @@ namespace Mercury.Charts
                 var chart = Charts[i];
                 chart.Lsma1 = r1.ElementAt(i);
                 chart.Lsma2 = r2.ElementAt(i);
-                chart.Rsi = r3.ElementAt(i);
+                chart.Rsi1 = r3.ElementAt(i);
             }
         }
 

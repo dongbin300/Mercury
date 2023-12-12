@@ -101,7 +101,7 @@ namespace MarinerX
             tmBackTestFiles = Directory.GetFiles(TradingModelPath.InspectedBackTestDirectory).Select(x => new BackTestTmFile(x)).ToList();
             tmMockTradeFileNames = Directory.GetFiles(TradingModelPath.InspectedMockTradeDirectory).ToList();
             tmRealTradeFileNames = Directory.GetFiles(TradingModelPath.InspectedRealTradeDirectory).ToList();
-            backTestResultFileNames = Directory.GetFiles(PathUtil.Desktop.Down("MarinerX"), "*.csv").ToList();
+            backTestResultFileNames = Directory.GetFiles(PathUtil.Base.Down("MarinerX"), "*.csv").ToList();
         }
 
         public void RefreshMenu()
@@ -836,7 +836,7 @@ namespace MarinerX
                     throw new Exception("No Trading!!");
                 }
 
-                var path = PathUtil.Desktop.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
+                var path = PathUtil.Base.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
                 result.SaveCsvFile(path);
 
                 DispatcherService.Invoke(() =>
@@ -1041,7 +1041,7 @@ namespace MarinerX
                     throw new Exception("Back Test No Trading!!!");
                 }
 
-                var path = PathUtil.Desktop.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}.csv");
+                var path = PathUtil.Base.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}.csv");
                 result.SaveCsvFile(path);
 
                 DispatcherService.Invoke(() =>
@@ -1108,7 +1108,7 @@ namespace MarinerX
                     throw new Exception("Back Test No Trading!!!");
                 }
 
-                var path = PathUtil.Desktop.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}_b{bandwidth}_r{profitRoe}.csv");
+                var path = PathUtil.Base.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}_b{bandwidth}_r{profitRoe}.csv");
                 result.SaveCsvFile(path);
 
                 //DispatcherService.Invoke(() =>
@@ -1348,7 +1348,7 @@ namespace MarinerX
                 //foreach (var d in result)
                 //{
                 //    var content = $"{d.ChartInfo.Symbol},{d.TargetRoe},{d.WinCount},{d.LoseCount},{Math.Round(d.WinRate, 2)}" + Environment.NewLine;
-                //    File.AppendAllText(PathUtil.Desktop.Down("EveryonesCoin_Backtest_History5m.csv"), content);
+                //    File.AppendAllText(PathUtil.Base.Down("EveryonesCoin_Backtest_History5m.csv"), content);
                 //}
 
                 //var dealManager = new CommasDealManager(1.75m, 100, 0, 0, 0, 0, 0);
@@ -1381,7 +1381,7 @@ namespace MarinerX
                 //}
 
                 //var content = $"{dealManager.TargetRoe},{dealManager.WinCount},{dealManager.LoseCount},{Math.Round(dealManager.WinRate, 2)},{Math.Round(dealManager.TotalIncome, 3)}" + Environment.NewLine;
-                //File.AppendAllText(PathUtil.Desktop.Down("EveryonesCoin_Backtest_History_v3.csv"), content);
+                //File.AppendAllText(PathUtil.Base.Down("EveryonesCoin_Backtest_History_v3.csv"), content);
 
                 //var etiPlus = result.Where(x => x.EstimatedTotalIncome > 0).ToList();
             }

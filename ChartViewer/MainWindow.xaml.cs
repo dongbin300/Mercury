@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -54,6 +55,11 @@ namespace ChartViewer
         private int ChartCount => Charts.Count;
         public float CurrentMouseX;
         public float CurrentMouseY;
+
+        float LiveActualWidth;
+        float LiveActualHeight;
+        float LiveActualItemFullWidth => LiveActualWidth / ChartCount;
+        float LiveActualItemMargin => LiveActualItemFullWidth * 0.2f;
 
         public MainWindow()
         {
@@ -109,26 +115,59 @@ namespace ChartViewer
             // Calculate Indicators
             var quotes = Charts.Select(x => x.Quote);
             //var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
-            var stoch = quotes.GetStoch(12).Select(x => x.Stoch);
-            var _macd = quotes.GetMacd(12, 26, 9);
-            var macd = _macd.Select(x => x.Macd);
-            var signal = _macd.Select(x => x.Signal);
-            var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
-            var bbu = quotes.GetBollingerBands(24, 3, QuoteType.High).Select(x => x.Upper);
-            var bbl = quotes.GetBollingerBands(24, 3, QuoteType.Low).Select(x => x.Lower);
-            for (int i = 0; i < Charts.Count; i++)
+            //var stoch = quotes.GetStoch(12).Select(x => x.Stoch);
+            //var _macd = quotes.GetMacd(22, 48, 9);
+            //var _macd2 = quotes.GetMacd(11, 24, 9);
+            //var macd = _macd.Select(x => x.Macd);
+            //var macd2 = _macd2.Select(x => x.Macd);
+            //var signal = _macd.Select(x => x.Signal);
+            //var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
+            //var bbu = quotes.GetBollingerBands(24, 3, QuoteType.High).Select(x => x.Upper);
+            //var bbl = quotes.GetBollingerBands(24, 3, QuoteType.Low).Select(x => x.Lower);
+            if (Ema1CheckBox.IsChecked ?? true)
             {
-                var chart = Charts[i];
-                //chart.Adx = adx.ElementAt(i);
-                chart.Stoch = stoch.ElementAt(i);
-                chart.Macd = macd.ElementAt(i);
-                chart.MacdSignal = signal.ElementAt(i);
-                chart.Supertrend1 = st.ElementAt(i);
-                chart.Bb1Upper = bbu.ElementAt(i);
-                chart.Bb1Lower = bbl.ElementAt(i);
+                var ema = quotes.GetEma(Ema1Text.Text.ToInt()).Select(x => x.Ema);
+                for (int i = 0; i < Charts.Count; i++)
+                {
+                    Charts[i].Ema1 = ema.ElementAt(i) == 0 ? -39909 : ema.ElementAt(i);
+                }
+            }
+            if (Ema2CheckBox.IsChecked ?? true)
+            {
+                var ema = quotes.GetEma(Ema2Text.Text.ToInt()).Select(x => x.Ema);
+                for (int i = 0; i < Charts.Count; i++)
+                {
+                    Charts[i].Ema2 = ema.ElementAt(i) == 0 ? -39909 : ema.ElementAt(i);
+                }
+            }
+            if (Ema3CheckBox.IsChecked ?? true)
+            {
+                var ema = quotes.GetEma(Ema3Text.Text.ToInt()).Select(x => x.Ema);
+                for (int i = 0; i < Charts.Count; i++)
+                {
+                    Charts[i].Ema3 = ema.ElementAt(i) == 0 ? -39909 : ema.ElementAt(i);
+                }
             }
 
             CandleChart.InvalidateVisual();
+        }
+
+        private void DrawIndicator(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color)
+        {
+            if (preValue == -39909 || value == -39909)
+            {
+                return;
+            }
+
+            canvas.DrawLine(
+                    new SKPoint(
+                        LiveActualItemFullWidth * (viewIndex - 0.5f),
+                        LiveActualHeight * (float)(1.0 - (preValue - min) / (max - min)) + CandleTopBottomMargin),
+                    new SKPoint(
+                        LiveActualItemFullWidth * (viewIndex + 0.5f),
+                        LiveActualHeight * (float)(1.0 - (value - min) / (max - min)) + CandleTopBottomMargin),
+                    new SKPaint() { Color = color }
+                    );
         }
 
         private void CandleChart_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
@@ -138,10 +177,8 @@ namespace ChartViewer
                 return;
             }
 
-            var actualWidth = (float)CandleChart.ActualWidth;
-            var actualHeight = (float)CandleChart.ActualHeight - CandleTopBottomMargin * 2;
-            var actualItemFullWidth = actualWidth / ChartCount;
-            var actualItemMargin = actualItemFullWidth * 0.2f;
+            LiveActualWidth = (float)CandleChart.ActualWidth;
+            LiveActualHeight = (float)CandleChart.ActualHeight - CandleTopBottomMargin * 2;
 
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
@@ -149,113 +186,66 @@ namespace ChartViewer
             var yMax = (double)Charts.Max(x => x.Quote.High);
             var yMin = (double)Charts.Min(x => x.Quote.Low);
 
-            var macdMax = (double)Charts.Max(x => x.Macd);
-            var macdMin = (double)Charts.Min(x => x.Macd);
+            if (Ema1CheckBox.IsChecked ?? true)
+            {
+                yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema1));
+                yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema1 != -39909).Min(x => x.Ema1));
+            }
+            if (Ema2CheckBox.IsChecked ?? true)
+            {
+                yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema2));
+                yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema2 != -39909).Min(x => x.Ema2));
+            }
+            if (Ema3CheckBox.IsChecked ?? true)
+            {
+                yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema3));
+                yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema3 != -39909).Min(x => x.Ema3));
+            }
 
             // Draw Quote and Indicator
             for (int i = 0; i < Charts.Count; i++)
             {
                 var quote = Charts[i].Quote;
-                var stoch = Charts[i].Stoch;
-                //var adx = Charts[i].Adx;
-                var macd = Charts[i].Macd;
-                var signal = Charts[i].MacdSignal;
-                var st = Charts[i].Supertrend1;
-                var bbu = Charts[i].Bb1Upper;
-                var bbl = Charts[i].Bb1Lower;
-                var preStoch = i == 0 ? stoch : Charts[i - 1].Stoch;
-                //var preAdx = i == 0 ? adx : Charts[i - 1].Adx;
-                var preMacd = i == 0 ? macd : Charts[i - 1].Macd;
-                var preSignal = i == 0 ? signal : Charts[i - 1].MacdSignal;
-                var preSt = i == 0 ? st : Charts[i - 1].Supertrend1;
-                var preBbu = i == 0 ? bbu : Charts[i - 1].Bb1Upper;
-                var preBbl = i == 0 ? bbl : Charts[i - 1].Bb1Lower;
-                var viewIndex = i;
 
+                if (Ema1CheckBox.IsChecked ?? true)
+                {
+                    DrawIndicator(canvas, i, i == 0 ? Charts[i].Ema1 : Charts[i - 1].Ema1, Charts[i].Ema1, yMax, yMin, new SKColor(128, 128, 128));
+                }
+                if (Ema2CheckBox.IsChecked ?? true)
+                {
+                    DrawIndicator(canvas, i, i == 0 ? Charts[i].Ema2 : Charts[i - 1].Ema2, Charts[i].Ema2, yMax, yMin, new SKColor(128, 128, 160));
+                }
+                if (Ema3CheckBox.IsChecked ?? true)
+                {
+                    DrawIndicator(canvas, i, i == 0 ? Charts[i].Ema3 : Charts[i - 1].Ema3, Charts[i].Ema3, yMax, yMin, new SKColor(128, 128, 192));
+                }
+
+                #region Candle
                 canvas.DrawLine(
                     new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (preMacd - macdMin) / (macdMax - macdMin)) + CandleTopBottomMargin),
+                        LiveActualItemFullWidth * (i + 0.5f),
+                        LiveActualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
                     new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (macd - macdMin) / (macdMax - macdMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = SKColors.SkyBlue }
-                    );
-
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (preSignal - macdMin) / (macdMax - macdMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (signal - macdMin) / (macdMax - macdMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = SKColors.Orange }
-                    );
-
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(preSt) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(st) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    st > 0 ? LongPaint : ShortPaint
-                    );
-
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - Math.Abs(preStoch) / 100) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - Math.Abs(stoch) / 100) + CandleTopBottomMargin),
-                    new SKPaint() { Color = stoch < 20 || stoch > 80 ? SKColors.Yellow : SKColors.Gray }
-                    );
-
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(preBbu) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(bbu) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = SKColors.White }
-                    );
-
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(preBbl) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (Math.Abs(bbl) - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = SKColors.White }
-                    );
-
-                canvas.DrawLine(
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - ((double)quote.Low - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                        LiveActualItemFullWidth * (i + 0.5f),
+                        LiveActualHeight * (float)(1.0 - ((double)quote.Low - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
                     quote.Open < quote.Close ? LongPaint : ShortPaint);
                 canvas.DrawRect(
                     new SKRect(
-                        actualItemFullWidth * viewIndex + actualItemMargin / 2,
-                        actualHeight * (float)(1.0 - ((double)quote.Open - yMin) / (yMax - yMin)) + CandleTopBottomMargin,
-                        actualItemFullWidth * (viewIndex + 1) - actualItemMargin / 2,
-                        actualHeight * (float)(1.0 - ((double)quote.Close - yMin) / (yMax - yMin)) + CandleTopBottomMargin
+                        LiveActualItemFullWidth * i + LiveActualItemMargin / 2,
+                        LiveActualHeight * (float)(1.0 - ((double)quote.Open - yMin) / (yMax - yMin)) + CandleTopBottomMargin,
+                        LiveActualItemFullWidth * (i + 1) - LiveActualItemMargin / 2,
+                        LiveActualHeight * (float)(1.0 - ((double)quote.Close - yMin) / (yMax - yMin)) + CandleTopBottomMargin
                         ),
                     quote.Open < quote.Close ? LongPaint : ShortPaint
                     );
+                #endregion
             }
 
             // Draw Pointer
             canvas.DrawRect(
-                (int)(CurrentMouseX / actualItemFullWidth) * actualItemFullWidth,
+                (int)(CurrentMouseX / LiveActualItemFullWidth) * LiveActualItemFullWidth,
                 0,
-                actualItemFullWidth,
+                LiveActualItemFullWidth,
                 (float)CandleChart.ActualHeight,
                 CandlePointerPaint
                 );
@@ -264,17 +254,17 @@ namespace ChartViewer
             if (buyIndex != -1 && sellIndex != -1)
             {
                 canvas.DrawRect(
-               buyIndex * actualItemFullWidth,
+               buyIndex * LiveActualItemFullWidth,
                0,
-               actualItemFullWidth,
+               LiveActualItemFullWidth,
                (float)CandleChart.ActualHeight,
                CandleBuyPointerPaint
                );
 
                 canvas.DrawRect(
-               sellIndex * actualItemFullWidth,
+               sellIndex * LiveActualItemFullWidth,
                0,
-               actualItemFullWidth,
+               LiveActualItemFullWidth,
                (float)CandleChart.ActualHeight,
                CandleSellPointerPaint
                );
@@ -288,13 +278,13 @@ namespace ChartViewer
                 0, CurrentMouseY, (float)CandleChart.ActualWidth, CurrentMouseY, HorizontalLinePointerPaint
                 );
             // Draw Horizontal Line Price
-            var pointingPrice = ((decimal)(((CandleTopBottomMargin - CurrentMouseY) / actualHeight + 1) * (yMax - yMin) + yMin)).Round(4);
+            var pointingPrice = ((decimal)(((CandleTopBottomMargin - CurrentMouseY) / LiveActualHeight + 1) * (yMax - yMin) + yMin)).Round(4);
             canvas.DrawText($"{pointingPrice}", 2, CurrentMouseY - 4, CandleInfoFont, CandleInfoPaint);
 
             // Draw Info Text
             try
             {
-                var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / actualItemFullWidth)];
+                var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
                 var changeText = pointingChart.Quote.Close >= pointingChart.Quote.Open ? $"+{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}" : $"{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}";
                 canvas.DrawText($"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close}", 3, 10, CandleInfoFont, CandleInfoPaint);
             }
@@ -391,6 +381,11 @@ namespace ChartViewer
 
             resultString = $"{history.Result}, {history.Income}({(history.Income / 5).Round(2)}%)";
 
+            LoadChart();
+        }
+
+        private void RefreshOptionButton_Click(object sender, RoutedEventArgs e)
+        {
             LoadChart();
         }
     }

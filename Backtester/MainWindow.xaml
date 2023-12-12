@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Mariner XX" Height="660" Width="300" Background="{StaticResource Background}">
+        Title="Mariner XX" Height="750" Width="300" Background="{StaticResource Background}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
@@ -26,7 +26,7 @@
             <Rectangle x:Name="PrecisionBacktestRectangle" Grid.Row="1" Grid.Column="1" Fill="{StaticResource Long}"/>
         </Grid>
 
-        <Grid Grid.Row="1" x:Name="BySymbolGrid">
+        <Grid Grid.Row="1" x:Name="BySymbolGrid" Visibility="Hidden">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="20"/>
@@ -63,7 +63,7 @@
             <Button Grid.Row="2" x:Name="BacktestButton" Content="Backtest" Click="BacktestButton_Click"/>
         </Grid>
 
-        <Grid Grid.Row="1" x:Name="PrecisionBacktestGrid" Visibility="Hidden">
+        <Grid Grid.Row="1" x:Name="PrecisionBacktestGrid" Visibility="Visible">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="20"/>
@@ -99,10 +99,15 @@
                 <TextBox x:Name="Parameter2TextBoxPB" Text="40"/>
                 <TextBlock Style="{StaticResource Description}">Parameter 3</TextBlock>
                 <TextBox x:Name="Parameter3TextBoxPB" Text="0"/>
+                <TextBlock Style="{StaticResource Description}">Max Candle Count</TextBlock>
+                <TextBox x:Name="MaxCandleCountTextBoxPB" Text="2016"/>
             </StackPanel>
 
             <ProgressBar Grid.Row="1" x:Name="BacktestProgressPB" Margin="5 0" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
-            <Button Grid.Row="2" x:Name="BacktestButtonPB" Content="Backtest" Click="BacktestButtonPB_Click"/>
+            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                <Button x:Name="FindCheckpointButtonPB" Content="Checkpoint" Click="FindCheckpointButtonPB_Click"  Width="140"/>
+                <Button x:Name="BacktestButtonPB" Content="Backtest" Click="BacktestButtonPB_Click" Width="140"/>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

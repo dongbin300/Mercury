@@ -361,7 +361,7 @@ namespace MarinerX.Charts
         {
             try
             {
-                var manualStartTime = DateTime.Parse("2020-01-01");
+                var manualStartTime = DateTime.Parse("2019-09-08");
                 var symbols = LocalStorageApi.SymbolNames;
                 var dayCountTemp = (DateTime.Today - manualStartTime).Days + 1;
                 var csvFileCount = symbols.Count * dayCountTemp;

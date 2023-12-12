@@ -12,7 +12,7 @@ namespace MarinerX.Excels
 {
     public class TradeHistoryParser
     {
-        private static readonly string DefaultTargetPath = PathUtil.Desktop.Down("Export Trade History.xlsx");
+        private static readonly string DefaultTargetPath = PathUtil.Base.Down("Export Trade History.xlsx");
         private const string TargetSheetName = "sheet1";
         private const int MaxLoopCount = 10000; // Dummy Value just in case
 

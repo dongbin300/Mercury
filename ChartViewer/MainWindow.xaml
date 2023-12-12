@@ -6,60 +6,97 @@
         xmlns:local="clr-namespace:MarinerX.ChartViewer"
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
-        Title="Mariner X Chart Viewer" Height="240" Width="600" Background="{StaticResource Background}"
+        Title="Mariner X Chart Viewer" Height="240" Width="800" Background="{StaticResource Background}"
         MouseMove="Window_MouseMove">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="45"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="150"/>
+        </Grid.ColumnDefinitions>
 
-        <Grid Name="SettingGrid" Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0">
-                <TextBlock Style="{StaticResource Description}" Margin="0">Symbol</TextBlock>
-                <TextBox x:Name="SymbolTextBox" CharacterCasing="Upper" TextChanged="SymbolTextBox_TextChanged"/>
-            </StackPanel>
+            <Grid Name="SettingGrid" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0">
-                <TextBlock Style="{StaticResource Description}" Margin="0">Date</TextBlock>
-                <TextBox x:Name="DateTextBox" TextChanged="DateTextBox_TextChanged"/>
-            </StackPanel>
+                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Symbol</TextBlock>
+                    <TextBox x:Name="SymbolTextBox" CharacterCasing="Upper" TextChanged="SymbolTextBox_TextChanged"/>
+                </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0">
-                <TextBlock Style="{StaticResource Description}" Margin="0">Interval</TextBlock>
-                <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
-                    <ComboBoxItem>1m</ComboBoxItem>
-                    <ComboBoxItem>3m</ComboBoxItem>
-                    <ComboBoxItem>5m</ComboBoxItem>
-                    <ComboBoxItem>15m</ComboBoxItem>
-                    <ComboBoxItem>30m</ComboBoxItem>
-                    <ComboBoxItem>1h</ComboBoxItem>
-                    <ComboBoxItem>1d</ComboBoxItem>
-                    <ComboBoxItem>1w</ComboBoxItem>
-                    <ComboBoxItem>1M</ComboBoxItem>
-                </ComboBox>
-            </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Date</TextBlock>
+                    <TextBox x:Name="DateTextBox" TextChanged="DateTextBox_TextChanged"/>
+                </StackPanel>
 
-            <StackPanel Grid.Column="3" Orientation="Vertical" Margin="0">
-                <TextBlock Style="{StaticResource Description}" Margin="0">Candle</TextBlock>
-                <TextBox x:Name="CandleCountTextBox" Text="" PreviewKeyDown="CandleCountTextBox_PreviewKeyDown"/>
-            </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Interval</TextBlock>
+                    <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
+                        <ComboBoxItem>1m</ComboBoxItem>
+                        <ComboBoxItem>3m</ComboBoxItem>
+                        <ComboBoxItem>5m</ComboBoxItem>
+                        <ComboBoxItem>15m</ComboBoxItem>
+                        <ComboBoxItem>30m</ComboBoxItem>
+                        <ComboBoxItem>1h</ComboBoxItem>
+                        <ComboBoxItem>1d</ComboBoxItem>
+                        <ComboBoxItem>1w</ComboBoxItem>
+                        <ComboBoxItem>1M</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
 
-            <Button Grid.Column="4" x:Name="LoadHistoryButton" Click="LoadHistoryButton_Click">Load</Button>
-            <Button Grid.Column="5" x:Name="NextHistoryButton" Click="NextHistoryButton_Click">Next</Button>
+                <StackPanel Grid.Column="3" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Candle</TextBlock>
+                    <TextBox x:Name="CandleCountTextBox" Text="" PreviewKeyDown="CandleCountTextBox_PreviewKeyDown"/>
+                </StackPanel>
+
+                <Button Grid.Column="4" x:Name="LoadHistoryButton" Click="LoadHistoryButton_Click">Load</Button>
+                <Button Grid.Column="5" x:Name="NextHistoryButton" Click="NextHistoryButton_Click">Next</Button>
+            </Grid>
+
+            <Grid Name="CandleChartGrid" Grid.Row="1">
+                <skia:SKElement x:Name="CandleChart" PaintSurface="CandleChart_PaintSurface"/>
+            </Grid>
         </Grid>
 
-        <Grid Name="CandleChartGrid" Grid.Row="1">
-            <skia:SKElement x:Name="CandleChart" PaintSurface="CandleChart_PaintSurface"/>
+        <Grid Grid.Column="1">
+            <StackPanel Orientation="Vertical">
+                <Button x:Name="RefreshOptionButton" Click="RefreshOptionButton_Click">Refresh</Button>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ma1CheckBox">MA 1</CheckBox>
+                    <TextBox x:Name="Ma1Text">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ma2CheckBox">MA 2</CheckBox>
+                    <TextBox x:Name="Ma2Text">20</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ma3CheckBox">MA 3</CheckBox>
+                    <TextBox x:Name="Ma3Text">30</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ema1CheckBox" IsChecked="True">EMA 1</CheckBox>
+                    <TextBox x:Name="Ema1Text">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ema2CheckBox">EMA 2</CheckBox>
+                    <TextBox x:Name="Ema2Text">20</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ema3CheckBox">EMA 3</CheckBox>
+                    <TextBox x:Name="Ema3Text">30</TextBox>
+                </StackPanel>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

@@ -266,22 +266,49 @@
 
         <!--#region CheckBox -->
         <Style TargetType="{x:Type CheckBox}">
-            <Setter Property="Width" Value="32" />
-            <Setter Property="Height" Value="16" />
-            <Setter Property="Margin" Value="10,0" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Margin" Value="3,2" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="CheckBox">
-                        <Border x:Name="_border" Background="#858585" CornerRadius="8">
-                            <Ellipse x:Name="_ellipse" HorizontalAlignment="Left" Fill="#555555" Width="21" Height="21" Margin="-5" />
-                        </Border>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <BulletDecorator Background="Transparent">
+                            <BulletDecorator.Bullet>
+                                <Border x:Name="Border"
+                                Width="20" Height="20" CornerRadius="3" 
+                                Background="#C0C0C0" BorderThickness="1" BorderBrush="#404040">
+                                    <Path 
+                                x:Name="CheckMark"
+                                Width="11" Height="11" Margin="1" SnapsToDevicePixels="False" 
+                                Stroke="#EEEEEE" StrokeThickness="3"
+                                Data="M 1 3 L 5 8 L 10 3" />
+                                </Border>
+                            </BulletDecorator.Bullet>
+                            <ContentPresenter Margin="4,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left"
+                                      RecognizesAccessKey="True"/>
+                        </BulletDecorator>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="false">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="_ellipse" Property="HorizontalAlignment" Value="Right" />
-                                <Setter TargetName="_ellipse" Property="Fill" Value="{StaticResource Long}" />
-                                <Setter TargetName="_border" Property="Background" Value="{StaticResource Long}" />
+                                <Setter TargetName="Border" Property="Background" Value="#0ECB81" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="{x:Null}">
+                                <Setter TargetName="CheckMark" Property="Data" Value="M 0 7 L 7 0" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="#808080" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="#E0E0E0" />
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#606060" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="Border" Property="Background" Value="#EEEEEE" />
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#AAAAAA" />
+                                <Setter Property="Foreground" Value="#888888"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

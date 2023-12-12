@@ -195,6 +195,20 @@ namespace Mercury
             return result;
         }
 
+        public static IEnumerable<SmaResult> GetVolumeSma(this IEnumerable<Quote> quotes, int period)
+        {
+            var result = new List<SmaResult>();
+
+            var values = quotes.Select(x => (double)x.Volume).ToArray();
+            var sma = ArrayCalculator.Sma(values, period);
+            for (int i = 0; i < sma.Length; i++)
+            {
+                result.Add(new SmaResult(quotes.ElementAt(i).Date, sma[i]));
+            }
+
+            return result;
+        }
+
         public static IEnumerable<BbResult> GetBollingerBands(this IEnumerable<Quote> quotes, int period = 20, double deviation = 2.0, QuoteType quoteType = QuoteType.Close)
         {
             var result = new List<BbResult>();

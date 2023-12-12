@@ -1,5 +1,4 @@
 ﻿using Binance.Net.Enums;
-using Binance.Net.Objects.Models.Futures.Socket;
 
 using Mercury.Charts;
 using Mercury.Maths;
@@ -48,6 +47,16 @@ namespace Mercury.Backtests
             Fee = fee;
         }
 
+        public PrecisionBacktestDealManager(DateTime startDate, DateTime endDate, int maxActiveDeals)
+        {
+            StartDate = startDate;
+            EndDate = endDate;
+            MaxActiveDeals = maxActiveDeals;
+            TakeProfitRoe = 1;
+            StopLossRoe = 1;
+            Fee = 0.1m;
+        }
+
         public void ConcatenateChart(Dictionary<string, ChartInfo> charts)
         {
             foreach (var chart in charts)
@@ -85,7 +94,7 @@ namespace Mercury.Backtests
                     var _chart = chart.Value[i];
                     _chart.Lsma1 = r1.ElementAt(i);
                     _chart.Lsma2 = r2.ElementAt(i);
-                    _chart.Rsi = r3.ElementAt(i);
+                    _chart.Rsi1 = r3.ElementAt(i);
                 }
             }
         }
@@ -135,7 +144,7 @@ namespace Mercury.Backtests
                         continue;
                     }
                     // RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 진입
-                    if ((c0.Rsi > rsiThreshold && c1.Rsi < rsiThreshold) || (c1.Rsi > rsiThreshold && c2.Rsi < rsiThreshold) || (c2.Rsi > rsiThreshold && c3.Rsi < rsiThreshold))
+                    if ((c0.Rsi1 > rsiThreshold && c1.Rsi1 < rsiThreshold) || (c1.Rsi1 > rsiThreshold && c2.Rsi1 < rsiThreshold) || (c2.Rsi1 > rsiThreshold && c3.Rsi1 < rsiThreshold))
                     {
                         var per = 0m;
                         var testPrice = c0.Quote.Open;
@@ -224,7 +233,7 @@ namespace Mercury.Backtests
                         continue;
                     }
                     // RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 진입
-                    if ((c0.Rsi < rsiThreshold && c1.Rsi > rsiThreshold) || (c1.Rsi < rsiThreshold && c2.Rsi > rsiThreshold) || (c2.Rsi < rsiThreshold && c3.Rsi > rsiThreshold))
+                    if ((c0.Rsi1 < rsiThreshold && c1.Rsi1 > rsiThreshold) || (c1.Rsi1 < rsiThreshold && c2.Rsi1 > rsiThreshold) || (c2.Rsi1 < rsiThreshold && c3.Rsi1 > rsiThreshold))
                     {
                         var per = 0m;
                         var testPrice = c0.Quote.Open;
@@ -313,7 +322,7 @@ namespace Mercury.Backtests
                         continue;
                     }
                     // RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 진입
-                    if ((c1.Rsi > rsiThreshold && c2.Rsi < rsiThreshold) || (c2.Rsi > rsiThreshold && c3.Rsi < rsiThreshold) || (c3.Rsi > rsiThreshold && c4.Rsi < rsiThreshold))
+                    if ((c1.Rsi1 > rsiThreshold && c2.Rsi1 < rsiThreshold) || (c2.Rsi1 > rsiThreshold && c3.Rsi1 < rsiThreshold) || (c3.Rsi1 > rsiThreshold && c4.Rsi1 < rsiThreshold))
                     {
                         if (c1.Lsma1 > c1.Lsma2 && c2.Lsma1 < c2.Lsma2)
                         {
@@ -382,7 +391,7 @@ namespace Mercury.Backtests
                         continue;
                     }
                     // RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 진입
-                    if ((c1.Rsi < rsiThreshold && c2.Rsi > rsiThreshold) || (c2.Rsi < rsiThreshold && c3.Rsi > rsiThreshold) || (c3.Rsi < rsiThreshold && c4.Rsi > rsiThreshold))
+                    if ((c1.Rsi1 < rsiThreshold && c2.Rsi1 > rsiThreshold) || (c2.Rsi1 < rsiThreshold && c3.Rsi1 > rsiThreshold) || (c3.Rsi1 < rsiThreshold && c4.Rsi1 > rsiThreshold))
                     {
                         if (c1.Lsma1 < c1.Lsma2 && c2.Lsma1 > c2.Lsma2)
                         {
@@ -1678,22 +1687,25 @@ namespace Mercury.Backtests
             return charts.SkipLast(1).TakeLast(period).Max(x => x.Quote.Close);
         }
 
-        public void CalculateIndicatorsMacd()
+        public void CalculateIndicatorsMacd(int MACDF, int MACDS, int MACD2F, int MACD2S)
         {
             foreach (var chart in Charts)
             {
                 var quotes = chart.Value.Select(x => x.Quote);
-                var macd = quotes.GetMacd(12, 26, 9);
+                var macd = quotes.GetMacd(MACDF, MACDS, 9);
                 var m = macd.Select(x => x.Macd);
                 var s = macd.Select(x => x.Signal);
-                var macd2 = quotes.GetMacd(9, 20, 7);
+                var macd2 = quotes.GetMacd(MACD2F, MACD2S, 7);
                 var m2 = macd2.Select(x => x.Macd);
                 var s2 = macd2.Select(x => x.Signal);
                 var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
                 var st2 = quotes.GetSupertrend(10, 3).Select(x => x.Supertrend);
                 var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
                 var stoch = quotes.GetStoch(12).Select(x => x.Stoch);
-                var rsi = quotes.GetRsi(14).Select(x => x.Rsi);
+                var rsi1 = quotes.GetRsi(7).Select(x => x.Rsi);
+                var rsi2 = quotes.GetRsi(14).Select(x => x.Rsi);
+                var rsi3 = quotes.GetRsi(21).Select(x => x.Rsi);
+                var ema = quotes.GetEma(50).Select(x=>x.Ema);
 
                 // SL
                 var bbu = quotes.GetBollingerBands(24, 3, QuoteType.High).Select(x=>x.Upper);
@@ -1714,7 +1726,10 @@ namespace Mercury.Backtests
                     _chart.Supertrend2 = st2.ElementAt(i);
                     _chart.Adx = adx.ElementAt(i);
                     _chart.Stoch = stoch.ElementAt(i);
-                    _chart.Rsi = rsi.ElementAt(i);
+                    _chart.Rsi1 = rsi1.ElementAt(i);
+                    _chart.Rsi2 = rsi2.ElementAt(i);
+                    _chart.Rsi3 = rsi3.ElementAt(i);
+                    _chart.Ema1 = ema.ElementAt(i);
                     _chart.Bb1Upper = bbu.ElementAt(i);
                     _chart.Bb1Lower = bbl.ElementAt(i);
                     _chart.Bb2Upper = bbu2.ElementAt(i);
@@ -1837,6 +1852,7 @@ namespace Mercury.Backtests
                 var charts = Charts[symbol];
                 var c0 = charts[^1];
                 var c1 = charts[^2];
+                var c2 = charts[^3];
 
                 if (position == null)
                 {
@@ -1920,13 +1936,23 @@ namespace Mercury.Backtests
                     //var maxClosePrice = GetMaxClosePrice(charts, 7);
                     //var minClosePricePer = Calculator.Roe(side, minClosePrice, c0.Quote.Open);
 
-                    if (IsPowerGoldenCross(charts, 14, c1.Macd) &&
-                        IsPowerGoldenCross2(charts, 14, c1.Macd2) &&
+                    /*
+                     * 1. c1.Supertrend1(10, 1.0~2.0) 의 값이 0 초과인지 체크 / 안체크
+                     * 2. c1.Adx의 값이 30 초과인지 체크 / 안체크
+                     * 3. tpPer의 값이 [0.5~1.5] 초과인지 체크 / 안체크
+                     * 4. slPer의 값이 [0.5~1.5] 초과인지 체크 / 안체크
+                     * 5. Macd1(18,39) Macd2(12,26) 조정
+                     * 
+                     * */
+                    if (//IsPowerGoldenCross(charts, 14, c1.Macd) &&
+                        //IsPowerGoldenCross2(charts, 14, c1.Macd2) &&
+                        c1.Macd < 0 && c1.Macd2 < 0 && c1.Macd2 > c1.Macd && c2.Macd2 < c2.Macd && c1.Supertrend1 > 0 && c1.Adx > 40
                         //c1.Supertrend1 > 0 &&
                         //c1.Macd < 0 &&
                         //c1.Macd2 < 0 &&
                         //minClosePricePer < 0.5m &&
-                        tpPer > 1.0m)
+                        //tpPer > 0.75m && slPer < -1.5m
+                        )
                     {
                         var price = c0.Quote.Open;
                         var stopLossPrice = slPrice;
@@ -1999,6 +2025,7 @@ namespace Mercury.Backtests
                 var charts = Charts[symbol];
                 var c0 = charts[^1];
                 var c1 = charts[^2];
+                var c2 = charts[^3];
 
                 if (position == null)
                 {
@@ -2018,13 +2045,15 @@ namespace Mercury.Backtests
                     //var maxClosePrice = GetMaxClosePrice(charts, 7);
                     //var maxClosePricePer = Calculator.Roe(side, maxClosePrice, c0.Quote.Open);
 
-                    if (IsPowerDeadCross(charts, 14, c1.Macd) &&
-                        IsPowerDeadCross2(charts, 14, c1.Macd2) &&
+                    if (//IsPowerDeadCross(charts, 14, c1.Macd) &&
+                        //IsPowerDeadCross2(charts, 14, c1.Macd2) &&
+                        c1.Macd > 0 && c1.Macd2 > 0 && c1.Macd2 < c1.Macd && c2.Macd2 > c2.Macd && c1.Supertrend1 < 0 && c1.Adx > 40
                         //c1.Supertrend1 < 0 &&
                         //c1.Macd > 0 && 
                         //c1.Macd2 > 0 &&
                         //maxClosePricePer < 0.5m &&
-                        tpPer > 1.0m)
+                        //tpPer > 0.75m && slPer < -1.5m
+                        )
                     {
                         var price = c0.Quote.Open;
                         var stopLossPrice = slPrice;
@@ -2795,6 +2824,419 @@ namespace Mercury.Backtests
                             ExitAmount = position.ExitAmount + price * quantity
                         });
                         Win++;
+                        Money -= FeeSize;
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region StochRSI + EMA
+
+        /*
+         *  롱
+         *  EMA 200 위
+         *  StochRSI K선이 20 상향돌파
+         *  
+         *  숏
+         *  EMA 200 아래
+         *  StochRSI K선이 80 하향돌파
+         *  
+         *  정리
+         *  손절 전저점
+         *  익절 손절비 1:2
+         *  
+         */
+
+        public void CalculateIndicatorsStochRsiEma()
+        {
+            foreach (var chart in Charts)
+            {
+                var quotes = chart.Value.Select(x => x.Quote);
+                var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
+                var macd = quotes.GetMacd(12, 26, 9);
+                var mv = macd.Select(x => x.Macd);
+                var ms = macd.Select(x => x.Signal);
+                var s = quotes.GetStoch(14).Select(x => x.Stoch);
+                var rsi = quotes.GetRsi(14).Select(x => x.Rsi);
+                var volumeSma = quotes.GetVolumeSma(30).Select(x => x.Sma);
+
+                for (int i = 0; i < chart.Value.Count; i++)
+                {
+                    var _chart = chart.Value[i];
+                    _chart.Supertrend1 = st.ElementAt(i);
+                    _chart.Macd = mv.ElementAt(i);
+                    _chart.MacdSignal = ms.ElementAt(i);
+                    _chart.Stoch = s.ElementAt(i);
+                    _chart.Rsi1= rsi.ElementAt(i);
+                    _chart.VolumeSma= volumeSma.ElementAt(i);
+                }
+            }
+        }
+
+        public void EvaluateStochRsiEmaLong()
+        {
+            var side = PositionSide.Long;
+            foreach (var symbol in MonitoringSymbols)
+            {
+                var position = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+                var charts = Charts[symbol];
+                var c0 = charts[^1];
+                var c1 = charts[^2];
+                var c2 = charts[^3];
+                //var c1CandleLength = Math.Abs(Calculator.Roe(side, c1.Quote.Open, c1.Quote.Close));
+                var minPrice = charts.SkipLast(1).TakeLast(14).Min(x => x.Quote.Low);
+                var maxPrice = charts.SkipLast(1).TakeLast(14).Max(x => x.Quote.High);
+                var slPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 1.1m;
+                //var tpPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 0.9m;
+                var tpPer = slPer * -1.5m;
+
+                if (position == null)
+                {
+                    if (LongPositionCount + ShortPositionCount >= MaxActiveDeals * 2)
+                    {
+                        continue;
+                    }
+
+                    if (c1.Quote.Volume > (decimal)c1.VolumeSma &&
+                        charts.SkipLast(1).TakeLast(14).Count(x=>x.Stoch < 20) > 0 &&
+                        c1.Rsi1 > 50 &&
+                        c2.Macd < c2.MacdSignal && c1.Macd > c1.MacdSignal && slPer < -0.8m)
+                    {
+                        var price = c0.Quote.Open;
+                        var stopLossPrice = Calculator.TargetPrice(side, c0.Quote.Open, slPer);
+                        var takeProfitPrice = Calculator.TargetPrice(side, c0.Quote.Open, tpPer);
+                        var quantity = BaseOrderSize / price;
+                        Money -= price * quantity;
+                        var newPosition = new Position(c0.DateTime, symbol, side, price)
+                        {
+                            TakeProfitPrice = takeProfitPrice,
+                            StopLossPrice = stopLossPrice,
+                            Quantity = quantity,
+                            EntryAmount = price * quantity
+                        };
+                        Positions.Add(newPosition);
+                    }
+                }
+                else
+                {
+                    if (position.Stage == 0 && c0.Quote.Low <= position.StopLossPrice)
+                    {
+                        var price = position.StopLossPrice;
+                        var quantity = position.Quantity;
+                        Money += price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Lose++;
+                        Money -= FeeSize;
+                    }
+                    else if (position.Stage == 0 && c0.Quote.High >= position.TakeProfitPrice)
+                    {
+                        var price = position.TakeProfitPrice;
+                        var quantity = position.Quantity / 2;
+                        Money += price * quantity;
+                        position.Quantity -= quantity;
+                        position.ExitAmount = price * quantity;
+                        position.Stage = 1;
+                    }
+
+                    if (position.Stage == 1 && c0.Supertrend1 < 0)
+                    {
+                        var price = c0.Quote.Close;
+                        var quantity = position.Quantity;
+                        Money += price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = position.ExitAmount + price * quantity
+                        });
+                        Win++;
+                        Money -= FeeSize;
+                    }
+                }
+            }
+        }
+
+        public void EvaluateStochRsiEmaShort()
+        {
+            var side = PositionSide.Short;
+            foreach (var symbol in MonitoringSymbols)
+            {
+                var position = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+                var charts = Charts[symbol];
+                var c0 = charts[^1];
+                var c1 = charts[^2];
+                var c2 = charts[^3];
+                //var c1CandleLength = Math.Abs(Calculator.Roe(side, c1.Quote.Open, c1.Quote.Close));
+                var minPrice = charts.SkipLast(1).TakeLast(14).Min(x => x.Quote.Low);
+                var maxPrice = charts.SkipLast(1).TakeLast(14).Max(x => x.Quote.High);
+                var slPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 1.1m;
+                //var tpPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 0.9m;
+                var tpPer = slPer * -1.5m;
+
+                if (position == null)
+                {
+                    if (LongPositionCount + ShortPositionCount >= MaxActiveDeals * 2)
+                    {
+                        continue;
+                    }
+
+                    if (c1.Quote.Volume > (decimal)c1.VolumeSma &&
+                        charts.SkipLast(1).TakeLast(14).Count(x => x.Stoch > 80) > 0 &&
+                        c1.Rsi1 < 50 &&
+                        c2.Macd > c2.MacdSignal && c1.Macd < c1.MacdSignal && slPer < -0.8m)
+                    {
+                        var price = c0.Quote.Open;
+                        var stopLossPrice = Calculator.TargetPrice(side, c0.Quote.Open, slPer);
+                        var takeProfitPrice = Calculator.TargetPrice(side, c0.Quote.Open, tpPer);
+                        var quantity = BaseOrderSize / price;
+                        Money += price * quantity;
+                        var newPosition = new Position(c0.DateTime, symbol, side, price)
+                        {
+                            StopLossPrice = stopLossPrice,
+                            TakeProfitPrice = takeProfitPrice,
+                            Quantity = quantity,
+                            EntryAmount = price * quantity
+                        };
+                        Positions.Add(newPosition);
+                    }
+                }
+                else
+                {
+                    if (position.Stage == 0 && c0.Quote.High >= position.StopLossPrice)
+                    {
+                        var price = position.StopLossPrice;
+                        var quantity = position.Quantity;
+                        Money -= price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Lose++;
+                        Money -= FeeSize;
+                    }
+                    else if (position.Stage == 0 && c0.Quote.Low <= position.TakeProfitPrice)
+                    {
+                        var price = position.TakeProfitPrice;
+                        var quantity = position.Quantity / 2;
+                        Money -= price * quantity;
+                        position.Quantity -= quantity;
+                        position.ExitAmount = price * quantity;
+                        position.Stage = 1;
+                    }
+
+                    if (position.Stage == 1 && c0.Supertrend1 > 0)
+                    {
+                        var price = c0.Quote.Close;
+                        var quantity = position.Quantity;
+                        Money -= price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = position.ExitAmount + price * quantity
+                        });
+                        Win++;
+                        Money -= FeeSize;
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Triple RSI
+
+        public void CalculateIndicatorsTripleRsi()
+        {
+            foreach (var chart in Charts)
+            {
+                var quotes = chart.Value.Select(x => x.Quote);
+                var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
+                var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
+                var rsi1 = quotes.GetRsi(7).Select(x => x.Rsi);
+                var rsi2 = quotes.GetRsi(14).Select(x => x.Rsi);
+                var rsi3 = quotes.GetRsi(21).Select(x => x.Rsi);
+                var ema = quotes.GetEma(50).Select(x => x.Ema);
+
+                for (int i = 0; i < chart.Value.Count; i++)
+                {
+                    var _chart = chart.Value[i];
+                    _chart.Supertrend1 = st.ElementAt(i);
+                    _chart.Adx = adx.ElementAt(i);
+                    _chart.Rsi1 = rsi1.ElementAt(i);
+                    _chart.Rsi2 = rsi2.ElementAt(i);
+                    _chart.Rsi3 = rsi3.ElementAt(i);
+                    _chart.Ema1 = ema.ElementAt(i);
+                }
+            }
+        }
+
+        public void EvaluateTripleRsiLong()
+        {
+            var side = PositionSide.Long;
+            foreach (var symbol in MonitoringSymbols)
+            {
+                var position = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+                var charts = Charts[symbol];
+                var c0 = charts[^1];
+                var c1 = charts[^2];
+                var c2 = charts[^3];
+
+                if (position == null)
+                {
+                    if (LongPositionCount + ShortPositionCount >= MaxActiveDeals * 2)
+                    {
+                        continue;
+                    }
+
+                    var minPrice = GetMinPrice(charts, 14);
+                    var maxPrice = GetMaxPrice(charts, 14);
+                    var slPrice = minPrice - (maxPrice - minPrice) * 0.1m;
+                    var tpPrice = maxPrice - (maxPrice - minPrice) * 0.1m;
+                    var slPer = Calculator.Roe(side, c0.Quote.Open, slPrice);
+                    var tpPer = Calculator.Roe(side, c0.Quote.Open, tpPrice);
+
+                    if (
+                        c1.Rsi3 > 50 &&
+                        c1.Rsi1 > c1.Rsi2 && c1.Rsi2 > c1.Rsi3 && c1.Quote.Close > (decimal)c1.Ema1 && c1.Adx > 20
+                        //slPer < -0.5m && tpPer > 0.5m
+                        )
+                    {
+                        var price = c0.Quote.Open;
+                        var stopLossPrice = slPrice;
+                        var takeProfitPrice = tpPrice;
+                        var quantity = BaseOrderSize / price;
+                        Money -= price * quantity;
+                        var newPosition = new Position(c0.DateTime, symbol, side, price)
+                        {
+                            TakeProfitPrice = takeProfitPrice,
+                            StopLossPrice = stopLossPrice,
+                            Quantity = quantity,
+                            EntryAmount = price * quantity
+                        };
+                        Positions.Add(newPosition);
+                    }
+                }
+                else
+                {
+                    if (c1.Quote.High >= position.TakeProfitPrice)
+                    {
+                        var price = position.TakeProfitPrice;
+                        var quantity = position.Quantity;
+                        Money += price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Win++;
+                        Money -= FeeSize;
+                    }
+                    else if (c1.Quote.Low <= position.StopLossPrice)
+                    {
+                        var price = position.StopLossPrice;
+                        var quantity = position.Quantity;
+                        Money += price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Lose++;
+                        Money -= FeeSize;
+                    }
+                }
+            }
+        }
+
+        public void EvaluateTripleRsiShort()
+        {
+            var side = PositionSide.Short;
+            foreach (var symbol in MonitoringSymbols)
+            {
+                var position = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+                var charts = Charts[symbol];
+                var c0 = charts[^1];
+                var c1 = charts[^2];
+                var c2 = charts[^3];
+
+                if (position == null)
+                {
+                    if (LongPositionCount + ShortPositionCount >= MaxActiveDeals * 2)
+                    {
+                        continue;
+                    }
+
+                    var minPrice = GetMinPrice(charts, 14);
+                    var maxPrice = GetMaxPrice(charts, 14);
+                    var slPrice = maxPrice + (maxPrice - minPrice) * 0.1m;
+                    var tpPrice = minPrice + (maxPrice - minPrice) * 0.1m;
+                    var slPer = Calculator.Roe(side, c0.Quote.Open, slPrice);
+                    var tpPer = Calculator.Roe(side, c0.Quote.Open, tpPrice);
+
+                    if (
+                        c1.Rsi3 < 50 &&
+                        c1.Rsi1 < c1.Rsi2 && c1.Rsi2 < c1.Rsi3 && c1.Quote.Close < (decimal)c1.Ema1 && c1.Adx > 20
+                        //slPer < -0.5m && tpPer > 0.5m
+                        )
+                    {
+                        var price = c0.Quote.Open;
+                        var stopLossPrice = slPrice;
+                        var takeProfitPrice = tpPrice;
+                        var quantity = BaseOrderSize / price;
+                        Money += price * quantity;
+                        var newPosition = new Position(c0.DateTime, symbol, side, price)
+                        {
+                            StopLossPrice = stopLossPrice,
+                            TakeProfitPrice = takeProfitPrice,
+                            Quantity = quantity,
+                            EntryAmount = price * quantity
+                        };
+                        Positions.Add(newPosition);
+                    }
+                }
+                else
+                {
+                    if (c1.Quote.Low <= position.TakeProfitPrice)
+                    {
+                        var price = position.TakeProfitPrice;
+                        var quantity = position.Quantity;
+                        Money -= price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Win)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Win++;
+                        Money -= FeeSize;
+                    }
+
+                    if (c1.Quote.High >= position.StopLossPrice)
+                    {
+                        var price = position.StopLossPrice;
+                        var quantity = position.Quantity;
+                        Money -= price * quantity;
+                        Positions.Remove(position);
+                        PositionHistories.Add(new PositionHistory(c0.DateTime, position.Time, symbol, side, PositionResult.Lose)
+                        {
+                            EntryAmount = position.EntryAmount,
+                            ExitAmount = price * quantity
+                        });
+                        Lose++;
                         Money -= FeeSize;
                     }
                 }

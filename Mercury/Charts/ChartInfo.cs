@@ -15,7 +15,9 @@
         public double Lsma1 { get; set; }
         public double Lsma2 { get; set; }
         public double Lsma3 { get; set; }
-        public double Rsi { get; set; }
+        public double Rsi1 { get; set; }
+        public double Rsi2 { get; set; }
+        public double Rsi3 { get; set; }
         public double JmaSlope { get; set; }
         public double K { get; set; }
         public double D { get; set; }
@@ -34,6 +36,8 @@
         public double Bb1Lower { get; set; }
         public double Bb2Upper { get; set; }
         public double Bb2Lower { get; set; }
+
+        public double VolumeSma { get; set; }
 
         public ChartInfo(string symbol, Quote quote)
         {

@@ -186,7 +186,7 @@ namespace MarinerX.Views
             }, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
 
 
-            var path = PathUtil.Desktop.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
+            var path = PathUtil.Base.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
             trades.SaveCsvFile(path);
 
             DispatcherService.Invoke(() =>
