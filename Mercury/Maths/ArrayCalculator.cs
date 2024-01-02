@@ -132,6 +132,21 @@
         }
 
         /// <summary>
+        /// Get geometric mean 
+        /// </summary>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static double GeometricMean(double[] values)
+        {
+            double result = 1.0;
+            for (int i = 0; i < values.Length; i++)
+            {
+                result *= Math.Pow(values[i], 1.0 / values.Length);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Recommend values is Quote.Close
         /// </summary>
         /// <param name="values"></param>
@@ -556,6 +571,38 @@
                     (close[i] < lowerBand[i] ? 1 : -1);
 
                 supertrend[i] = direction[i] == -1 ? lowerBand[i] : upperBand[i];
+            }
+
+            return (supertrend, direction);
+        }
+
+        public static (double[], double[]) ReverseSupertrend(double[] high, double[] low, double[] close, double factor, int atrPeriod)
+        {
+            var upperBand = new double[high.Length];
+            var lowerBand = new double[high.Length];
+            var supertrend = new double[high.Length];
+            var direction = new double[high.Length];
+
+            var atr = Atr(high, low, close, atrPeriod);
+            for (int i = 0; i < high.Length; i++)
+            {
+                var mid = (high[i] + low[i]) / 2;
+                upperBand[i] = mid + factor * atr[i];
+                lowerBand[i] = mid - factor * atr[i];
+                var prevUpperBand = i == 0 ? 0 : upperBand[i - 1];
+                var prevLowerBand = i == 0 ? 0 : lowerBand[i - 1];
+                var prevClose = i == 0 ? 0 : close[i - 1];
+                var prevSupertrend = i == 0 ? 0 : supertrend[i - 1];
+
+                lowerBand[i] = lowerBand[i] > prevLowerBand || prevClose < prevLowerBand ? lowerBand[i] : prevLowerBand;
+                upperBand[i] = upperBand[i] < prevUpperBand || prevClose > prevUpperBand ? upperBand[i] : prevUpperBand;
+
+                direction[i] =
+                    i == 0 ? 1 :
+                    prevSupertrend == prevLowerBand ? (close[i] > upperBand[i] ? -1 : 1) :
+                    (close[i] < lowerBand[i] ? 1 : -1);
+
+                supertrend[i] = direction[i] == -1 ? upperBand[i] : lowerBand[i];
             }
 
             return (supertrend, direction);

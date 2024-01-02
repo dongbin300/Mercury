@@ -287,6 +287,25 @@ namespace Mercury
             return result;
         }
 
+        public static IEnumerable<SupertrendResult> GetReverseSupertrend(this IEnumerable<Quote> quotes, int atrPeriod, double factor)
+        {
+            var result = new List<SupertrendResult>();
+
+            var high = quotes.Select(x => (double)x.High).ToArray();
+            var low = quotes.Select(x => (double)x.Low).ToArray();
+            var close = quotes.Select(x => (double)x.Close).ToArray();
+            (var supertrend, var direction) = ArrayCalculator.ReverseSupertrend(high, low, close, factor, atrPeriod);
+
+            for (int i = 0; i < supertrend.Length; i++)
+            {
+                var st = i >= atrPeriod - 1 ? -direction[i] * supertrend[i] : 0;
+                var _supertrend = new SupertrendResult(quotes.ElementAt(i).Date, st);
+                result.Add(_supertrend);
+            }
+
+            return result;
+        }
+
         public static IEnumerable<TripleSupertrendResult> GetTripleSupertrend(this IEnumerable<Quote> quotes, int atrPeriod1, double factor1, int atrPeriod2, double factor2, int atrPeriod3, double factor3)
         {
             var result = new List<TripleSupertrendResult>();

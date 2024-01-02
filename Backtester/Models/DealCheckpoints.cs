@@ -109,9 +109,41 @@ namespace Backtester.Models
             return 0;
         }
 
+        /// <summary>
+        /// ROE Range의 평균을 구한다.
+        /// -Roe 다음에 오는 +Roe와의 비율의 평균을 구한다.
+        /// EX) Roes = 0.1% -0.2% 0.3% -0.4% 0.5% -1.0% 0.8% 5.5%
+        /// 1:1.5, 1:1.25, 1:0.8
+        /// 여기서 1.5, 1.25, 0.8의 기하평균 값이 ROE Range의 평균이다.
+        /// (1.5*1.25*0.8)^(1/3) = 1.1447...
+        /// </summary>
+        /// <returns></returns>
+        public double CalculateRoeRangeAverage(double minRoePercent, double maxRoePercent)
+        {
+            var ranges = new List<double>();
+            for (int i = 0; i < Roes.Count - 1; i++)
+            {
+                var r0 = (double)Roes[i];
+                var r1 = (double)Roes[i + 1];
+
+                var roeRange =
+                    r0 < 0 && r1 > 0 ? // (-,+)
+                    Math.Clamp(r1, minRoePercent, maxRoePercent) / Math.Clamp(-r0, minRoePercent, maxRoePercent) :
+                    r0 > 0 && r1 < 0 ? // (+,-)
+                    Math.Clamp(r0, minRoePercent, maxRoePercent) / Math.Clamp(-r1, minRoePercent, maxRoePercent) :
+                    r0 > 0 && r1 > 0 ? // (+,+)
+                    Math.Clamp(r1, minRoePercent, maxRoePercent) / Math.Clamp(r0, minRoePercent, maxRoePercent) :
+                    // (-,-)
+                    Math.Clamp(-r0, minRoePercent, maxRoePercent) / Math.Clamp(-r1, minRoePercent, maxRoePercent);
+
+                ranges.Add(roeRange);
+            }
+            return ArrayCalculator.GeometricMean(ranges.ToArray());
+        }
+
         public override string ToString()
         {
-            return string.Join(", ", Histories.Select(x=> Calculator.Roe(Side, EntryPrice, x.Price) + "%"));
+            return string.Join(", ", Histories.Select(x => Calculator.Roe(Side, EntryPrice, x.Price) + "%"));
         }
     }
 }

@@ -25,6 +25,9 @@
         public double Supertrend1 { get; set; }
         public double Supertrend2 { get; set; }
         public double Supertrend3 { get; set; }
+        public double ReverseSupertrend1 { get; set; }
+        public double ReverseSupertrend2 { get; set; }
+        public double ReverseSupertrend3 { get; set; }
         public double Macd { get; set; }
         public double MacdSignal { get; set; }
         public double MacdHist { get; set; }

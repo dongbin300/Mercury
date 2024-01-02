@@ -67,6 +67,17 @@ namespace ChartViewer
         {
             InitializeComponent();
             SymbolTextBox.Focus();
+
+            /* init */
+            SymbolTextBox.Text = "BTCUSDT";
+            DateTextBox.Text = "2022-02-22";
+            CandleCountTextBox.Text = "360";
+            CandleCountTextBox.Focus();
+            Ema1CheckBox.IsChecked = true;
+            Ema2CheckBox.IsChecked = true;
+            Ema3CheckBox.IsChecked = true;
+            Supertrend1CheckBox.IsChecked = true;
+            RSupertrend1CheckBox.IsChecked = true;
         }
 
         private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -106,7 +117,7 @@ namespace ChartViewer
         void LoadChart()
         {
             var symbol = SymbolTextBox.Text;
-            var interval = (IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()?.ToKlineInterval() ?? Binance.Net.Enums.KlineInterval.FiveMinutes;
+            var interval = (IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString()?.ToKlineInterval() ?? KlineInterval.FiveMinutes;
             var candleCount = CandleCountTextBox.Text.ToInt();
             var startDate = DateTextBox.Text.ToDateTime();
             var endDate = startDate.AddSeconds((int)interval * candleCount);
@@ -116,16 +127,6 @@ namespace ChartViewer
 
             // Calculate Indicators
             var quotes = Charts.Select(x => x.Quote);
-            //var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
-            //var stoch = quotes.GetStoch(12).Select(x => x.Stoch);
-            //var _macd = quotes.GetMacd(22, 48, 9);
-            //var _macd2 = quotes.GetMacd(11, 24, 9);
-            //var macd = _macd.Select(x => x.Macd);
-            //var macd2 = _macd2.Select(x => x.Macd);
-            //var signal = _macd.Select(x => x.Signal);
-            //var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
-            //var bbu = quotes.GetBollingerBands(24, 3, QuoteType.High).Select(x => x.Upper);
-            //var bbl = quotes.GetBollingerBands(24, 3, QuoteType.Low).Select(x => x.Lower);
             if (Ema1CheckBox.IsChecked ?? true)
             {
                 var ema = quotes.GetEma(Ema1Text.Text.ToInt()).Select(x => x.Ema);
@@ -156,6 +157,14 @@ namespace ChartViewer
                 for (int i = 0; i < Charts.Count; i++)
                 {
                     Charts[i].Supertrend1 = st.ElementAt(i) == 0 ? -39909 : st.ElementAt(i);
+                }
+            }
+            if (RSupertrend1CheckBox.IsChecked ?? true)
+            {
+                var st = quotes.GetReverseSupertrend(RSupertrend1PeriodText.Text.ToInt(), RSupertrend1FactorText.Text.ToDouble()).Select(x => x.Supertrend);
+                for (int i = 0; i < Charts.Count; i++)
+                {
+                    Charts[i].ReverseSupertrend1 = st.ElementAt(i) == 0 ? -39909 : st.ElementAt(i);
                 }
             }
 
@@ -234,6 +243,11 @@ namespace ChartViewer
                 yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend1 != -39909).Max(x => Math.Abs(x.Supertrend1)));
                 yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend1 != -39909).Min(x => Math.Abs(x.Supertrend1)));
             }
+            if (RSupertrend1CheckBox.IsChecked ?? true)
+            {
+                yMax = Math.Max(yMax, (double)Charts.Where(x => x.ReverseSupertrend1 != -39909).Max(x => Math.Abs(x.ReverseSupertrend1)));
+                yMin = Math.Min(yMin, (double)Charts.Where(x => x.ReverseSupertrend1 != -39909).Min(x => Math.Abs(x.ReverseSupertrend1)));
+            }
 
             // Draw Quote and Indicator
             for (int i = 0; i < Charts.Count; i++)
@@ -255,6 +269,10 @@ namespace ChartViewer
                 if (Supertrend1CheckBox.IsChecked ?? true)
                 {
                     DrawSupertrend(canvas, i, i == 0 ? Charts[i].Supertrend1 : Charts[i - 1].Supertrend1, Charts[i].Supertrend1, yMax, yMin, Charts[i].Supertrend1 > 0 ? LongColor : ShortColor);
+                }
+                if (RSupertrend1CheckBox.IsChecked ?? true)
+                {
+                    DrawSupertrend(canvas, i, i == 0 ? Charts[i].ReverseSupertrend1 : Charts[i - 1].ReverseSupertrend1, Charts[i].ReverseSupertrend1, yMax, yMin, Charts[i].ReverseSupertrend1 > 0 ? LongColor : ShortColor);
                 }
 
                 #region Candle

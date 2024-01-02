@@ -6,12 +6,12 @@
         xmlns:local="clr-namespace:MarinerX.ChartViewer"
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
-        Title="Mariner X Chart Viewer" Height="300" Width="800" Background="{StaticResource Background}"
+        Title="Mariner X Chart Viewer" Height="300" Width="850" Background="{StaticResource Background}"
         MouseMove="Window_MouseMove">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="150"/>
+            <ColumnDefinition Width="200"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
@@ -94,12 +94,17 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="Ema3CheckBox">EMA 3</CheckBox>
-                    <TextBox x:Name="Ema3Text">30</TextBox>
+                    <TextBox x:Name="Ema3Text">50</TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="Supertrend1CheckBox">Supertrend</CheckBox>
-                    <TextBox x:Name="Supertrend1PeriodText">10</TextBox>
-                    <TextBox x:Name="Supertrend1FactorText">2</TextBox>
+                    <TextBox x:Name="Supertrend1PeriodText">12</TextBox>
+                    <TextBox x:Name="Supertrend1FactorText">3</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="RSupertrend1CheckBox">R-Supertrend</CheckBox>
+                    <TextBox x:Name="RSupertrend1PeriodText">12</TextBox>
+                    <TextBox x:Name="RSupertrend1FactorText">3</TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="HLBoxCheckBox">HL-Box</CheckBox>

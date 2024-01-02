@@ -7,6 +7,7 @@ using Mercury;
 using Mercury.Backtests;
 using Mercury.Charts;
 using Mercury.Cryptos;
+using Mercury.Maths;
 
 using System;
 using System.Collections.Generic;
@@ -579,38 +580,42 @@ namespace Backtester
                     }
                 }
 
+                // 진입 시그널 레이팅 계산
+                var temp = result.Select(x => x.CalculateRoeRangeAverage(0.5, 10.0)).ToArray();
+                var rating = 5 * ArrayCalculator.GeometricMean(temp);
+
                 // 목표 수익별 승률 계산
-                var dealResults = new List<DealCheckpointTestResult>();
-                for (decimal targetRoe = 0.5m; targetRoe <= 3.0m; targetRoe += 0.05m)
-                {
-                    var dealResult = new DealCheckpointTestResult
-                    {
-                        TargetRoe = targetRoe
-                    };
-                    foreach (var deal in result)
-                    {
-                        switch (deal.EvaluateDealResult(targetRoe))
-                        {
-                            case 1:
-                                dealResult.Win++;
-                                break;
+                //var dealResults = new List<DealCheckpointTestResult>();
+                //for (decimal targetRoe = 0.5m; targetRoe <= 3.0m; targetRoe += 0.05m)
+                //{
+                //    var dealResult = new DealCheckpointTestResult
+                //    {
+                //        TargetRoe = targetRoe
+                //    };
+                //    foreach (var deal in result)
+                //    {
+                //        switch (deal.EvaluateDealResult(targetRoe))
+                //        {
+                //            case 1:
+                //                dealResult.Win++;
+                //                break;
 
-                            case -1:
-                                dealResult.Lose++;
-                                break;
+                //            case -1:
+                //                dealResult.Lose++;
+                //                break;
 
-                            case 0:
-                                dealResult.Draw++;
-                                break;
-                        }
-                    }
-                    dealResults.Add(dealResult);
-                }
-                var highestWinRateResult = dealResults.Find(x => x.WinRate == dealResults.Max(y => y.WinRate));
+                //            case 0:
+                //                dealResult.Draw++;
+                //                break;
+                //        }
+                //    }
+                //    dealResults.Add(dealResult);
+                //}
+                //var highestWinRateResult = dealResults.Find(x => x.WinRate == dealResults.Max(y => y.WinRate));
 
                 // 결과 저장
-                StringBuilder builder = new StringBuilder();
-                builder.Append($"{symbol},{interval},{startDate},{endDate},{maxCandleCount},{highestWinRateResult}");
+                var builder = new StringBuilder();
+                builder.Append($"{symbol},{interval},{startDate},{endDate},{maxCandleCount},{rating.Round(4)}");
                 //foreach(var deal in dealResults)
                 //{
                 //    builder.AppendLine(deal.ToString());
