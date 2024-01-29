@@ -1,5 +1,6 @@
 ﻿using Binance.Net.Clients;
 using Binance.Net.Enums;
+using Binance.Net.Objects.Models.Spot;
 
 using CryptoExchange.Net.Authentication;
 
@@ -71,6 +72,11 @@ namespace MarinerX.Apis
                 .Where(s => s.Name.EndsWith("USDT") && !s.Name.Equals("LINKUSDT") && !s.Name.StartsWith("1"))
                 .Select(s => new FuturesSymbol(s.Name, s.LiquidationFee, s.ListingDate, s.PriceFilter?.MaxPrice, s.PriceFilter?.MinPrice, s.PriceFilter?.TickSize, s.LotSizeFilter?.MaxQuantity, s.LotSizeFilter?.MinQuantity, s.LotSizeFilter?.StepSize, s.PricePrecision, s.QuantityPrecision, s.UnderlyingType))
                 .ToList();
+        }
+
+        public static List<BinancePrice> GetFuturesPrices()
+        {
+            return binanceClient.UsdFuturesApi.ExchangeData.GetPricesAsync().Result.Data.Where(s => s.Symbol.EndsWith("USDT") && !s.Symbol.Equals("LINKUSDT") && !s.Symbol.StartsWith("1")).ToList();
         }
         #endregion
 

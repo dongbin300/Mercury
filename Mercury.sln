@@ -37,7 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MAll", "MAll\MAll.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CryptoProphet", "CryptoProphet\CryptoProphet.csproj", "{D337868D-33C7-4AAA-A0BC-8461DB8EC0FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradeBotConsole", "TradeBotConsole\TradeBotConsole.csproj", "{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TradeBotConsole", "TradeBotConsole\TradeBotConsole.csproj", "{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneticLab", "GeneticLab\GeneticLab.csproj", "{D778518F-0903-4FCD-9464-6A17715A3981}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,6 +111,10 @@ Global
 		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76603E0E-53F0-4216-BC7D-6E3BA4D538C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D778518F-0903-4FCD-9464-6A17715A3981}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D778518F-0903-4FCD-9464-6A17715A3981}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D778518F-0903-4FCD-9464-6A17715A3981}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D778518F-0903-4FCD-9464-6A17715A3981}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

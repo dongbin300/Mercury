@@ -10,6 +10,7 @@ using Mercury.Cryptos;
 using Mercury.Maths;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -397,8 +398,8 @@ namespace Backtester
         public bool IsPowerDeadCross2(IList<ChartInfo> charts, int startIndex, int lookback, double? currentMacd = null)
         {
             for (int i = startIndex; i >= startIndex - lookback; i--)
-                {
-                    var c0 = charts[i];
+            {
+                var c0 = charts[i];
                 var c1 = charts[i - 1];
 
                 if (currentMacd == null)
@@ -414,6 +415,121 @@ namespace Backtester
                     {
                         return true;
                     }
+                }
+            }
+            return false;
+        }
+        #endregion
+
+        #region Triple Supertrend
+        private bool IsTwoGreenSignal(ChartInfo info)
+        {
+            var count = 0;
+            count += info.Supertrend1 > 0 ? 1 : 0;
+            count += info.Supertrend2 > 0 ? 1 : 0;
+            count += info.Supertrend3 > 0 ? 1 : 0;
+            return count >= 2;
+        }
+
+        private bool IsTwoRedSignal(ChartInfo info)
+        {
+            var count = 0;
+            count += info.Supertrend1 < 0 ? 1 : 0;
+            count += info.Supertrend2 < 0 ? 1 : 0;
+            count += info.Supertrend3 < 0 ? 1 : 0;
+            return count >= 2;
+        }
+
+        private bool IsEntryTs2LongBit(IList<ChartInfo> charts, int startIndex)
+        {
+            int condition = 0;
+            for (int i = startIndex; i >= 0; i--) // 이전 봉 기준
+            {
+                var chart = charts[i];
+
+                switch (condition)
+                {
+                    case 0:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+                            condition = 1;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 1:
+                        if (chart.Supertrend1 < 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+                            condition = 2;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 2:
+                        if (chart.Supertrend1 < 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+
+                        }
+                        else if (chart.Supertrend1 > 0 && chart.Supertrend2 > 0 && chart.Supertrend3 > 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                }
+            }
+            return false;
+        }
+        private bool IsEntryTs2ShortBit(IList<ChartInfo> charts, int startIndex)
+        {
+            int condition = 0;
+            for (int i = startIndex; i >= 0; i--) // 이전 봉 기준
+            {
+                var chart = charts[i];
+
+                switch (condition)
+                {
+                    case 0:
+                        if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            condition = 1;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 1:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            condition = 2;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
+                    case 2:
+                        if (chart.Supertrend1 > 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+
+                        }
+                        else if (chart.Supertrend1 < 0 && chart.Supertrend2 < 0 && chart.Supertrend3 < 0)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        break;
                 }
             }
             return false;
@@ -445,13 +561,15 @@ namespace Backtester
                 }
             }
 
-            var title = "MACD 4.1";
+            var title = "Triple Supertrend";
             File.AppendAllText(MercuryPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), title + Environment.NewLine);
             foreach (var symbol in symbols)
             {
                 var result = new List<DealCheckpoints>();
                 var activeDeals = new List<DealCheckpoints>();
                 var charts = ChartLoader.GetChartPack(symbol, interval).Charts;
+
+                //==================================================================================
 
                 #region Triple RSI
                 //var quotes = charts.Select(x => x.Quote);
@@ -490,27 +608,49 @@ namespace Backtester
                 #endregion
 
                 #region MACD 4.1
+                //var quotes = charts.Select(x => x.Quote);
+                //var macd = quotes.GetMacd(12, 26, 9);
+                //var m = macd.Select(x => x.Macd);
+                //var s = macd.Select(x => x.Signal);
+                //var macd2 = quotes.GetMacd(9, 20, 7);
+                //var m2 = macd2.Select(x => x.Macd);
+                //var s2 = macd2.Select(x => x.Signal);
+                //var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
+                //var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
+
+                //for (int i = 0; i < charts.Count; i++)
+                //{
+                //    var _chart = charts[i];
+                //    _chart.Macd = m.ElementAt(i);
+                //    _chart.MacdSignal = s.ElementAt(i);
+                //    _chart.Macd2 = m2.ElementAt(i);
+                //    _chart.MacdSignal2 = s2.ElementAt(i);
+                //    _chart.Supertrend1 = st.ElementAt(i);
+                //    _chart.Adx = adx.ElementAt(i);
+                //}
+                #endregion
+
+                #region Triple Supertrend
                 var quotes = charts.Select(x => x.Quote);
-                var macd = quotes.GetMacd(12, 26, 9);
-                var m = macd.Select(x => x.Macd);
-                var s = macd.Select(x => x.Signal);
-                var macd2 = quotes.GetMacd(9, 20, 7);
-                var m2 = macd2.Select(x => x.Macd);
-                var s2 = macd2.Select(x => x.Signal);
-                var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
-                var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
+                var ts = quotes.GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
+                var r1 = ts.Select(x => x.Supertrend1);
+                var r2 = ts.Select(x => x.Supertrend2);
+                var r3 = ts.Select(x => x.Supertrend3);
+                var r4 = quotes.GetEma(200).Select(x => x.Ema);
+                var r5 = quotes.GetStochasticRsi(3, 3, 14, 14).Select(x => x.K);
 
                 for (int i = 0; i < charts.Count; i++)
                 {
                     var _chart = charts[i];
-                    _chart.Macd = m.ElementAt(i);
-                    _chart.MacdSignal = s.ElementAt(i);
-                    _chart.Macd2 = m2.ElementAt(i);
-                    _chart.MacdSignal2 = s2.ElementAt(i);
-                    _chart.Supertrend1 = st.ElementAt(i);
-                    _chart.Adx = adx.ElementAt(i);
+                    _chart.Supertrend1 = r1.ElementAt(i);
+                    _chart.Supertrend2 = r2.ElementAt(i);
+                    _chart.Supertrend3 = r3.ElementAt(i);
+                    _chart.Ema1 = r4.ElementAt(i);
+                    _chart.K = r5.ElementAt(i);
                 }
                 #endregion
+
+                //==================================================================================
 
                 for (int i = 240; i < charts.Count; i++)
                 {
@@ -518,6 +658,9 @@ namespace Backtester
                     var c1 = charts[i - 1];
                     var h = c.Quote.High;
                     var l = c.Quote.Low;
+                    var e = c.Quote.Close;
+
+                    //==================================================================================
 
                     #region Triple RSI
                     //if (c.Rsi3 > 50 && c.Rsi1 > c.Rsi2 && c.Rsi2 > c.Rsi3 && c.Quote.Close > (decimal)c.Ema1 && c.Adx > 20)
@@ -532,29 +675,67 @@ namespace Backtester
                     #endregion
 
                     #region Double MACD
-                    //if(c.Macd < 0 && c.Macd2 < 0 && c.Macd2 > c.Macd && c1.Macd2 < c1.Macd && c.Supertrend1 > 0 && c.Adx > 40)
+                    //if (c.Macd < 0 && c.Macd2 < 0 && c.Macd2 > c.Macd && c1.Macd2 < c1.Macd)
                     //{
                     //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Long));
                     //}
-                    //if(c.Macd > 0 && c.Macd2 > 0 && c.Macd2 < c.Macd && c1.Macd2 > c1.Macd && c.Supertrend1 < 0 && c.Adx > 40)
+                    //if (c.Macd > 0 && c.Macd2 > 0 && c.Macd2 < c.Macd && c1.Macd2 > c1.Macd)
                     //{
                     //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Short));
                     //}
                     #endregion
 
                     #region MACD 4.1
-                    if (IsPowerGoldenCross(charts, i, 14, c.Macd) && 
-                        IsPowerGoldenCross2(charts, i, 14, c.Macd2))
+                    //if (IsPowerGoldenCross(charts, i, 14, c.Macd) && 
+                    //    IsPowerGoldenCross2(charts, i, 14, c.Macd2))
+                    //{
+                    //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Long));
+                    //}
+
+                    //if (IsPowerDeadCross(charts, i, 14, c.Macd) &&
+                    //    IsPowerDeadCross2(charts, i, 14, c.Macd2))
+                    //{
+                    //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Short));
+                    //}
+                    #endregion
+
+                    #region Triple Supertrend
+                    //if (IsTwoGreenSignal(c) && e > (decimal)c.Ema1 && c.K > 20 && c1.K < 20)
+                    //{
+                    //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Long));
+                    //}
+
+                    //if (IsTwoRedSignal(c) && e < (decimal)c.Ema1 && c.K < 80 && c1.K > 80)
+                    //{
+                    //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Short));
+                    //}
+                    #endregion
+
+                    #region Triple Supertrend2
+                    //if (c.Supertrend1 > 0 && c1.Supertrend1 < 0 && c.Supertrend2 > 0 && c.Supertrend3 > 0)
+                    //{
+                    //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Long));
+                    //}
+
+                    //if (c.Supertrend1 < 0 && c1.Supertrend1 > 0 && c.Supertrend2 < 0 && c.Supertrend3 < 0)
+                    //{
+                    //    activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Short));
+                    //}
+                    #endregion
+
+                    #region Triple Supertrend3
+                    if (IsEntryTs2LongBit(charts, i))
                     {
                         activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Long));
                     }
 
-                    if (IsPowerDeadCross(charts, i, 14, c.Macd) &&
-                        IsPowerDeadCross2(charts, i, 14, c.Macd2))
+                    if (IsEntryTs2ShortBit(charts, i))
                     {
                         activeDeals.Add(new DealCheckpoints(symbol, c.DateTime, c.Quote.Close, PositionSide.Short));
                     }
                     #endregion
+
+                    //==================================================================================
 
                     var dealsToRemove = new List<DealCheckpoints>();
                     foreach (var activeDeal in activeDeals)
@@ -615,7 +796,7 @@ namespace Backtester
 
                 // 결과 저장
                 var builder = new StringBuilder();
-                builder.Append($"{symbol},{interval},{startDate},{endDate},{maxCandleCount},{rating.Round(4)}");
+                builder.Append($"{symbol},{rating.Round(4)}");
                 //foreach(var deal in dealResults)
                 //{
                 //    builder.AppendLine(deal.ToString());

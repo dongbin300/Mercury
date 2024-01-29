@@ -113,6 +113,7 @@ namespace MarinerX
             menuStrip.Items.Add(new ToolStripSeparator());
 
             var menu1 = new ToolStripMenuItem("데이터 수집");
+            menu1.DropDownItems.Add("Binance 현재가 데이터 수집", null, new EventHandler(GetBinancePriceDataEvent));
             menu1.DropDownItems.Add("Binance 심볼 데이터 수집", null, new EventHandler(GetBinanceSymbolDataEvent));
             menu1.DropDownItems.Add("Binance 1분봉 데이터 수집", null, new EventHandler(GetBinanceCandleDataEvent));
             menu1.DropDownItems.Add("Binance 1일봉 데이터 추출", null, new EventHandler(Extract1DCandleEvent));
@@ -296,6 +297,22 @@ namespace MarinerX
         }
 
         #region 데이터 수집
+        public static void GetBinancePriceDataEvent(object? sender, EventArgs e)
+        {
+            try
+            {
+                var prices = BinanceRestApi.GetFuturesPrices().OrderBy(x=>x.Symbol);
+                var data = string.Join(Environment.NewLine, prices.Select(x => x.Symbol + "," + x.Price));
+
+                System.Windows.Clipboard.SetText(data);
+                MessageBox.Show(data);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
         public static void GetBinanceSymbolDataEvent(object? sender, EventArgs e)
         {
             try
