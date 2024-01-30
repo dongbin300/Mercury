@@ -24,7 +24,8 @@ namespace GeneticLab
         private void Run(object? sender, DoWorkEventArgs e)
         {
             //new SumSample().Run(Dispatcher, LogListBox);
-            new TspSample().Run(Dispatcher, TspCanvas);
+            //new TspSample().Run(Dispatcher, TspCanvas);
+            new FunctionOptimizationSample().Run(Dispatcher, LogListBox);
         }
     }
 }

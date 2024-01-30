@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Genetic Lab" Height="450" Width="800">
     <Grid>
-        <!--<ListBox x:Name="LogListBox"/>-->
-        <Canvas x:Name="TspCanvas"/>
+        <ListBox x:Name="LogListBox"/>
+        <!--<Canvas x:Name="TspCanvas"/>-->
     </Grid>
 </Window>
