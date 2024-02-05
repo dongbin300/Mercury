@@ -75,36 +75,6 @@ namespace Mercury.Charts
             Charts = newChart;
         }
 
-        public void CalculateIndicatorsEveryonesCoin()
-        {
-            var quotes = Charts.Select(x => x.Quote);
-            var r1 = quotes.GetLsma(10).Select(x => x.Lsma);
-            var r2 = quotes.GetLsma(30).Select(x => x.Lsma);
-            var r3 = quotes.GetRsi(14).Select(x => x.Rsi);
-            for (int i = 0; i < Charts.Count; i++)
-            {
-                var chart = Charts[i];
-                chart.Lsma1 = r1.ElementAt(i);
-                chart.Lsma2 = r2.ElementAt(i);
-                chart.Rsi1 = r3.ElementAt(i);
-            }
-        }
-
-        public void CalculateIndicatorsStefano()
-        {
-            var quotes = Charts.Select(x => x.Quote);
-            var r1 = quotes.GetEma(12).Select(x => x.Ema);
-            var r2 = quotes.GetEma(26).Select(x => x.Ema);
-            //var r3 = quotes.GetJmaSlope(14).Select(x => x.JmaSlope);
-            for (int i = 0; i < Charts.Count; i++)
-            {
-                var chart = Charts[i];
-                chart.Ema1 = r1.ElementAt(i);
-                chart.Ema2 = r2.ElementAt(i);
-                //chart.JmaSlope = r3.ElementAt(i);
-            }
-        }
-
         public ChartInfo Select()
         {
             return CurrentChart = GetChart(StartTime);
@@ -141,5 +111,44 @@ namespace Mercury.Charts
         {
             return Charts.Where(x => x.DateTime >= startTime && x.DateTime <= endTime).ToList();
         }
-    }
+
+		public void CalculateIndicatorsEveryonesCoin()
+		{
+			var quotes = Charts.Select(x => x.Quote);
+			var r1 = quotes.GetLsma(10).Select(x => x.Lsma);
+			var r2 = quotes.GetLsma(30).Select(x => x.Lsma);
+			var r3 = quotes.GetRsi(14).Select(x => x.Rsi);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				var chart = Charts[i];
+				chart.Lsma1 = r1.ElementAt(i);
+				chart.Lsma2 = r2.ElementAt(i);
+				chart.Rsi1 = r3.ElementAt(i);
+			}
+		}
+
+		public void CalculateIndicatorsStefano()
+		{
+			var quotes = Charts.Select(x => x.Quote);
+			var r1 = quotes.GetEma(12).Select(x => x.Ema);
+			var r2 = quotes.GetEma(26).Select(x => x.Ema);
+			//var r3 = quotes.GetJmaSlope(14).Select(x => x.JmaSlope);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				var chart = Charts[i];
+				chart.Ema1 = r1.ElementAt(i);
+				chart.Ema2 = r2.ElementAt(i);
+				//chart.JmaSlope = r3.ElementAt(i);
+			}
+		}
+
+        public void UseRsi(int period = 14)
+        {
+            var rsi = Charts.Select(x => x.Quote).GetRsi(period).Select(x=>x.Rsi);
+			for (int i = 0; i < Charts.Count; i++)
+            {
+                Charts[i].Rsi1 = rsi.ElementAt(i);
+            }
+		}
+	}
 }

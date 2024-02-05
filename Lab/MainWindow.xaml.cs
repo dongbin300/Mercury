@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Mercury.Charts;
+
+using System.Linq;
 using System.Windows;
 
 namespace Lab
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+	/// <summary>
+	/// Interaction logic for MainWindow.xaml
+	/// </summary>
+	public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
 
-            Dictionary<List<int>, int> test = new Dictionary<List<int>, int>()
-            {
-                { new List<int>(){1, 2, 3, 4}, 6 },
-                { new List<int>(){1, 2, 3, 4}, 7 },
-            };
+            ChartLoader.InitChartsMByDate("BTCUSDT", Binance.Net.Enums.KlineInterval.FiveMinutes);
+            var charts = ChartLoader.GetChartPack("BTCUSDT", Binance.Net.Enums.KlineInterval.FiveMinutes);
+            charts.UseRsi();
+            var rsi = charts.Charts.Select(x => x.Rsi1);
         }
     }
 }

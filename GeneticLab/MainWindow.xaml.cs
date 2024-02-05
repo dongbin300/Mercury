@@ -1,7 +1,14 @@
 ﻿using GeneticLab.Samples;
 
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
+
+using Tensorflow;
+using Tensorflow.NumPy;
+using Tensorflow.Operations.Initializers;
+
+using static Tensorflow.Binding;
 
 namespace GeneticLab
 {
@@ -25,7 +32,8 @@ namespace GeneticLab
         {
             //new SumSample().Run(Dispatcher, LogListBox);
             //new TspSample().Run(Dispatcher, TspCanvas);
-            new FunctionOptimizationSample().Run(Dispatcher, LogListBox);
-        }
+            //new FunctionOptimizationSample().Run(Dispatcher, LogListBox);
+            new CandleCrossRsiSample().Run(Dispatcher, LogListBox);
+		}
     }
 }
