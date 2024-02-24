@@ -13,17 +13,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace ChartViewer
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+	/// <summary>
+	/// Interaction logic for MainWindow.xaml
+	/// </summary>
+	public partial class MainWindow : Window
     {
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT
@@ -78,6 +77,7 @@ namespace ChartViewer
             Ema3CheckBox.IsChecked = true;
             Supertrend1CheckBox.IsChecked = true;
             RSupertrend1CheckBox.IsChecked = true;
+            CustomCheckBox.IsChecked = true;
         }
 
         private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -167,11 +167,19 @@ namespace ChartViewer
                     Charts[i].ReverseSupertrend1 = st.ElementAt(i) == 0 ? -39909 : st.ElementAt(i);
                 }
             }
+			if (CustomCheckBox.IsChecked ?? true)
+			{
+				var custom = quotes.GetCustom(14).Select(x=>x.Custom);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Custom = custom.ElementAt(i) == 0 ? -39909 : custom.ElementAt(i);
+				}
+			}
 
-            CandleChart.InvalidateVisual();
+			CandleChart.InvalidateVisual();
         }
 
-        private void DrawIndicator(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color)
+        private void DrawIndicator(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color, float strokeWidth = 1)
         {
             if (preValue == -39909 || value == -39909)
             {
@@ -185,7 +193,7 @@ namespace ChartViewer
                     new SKPoint(
                         LiveActualItemFullWidth * (viewIndex + 0.5f),
                         LiveActualHeight * (float)(1.0 - (value - min) / (max - min)) + CandleTopBottomMargin),
-                    new SKPaint() { Color = color }
+                    new SKPaint() { Color = color, StrokeWidth = strokeWidth }
                     );
         }
 
@@ -248,9 +256,13 @@ namespace ChartViewer
                 yMax = Math.Max(yMax, (double)Charts.Where(x => x.ReverseSupertrend1 != -39909).Max(x => Math.Abs(x.ReverseSupertrend1)));
                 yMin = Math.Min(yMin, (double)Charts.Where(x => x.ReverseSupertrend1 != -39909).Min(x => Math.Abs(x.ReverseSupertrend1)));
             }
+			if (CustomCheckBox.IsChecked ?? true)
+			{
+                // 아직은 필요없음
+			}
 
-            // Draw Quote and Indicator
-            for (int i = 0; i < Charts.Count; i++)
+			// Draw Quote and Indicator
+			for (int i = 0; i < Charts.Count; i++)
             {
                 var quote = Charts[i].Quote;
 
@@ -274,9 +286,13 @@ namespace ChartViewer
                 {
                     DrawSupertrend(canvas, i, i == 0 ? Charts[i].ReverseSupertrend1 : Charts[i - 1].ReverseSupertrend1, Charts[i].ReverseSupertrend1, yMax, yMin, Charts[i].ReverseSupertrend1 > 0 ? LongColor : ShortColor);
                 }
+				if (CustomCheckBox.IsChecked ?? true)
+				{
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Custom : Charts[i - 1].Custom, Charts[i].Custom, yMax, yMin, new SKColor(128, 128, 224), 3);
+				}
 
-                #region Candle
-                canvas.DrawLine(
+				#region Candle
+				canvas.DrawLine(
                     new SKPoint(
                         LiveActualItemFullWidth * (i + 0.5f),
                         LiveActualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + CandleTopBottomMargin),

@@ -2,10 +2,24 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <BaseOutputPath>D:\Project\CS\Mercury\MarinerX\bin</BaseOutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Images\mercury.ico" />
+    <None Remove="Resources\Images\mercury.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="Resources\Languages\Language-en.xaml" />
+    <Page Remove="Resources\Languages\Language-ja.xaml" />
+    <Page Remove="Resources\Languages\Language-ko.xaml" />
+    <Page Remove="Resources\Themes\DarkTheme.xaml" />
+    <Page Remove="Resources\Themes\LightTheme.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
@@ -13,6 +27,30 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Images\mercury.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\mercury.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Languages\Language-en.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Languages\Language-ja.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Languages\Language-ko.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Themes\DarkTheme.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Themes\LightTheme.xaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

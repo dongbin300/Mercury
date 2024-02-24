@@ -1,16 +1,9 @@
 ﻿#include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 
-#include <stdio.h>
-#include <time.h>
+#include "cryptodata.h"
 
 void UseCuda(int*, const int*, unsigned int, unsigned int);
-
-__global__ void addKernel(int* c, const int* a, const int* b)
-{
-	int i = threadIdx.x;
-	c[i] = a[i] * b[i];
-}
 
 __global__ void FactorialKernel(int* result, const int* a)
 {
@@ -30,7 +23,9 @@ extern "C" __declspec(dllexport) void factorial(int n)
 
 int main()
 {
-	const int arraySize = 65536;
+	read_data_1M("SOLUSDT");
+
+	const int arraySize = 256;
 	int a[arraySize];
 	int r[arraySize] = { 0 };
 
@@ -39,17 +34,13 @@ int main()
 		a[i] = i + 1;
 	}
 
-	time_t start_time = clock();
 	// Compute
-	UseCuda(r, a, 256, 256);
-	time_t end_time = clock();
+	UseCuda(r, a, 16, 16);
 
 	// Output
-	/*for (int i = 0; i < arraySize; i++) {
+	for (int i = 0; i < arraySize; i++) {
 		printf("%d ", r[i]);
-	}*/
-	double elapsed_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-	printf("%.3f 초\n", elapsed_time);
+	}
 
 	// Free
 	cudaDeviceReset();
@@ -68,18 +59,18 @@ void UseCuda(int* r, const int* a, unsigned int b_size, unsigned int t_size)
 {
 	int* d_a = 0;
 	int* d_r = 0;
+	size_t size = b_size * t_size * sizeof(int);
 
 	cudaSetDevice(0);
-	cudaMalloc((void**)&d_r, b_size * t_size * sizeof(int));
-	cudaMalloc((void**)&d_a, b_size * t_size * sizeof(int));
-	cudaMemcpy(d_a, a, b_size * t_size * sizeof(int), cudaMemcpyHostToDevice);
+	cudaMalloc((void**)&d_r, size);
+	cudaMalloc((void**)&d_a, size);
+	cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
 
 	FactorialKernel << <b_size, t_size >> > (d_r, d_a);
 
 	cudaGetLastError();
 	cudaDeviceSynchronize();
-	cudaMemcpy(r, d_r, b_size * t_size * sizeof(int), cudaMemcpyDeviceToHost);
-
+	cudaMemcpy(r, d_r, size, cudaMemcpyDeviceToHost);
 	cudaFree(d_r);
 	cudaFree(d_a);
 }

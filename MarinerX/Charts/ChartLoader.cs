@@ -280,6 +280,7 @@ namespace MarinerX.Charts
             try
             {
                 var startTimeTemp = File.Exists(PathUtil.BinanceFuturesData.Down("1D", "BTCUSDT.csv")) ? SymbolUtil.GetEndDateOf1D("BTCUSDT") : SymbolUtil.GetStartDate("BTCUSDT");
+                //var startTimeTemp = new DateTime(2019, 9, 8);
                 var symbols = LocalStorageApi.SymbolNames;
                 var dayCountTemp = (DateTime.Today - startTimeTemp).Days + 1;
                 var csvFileCount = symbols.Count * dayCountTemp;

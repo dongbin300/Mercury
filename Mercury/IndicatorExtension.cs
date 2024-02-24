@@ -359,5 +359,24 @@ namespace Mercury
 
             return result;
         }
+
+        public static IEnumerable<CustomResult> GetCustom(this IEnumerable<Quote> quotes, int period)
+        {
+			var result = new List<CustomResult>();
+
+			var open = quotes.Select(x => (double)x.Open).ToArray();
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			var volume = quotes.Select(x => (double)x.Volume).ToArray();
+			var custom = ArrayCalculator.Custom(open, high, low, close, volume, period);
+
+			for (int i = 0; i < custom.Length; i++)
+			{
+				result.Add(new CustomResult(quotes.ElementAt(i).Date, custom[i]));
+			}
+
+			return result;
+		}
     }
 }

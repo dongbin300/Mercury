@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MarinerX.ChartViewer"
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
         Title="Mariner X Chart Viewer" Height="300" Width="850" Background="{StaticResource Background}"
@@ -108,6 +107,9 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="HLBoxCheckBox">HL-Box</CheckBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="CustomCheckBox">Custom</CheckBox>
                 </StackPanel>
             </StackPanel>
         </Grid>

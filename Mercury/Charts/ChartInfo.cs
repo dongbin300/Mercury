@@ -42,6 +42,8 @@
 
         public double VolumeSma { get; set; }
 
+        public double Custom { get; set; }
+
         public ChartInfo(string symbol, Quote quote)
         {
             Symbol = symbol;
