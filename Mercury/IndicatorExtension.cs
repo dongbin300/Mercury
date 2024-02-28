@@ -369,11 +369,11 @@ namespace Mercury
 			var low = quotes.Select(x => (double)x.Low).ToArray();
 			var close = quotes.Select(x => (double)x.Close).ToArray();
 			var volume = quotes.Select(x => (double)x.Volume).ToArray();
-			var custom = ArrayCalculator.Custom(open, high, low, close, volume, period);
+			(var upper, var lower, var pioneer, var player) = ArrayCalculator.Custom(open, high, low, close, volume, period);
 
-			for (int i = 0; i < custom.Length; i++)
+			for (int i = 0; i < upper.Length; i++)
 			{
-				result.Add(new CustomResult(quotes.ElementAt(i).Date, custom[i]));
+				result.Add(new CustomResult(quotes.ElementAt(i).Date, upper[i], lower[i], pioneer[i], player[i]));
 			}
 
 			return result;

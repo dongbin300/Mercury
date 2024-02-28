@@ -784,14 +784,52 @@
 			return tsv;
 		}
 
-		public static double[] Custom(double[] open, double[] high, double[] low, double[] close, double[] volume, int period)
+		public static (double[], double[], double[], double[]) Custom(double[] open, double[] high, double[] low, double[] close, double[] volume, int period)
 		{
-			var custom = new double[open.Length];
+			double alpha = 2.0 / (period + 1);
+			var upper = new double[open.Length];
+			var lower = new double[open.Length];
+			var pioneer = new double[open.Length];
+			var player = new double[open.Length];
 			for (int i = 0; i < open.Length; i++)
 			{
-				custom[i] = (high[i] + low[i]) / 2;
+				if (i < period - 1)
+				{
+					upper[i] = NA;
+					lower[i] = NA;
+					pioneer[i] = NA;
+					player[i] = NA;
+					continue;
+				}
+
+				if(i == period - 1)
+				{
+					double sumOpen = 0;
+					double sumHigh = 0;
+					double sumLow = 0;
+					double sumClose = 0;
+					double sumVolume = 0;
+					for (int j = i - period + 1; j <= i; j++)
+					{
+						sumOpen += open[j] * volume[j];
+						sumHigh += high[j] * volume[j];
+						sumLow += low[j] * volume[j];
+						sumClose += close[j] * volume[j];
+						sumVolume += volume[j];
+					}
+					upper[i] = sumHigh / sumVolume;
+					lower[i] = sumLow / sumVolume;
+					pioneer[i] = sumOpen / sumVolume;
+					player[i] = sumClose / sumVolume;
+					continue;
+				}
+
+				upper[i] = alpha * high[i] + (1 - alpha) * upper[i - 1];
+				lower[i] = alpha * low[i] + (1 - alpha) * lower[i - 1];
+				pioneer[i] = alpha * open[i] + (1 - alpha) * pioneer[i - 1];
+				player[i] = alpha * close[i] + (1 - alpha) * player[i - 1];
 			}
-			return custom;
+			return (upper, lower, pioneer, player);
 		}
 	}
 }

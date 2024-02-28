@@ -45,9 +45,13 @@ namespace ChartViewer
         private readonly SKPaint CandleInfoPaint = new() { Color = SKColors.White };
         private readonly SKPaint HorizontalLinePointerPaint = new() { Color = SKColors.Silver };
         private static readonly SKColor LongColor = new(59, 207, 134);
+        private static readonly SKColor LongVolumeColor = new(59, 207, 134, 64);
         private static readonly SKColor ShortColor = new(237, 49, 97);
+        private static readonly SKColor ShortVolumeColor = new(237, 49, 97, 64);
         private readonly SKPaint LongPaint = new() { Color = LongColor };
+        private readonly SKPaint LongVolumePaint = new() { Color = LongVolumeColor };
         private readonly SKPaint ShortPaint = new() { Color = ShortColor };
+        private readonly SKPaint ShortVolumePaint = new() { Color = ShortVolumeColor };
         private readonly SKPaint CandlePointerPaint = new() { Color = new SKColor(255, 255, 255, 32) };
         private readonly SKPaint CandleBuyPointerPaint = new() { Color = new SKColor(59, 207, 134, 64) };
         private readonly SKPaint CandleSellPointerPaint = new() { Color = new SKColor(237, 49, 97, 64) };
@@ -75,8 +79,8 @@ namespace ChartViewer
             Ema1CheckBox.IsChecked = true;
             Ema2CheckBox.IsChecked = true;
             Ema3CheckBox.IsChecked = true;
-            Supertrend1CheckBox.IsChecked = true;
-            RSupertrend1CheckBox.IsChecked = true;
+            Supertrend1CheckBox.IsChecked = false;
+            RSupertrend1CheckBox.IsChecked = false;
             CustomCheckBox.IsChecked = true;
         }
 
@@ -169,10 +173,17 @@ namespace ChartViewer
             }
 			if (CustomCheckBox.IsChecked ?? true)
 			{
-				var custom = quotes.GetCustom(14).Select(x=>x.Custom);
+                var custom = quotes.GetCustom(CustomPeriodText.Text.ToInt());
+                var upper = custom.Select(x=>x.Upper);
+                var lower = custom.Select(x=>x.Lower);
+                var pioneer = custom.Select(x=>x.Pioneer);
+                var player = custom.Select(x=>x.Player);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Custom = custom.ElementAt(i) == 0 ? -39909 : custom.ElementAt(i);
+					Charts[i].CustomUpper = upper.ElementAt(i) == 0 ? -39909 : upper.ElementAt(i);
+					Charts[i].CustomLower = lower.ElementAt(i) == 0 ? -39909 : lower.ElementAt(i);
+					Charts[i].CustomPioneer = pioneer.ElementAt(i) == 0 ? -39909 : pioneer.ElementAt(i);
+					Charts[i].CustomPlayer = player.ElementAt(i) == 0 ? -39909 : player.ElementAt(i);
 				}
 			}
 
@@ -230,6 +241,8 @@ namespace ChartViewer
 
             var yMax = (double)Charts.Max(x => x.Quote.High);
             var yMin = (double)Charts.Min(x => x.Quote.Low);
+            var vMax = (double)Charts.Max(x => x.Quote.Volume);
+            var vMin = (double)Charts.Min(x => x.Quote.Volume);
 
             if (Ema1CheckBox.IsChecked ?? true)
             {
@@ -266,7 +279,39 @@ namespace ChartViewer
             {
                 var quote = Charts[i].Quote;
 
-                if (Ema1CheckBox.IsChecked ?? true)
+				#region Volume
+				canvas.DrawRect(
+					new SKRect(
+						LiveActualItemFullWidth * i + LiveActualItemMargin / 2,
+						LiveActualHeight * 0.66f + (float)(LiveActualHeight * 0.33f * (vMax - (double)quote.Volume) / vMax) + CandleTopBottomMargin,
+						LiveActualItemFullWidth * (i + 1) - LiveActualItemMargin / 2,
+						LiveActualHeight + CandleTopBottomMargin
+						),
+					quote.Open < quote.Close ? LongVolumePaint : ShortVolumePaint
+					);
+				#endregion
+
+				#region Candle
+				canvas.DrawLine(
+					new SKPoint(
+						LiveActualItemFullWidth * (i + 0.5f),
+						LiveActualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+					new SKPoint(
+						LiveActualItemFullWidth * (i + 0.5f),
+						LiveActualHeight * (float)(1.0 - ((double)quote.Low - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+					quote.Open < quote.Close ? LongPaint : ShortPaint);
+				canvas.DrawRect(
+					new SKRect(
+						LiveActualItemFullWidth * i + LiveActualItemMargin / 2,
+						LiveActualHeight * (float)(1.0 - ((double)quote.Open - yMin) / (yMax - yMin)) + CandleTopBottomMargin,
+						LiveActualItemFullWidth * (i + 1) - LiveActualItemMargin / 2,
+						LiveActualHeight * (float)(1.0 - ((double)quote.Close - yMin) / (yMax - yMin)) + CandleTopBottomMargin
+						),
+					quote.Open < quote.Close ? LongPaint : ShortPaint
+					);
+				#endregion
+
+				if (Ema1CheckBox.IsChecked ?? true)
                 {
                     DrawIndicator(canvas, i, i == 0 ? Charts[i].Ema1 : Charts[i - 1].Ema1, Charts[i].Ema1, yMax, yMin, new SKColor(128, 128, 128));
                 }
@@ -288,28 +333,11 @@ namespace ChartViewer
                 }
 				if (CustomCheckBox.IsChecked ?? true)
 				{
-					DrawIndicator(canvas, i, i == 0 ? Charts[i].Custom : Charts[i - 1].Custom, Charts[i].Custom, yMax, yMin, new SKColor(128, 128, 224), 3);
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].CustomUpper : Charts[i - 1].CustomUpper, Charts[i].CustomUpper, yMax, yMin, new SKColor(0, 255, 0), 2);
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].CustomLower : Charts[i - 1].CustomLower, Charts[i].CustomLower, yMax, yMin, new SKColor(255, 0, 0), 2);
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].CustomPioneer : Charts[i - 1].CustomPioneer, Charts[i].CustomPioneer, yMax, yMin, new SKColor(255, 128, 255), 2);
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].CustomPlayer : Charts[i - 1].CustomPlayer, Charts[i].CustomPlayer, yMax, yMin, new SKColor(128, 255, 0), 2);
 				}
-
-				#region Candle
-				canvas.DrawLine(
-                    new SKPoint(
-                        LiveActualItemFullWidth * (i + 0.5f),
-                        LiveActualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    new SKPoint(
-                        LiveActualItemFullWidth * (i + 0.5f),
-                        LiveActualHeight * (float)(1.0 - ((double)quote.Low - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
-                    quote.Open < quote.Close ? LongPaint : ShortPaint);
-                canvas.DrawRect(
-                    new SKRect(
-                        LiveActualItemFullWidth * i + LiveActualItemMargin / 2,
-                        LiveActualHeight * (float)(1.0 - ((double)quote.Open - yMin) / (yMax - yMin)) + CandleTopBottomMargin,
-                        LiveActualItemFullWidth * (i + 1) - LiveActualItemMargin / 2,
-                        LiveActualHeight * (float)(1.0 - ((double)quote.Close - yMin) / (yMax - yMin)) + CandleTopBottomMargin
-                        ),
-                    quote.Open < quote.Close ? LongPaint : ShortPaint
-                    );
-                #endregion
             }
 
             // Draw Pointer
@@ -357,7 +385,7 @@ namespace ChartViewer
             {
                 var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
                 var changeText = pointingChart.Quote.Close >= pointingChart.Quote.Open ? $"+{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}" : $"{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}";
-                canvas.DrawText($"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close}", 3, 10, CandleInfoFont, CandleInfoPaint);
+                canvas.DrawText($"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close} V {pointingChart.Quote.Volume}", 3, 10, CandleInfoFont, CandleInfoPaint);
             }
             catch
             {

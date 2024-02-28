@@ -42,7 +42,10 @@
 
         public double VolumeSma { get; set; }
 
-        public double Custom { get; set; }
+        public double CustomUpper { get; set; }
+        public double CustomLower { get; set; }
+        public double CustomPioneer { get; set; }
+        public double CustomPlayer { get; set; }
 
         public ChartInfo(string symbol, Quote quote)
         {
