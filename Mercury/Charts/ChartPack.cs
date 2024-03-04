@@ -1,116 +1,133 @@
 ﻿using Binance.Net.Enums;
 
+using Microsoft.VisualBasic;
+
 namespace Mercury.Charts
 {
-    public class ChartPack
-    {
-        public string Symbol => Charts.First().Symbol;
-        public KlineInterval Interval = KlineInterval.OneMinute;
-        public IList<ChartInfo> Charts { get; set; } = new List<ChartInfo>();
-        public DateTime StartTime => Charts.Min(x => x.DateTime);
-        public DateTime EndTime => Charts.Max(x => x.DateTime);
-        public ChartInfo? CurrentChart;
+	public class ChartPack
+	{
+		public string Symbol => Charts.First().Symbol;
+		public KlineInterval Interval = KlineInterval.OneMinute;
+		public IList<ChartInfo> Charts { get; set; } = new List<ChartInfo>();
+		public DateTime StartTime => Charts.Min(x => x.DateTime);
+		public DateTime EndTime => Charts.Max(x => x.DateTime);
+		public ChartInfo? CurrentChart;
 
-        public ChartPack(KlineInterval interval)
-        {
-            Interval = interval;
-            CurrentChart = null;
-        }
+		public ChartPack(KlineInterval interval)
+		{
+			Interval = interval;
+			CurrentChart = null;
+		}
 
-        public void AddChart(ChartInfo chart)
-        {
-            Charts.Add(chart);
-        }
+		public void AddChart(ChartInfo chart)
+		{
+			Charts.Add(chart);
+		}
 
-        public void ConvertCandle()
-        {
-            if (Interval == KlineInterval.OneMinute)
-            {
-                return;
-            }
+		public void ConvertCandle()
+		{
+			if (Interval == KlineInterval.OneMinute || Interval == KlineInterval.FiveMinutes || Interval == KlineInterval.OneHour || Interval == KlineInterval.OneDay)
+			{
+				return;
+			}
 
-            var newQuotes = new List<Quote>();
+			var newCharts = new List<ChartInfo>();
+			var groupedByInterval = Charts.GroupBy(c => GetGroupingKey(c.DateTime, Interval));
 
-            int unitCount = Interval switch
-            {
-                KlineInterval.ThreeMinutes => 3,
-                KlineInterval.FiveMinutes => 5,
-                KlineInterval.FifteenMinutes => 15,
-                KlineInterval.ThirtyMinutes => 30,
-                KlineInterval.OneHour => 60,
-                KlineInterval.TwoHour => 120,
-                KlineInterval.FourHour => 240,
-                KlineInterval.SixHour => 360,
-                KlineInterval.EightHour => 480,
-                KlineInterval.TwelveHour => 720,
-                KlineInterval.OneDay => 1440,
-                _ => 1
-            };
+			foreach (var group in groupedByInterval)
+			{
+				var groupCharts = group.ToList();
+				var firstChart = groupCharts.First();
+				var lastChart = groupCharts.Last();
 
-            int i = 0;
-            for (; i < Charts.Count; i++)
-            {
-                if ((Charts[i].DateTime.Hour * 60 + Charts[i].DateTime.Minute) % unitCount == 0)
-                {
-                    break;
-                }
-            }
+				var newQuote = new Quote
+				{
+					Date = GetGroupingDateTime(firstChart.DateTime, Interval),
+					Open = firstChart.Quote.Open,
+					High = groupCharts.Max(c => c.Quote.High),
+					Low = groupCharts.Min(c => c.Quote.Low),
+					Close = lastChart.Quote.Close,
+					Volume = groupCharts.Sum(c => c.Quote.Volume)
+				};
 
-            for (; i < Charts.Count; i += unitCount)
-            {
-                var targets = Charts.Skip(i).Take(unitCount).Select(x => x.Quote).ToList();
+				newCharts.Add(new ChartInfo(firstChart.Symbol, newQuote));
+			}
 
-                newQuotes.Add(new Quote
-                {
-                    Date = targets[0].Date,
-                    Open = targets[0].Open,
-                    High = targets.Max(t => t.High),
-                    Low = targets.Min(t => t.Low),
-                    Close = targets[^1].Close,
-                    Volume = targets.Sum(t => t.Volume)
-                });
-            }
+			Charts = newCharts;
+		}
 
-            var newChart = newQuotes.Select(candle => new ChartInfo(Symbol, candle)).ToList();
-            Charts = newChart;
-        }
+		DateTime GetGroupingDateTime(DateTime dateTime, KlineInterval interval)
+		{
+			return interval switch
+			{
+				KlineInterval.ThreeMinutes => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute - (dateTime.Minute % 3), 0),
+				KlineInterval.FifteenMinutes => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute - (dateTime.Minute % 15), 0),
+				KlineInterval.ThirtyMinutes => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute - (dateTime.Minute % 30), 0),
+				KlineInterval.TwoHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 2), 0, 0),
+				KlineInterval.FourHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 4), 0, 0),
+				KlineInterval.SixHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 6), 0, 0),
+				KlineInterval.EightHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 8), 0, 0),
+				KlineInterval.TwelveHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 12), 0, 0),
+				KlineInterval.OneWeek => new DateTime(dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Year, dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Month, dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Day, 0, 0, 0),
+				KlineInterval.OneMonth => new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0),
+				_ => throw new ArgumentException("Invalid interval"),
+			};
+		}
 
-        public ChartInfo Select()
-        {
-            return CurrentChart = GetChart(StartTime);
-        }
+		string GetGroupingKey(DateTime dateTime, KlineInterval interval)
+		{
+			return interval switch
+			{
+				KlineInterval.ThreeMinutes => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute / 3}",
+				KlineInterval.FifteenMinutes => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute / 15}",
+				KlineInterval.ThirtyMinutes => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour}-{dateTime.Minute / 30}",
+				KlineInterval.TwoHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 2}",
+				KlineInterval.FourHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 4}",
+				KlineInterval.SixHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 6}",
+				KlineInterval.EightHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 8}",
+				KlineInterval.TwelveHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 12}",
+				KlineInterval.OneWeek => $"{dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Year}-{dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Month}-{dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Day}",
+				KlineInterval.OneMonth => $"{dateTime.Year}-{dateTime.Month}",
+				_ => throw new ArgumentException("Invalid interval"),
+			};
+		}
 
-        public ChartInfo Select(DateTime time)
-        {
-            return CurrentChart = GetChart(time);
-        }
+		public ChartInfo Select()
+		{
+			return CurrentChart = GetChart(StartTime);
+		}
 
-        public ChartInfo Next() =>
-            CurrentChart == null ?
-            CurrentChart = default! :
-            CurrentChart = GetChart(Interval switch
-            {
-                KlineInterval.OneMinute => CurrentChart.DateTime.AddMinutes(1),
-                KlineInterval.ThreeMinutes => CurrentChart.DateTime.AddMinutes(3),
-                KlineInterval.FiveMinutes => CurrentChart.DateTime.AddMinutes(5),
-                KlineInterval.FifteenMinutes => CurrentChart.DateTime.AddMinutes(15),
-                KlineInterval.ThirtyMinutes => CurrentChart.DateTime.AddMinutes(30),
-                KlineInterval.OneHour => CurrentChart.DateTime.AddHours(1),
-                KlineInterval.TwoHour => CurrentChart.DateTime.AddHours(2),
-                KlineInterval.FourHour => CurrentChart.DateTime.AddHours(4),
-                KlineInterval.SixHour => CurrentChart.DateTime.AddHours(6),
-                KlineInterval.EightHour => CurrentChart.DateTime.AddHours(8),
-                KlineInterval.TwelveHour => CurrentChart.DateTime.AddHours(12),
-                KlineInterval.OneDay => CurrentChart.DateTime.AddDays(1),
-                _ => CurrentChart.DateTime.AddMinutes(1)
-            });
+		public ChartInfo Select(DateTime time)
+		{
+			return CurrentChart = GetChart(time);
+		}
 
-        public ChartInfo GetChart(DateTime dateTime) => Charts.First(x => x.DateTime.Equals(dateTime));
+		public ChartInfo Next() =>
+			CurrentChart == null ?
+			CurrentChart = default! :
+			CurrentChart = GetChart(Interval switch
+			{
+				KlineInterval.OneMinute => CurrentChart.DateTime.AddMinutes(1),
+				KlineInterval.ThreeMinutes => CurrentChart.DateTime.AddMinutes(3),
+				KlineInterval.FiveMinutes => CurrentChart.DateTime.AddMinutes(5),
+				KlineInterval.FifteenMinutes => CurrentChart.DateTime.AddMinutes(15),
+				KlineInterval.ThirtyMinutes => CurrentChart.DateTime.AddMinutes(30),
+				KlineInterval.OneHour => CurrentChart.DateTime.AddHours(1),
+				KlineInterval.TwoHour => CurrentChart.DateTime.AddHours(2),
+				KlineInterval.FourHour => CurrentChart.DateTime.AddHours(4),
+				KlineInterval.SixHour => CurrentChart.DateTime.AddHours(6),
+				KlineInterval.EightHour => CurrentChart.DateTime.AddHours(8),
+				KlineInterval.TwelveHour => CurrentChart.DateTime.AddHours(12),
+				KlineInterval.OneDay => CurrentChart.DateTime.AddDays(1),
+				_ => CurrentChart.DateTime.AddMinutes(1)
+			});
 
-        public List<ChartInfo> GetCharts(DateTime startTime, DateTime endTime)
-        {
-            return Charts.Where(x => x.DateTime >= startTime && x.DateTime <= endTime).ToList();
-        }
+		public ChartInfo GetChart(DateTime dateTime) => Charts.First(x => x.DateTime.Equals(dateTime));
+
+		public List<ChartInfo> GetCharts(DateTime startTime, DateTime endTime)
+		{
+			return Charts.Where(x => x.DateTime >= startTime && x.DateTime <= endTime).ToList();
+		}
 
 		public void CalculateIndicatorsEveryonesCoin()
 		{
@@ -142,13 +159,22 @@ namespace Mercury.Charts
 			}
 		}
 
-        public void UseRsi(int period = 14)
-        {
-            var rsi = Charts.Select(x => x.Quote).GetRsi(period).Select(x=>x.Rsi);
+		public void UseRsi(int period = 14)
+		{
+			var rsi = Charts.Select(x => x.Quote).GetRsi(period).Select(x => x.Rsi);
 			for (int i = 0; i < Charts.Count; i++)
-            {
-                Charts[i].Rsi1 = rsi.ElementAt(i);
-            }
+			{
+				Charts[i].Rsi1 = rsi.ElementAt(i);
+			}
+		}
+
+		public void UseEma(int period)
+		{
+			var ema = Charts.Select(x => x.Quote).GetEma(period).Select(x => x.Ema);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Ema1 = ema.ElementAt(i);
+			}
 		}
 	}
 }

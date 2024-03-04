@@ -65,7 +65,8 @@ namespace Backtester
             StrategyComboBoxPB.Items.Add("MACD V2 Single");
             StrategyComboBoxPB.Items.Add("S2 TEST All");
             StrategyComboBoxPB.Items.Add("Triple RSI All");
-            StrategyComboBoxPB.SelectedIndex = 6;
+            StrategyComboBoxPB.Items.Add("MACD V2 CUDA All");
+            StrategyComboBoxPB.SelectedIndex = 16;
 
 #pragma warning disable CS8625 // Null 리터럴을 null을 허용하지 않는 참조 형식으로 변환할 수 없습니다.
             PrecisionBacktestText_MouseLeftButtonDown(null, null);
@@ -310,6 +311,10 @@ namespace Backtester
 
                     case 15:
                         StrategyTripleRsi(symbols, interval, startDate, endDate, takeProfitRoe);
+                        break;
+
+                    case 16:
+                        Strategy13_CUDA(symbols, interval, startDate, endDate);
                         break;
                 }
             }
@@ -1575,13 +1580,85 @@ namespace Backtester
         }
 
         /// <summary>
-        /// MACD V2 개별 테스트
+        /// MACD V2 전체 테스트_CUDA
         /// </summary>
         /// <param name="symbols"></param>
         /// <param name="interval"></param>
         /// <param name="startDate"></param>
         /// <param name="endDate"></param>
-        private void Strategy14(string[] symbols, KlineInterval interval, DateTime startDate, DateTime endDate)
+		private void Strategy13_CUDA(string[] symbols, KlineInterval interval, DateTime startDate, DateTime endDate)
+		{
+			foreach (var symbol in symbols)
+			{
+				try
+				{
+					// 차트 로드 및 초기화
+					if (ChartLoader.GetChartPack(symbol, interval) == null)
+					{
+						ChartLoader.InitChartsMByDate(symbol, interval, startDate, endDate);
+					}
+				}
+				catch
+				{
+				}
+			}
+
+            var dealManager = new PrecisionBacktestDealManager(startDate, endDate, 10, 2, 1, 0.2m);
+			var evaluateCount = (int)((endDate - startDate).TotalMinutes / ((int)interval / 60));
+
+			foreach (var symbol in symbols)
+            {
+				var chart = ChartLoader.GetChartPack(symbol, interval).Charts.ToList();
+
+                // 지표 계산 (CUDA)
+                //calculate_macd();
+                //calculate_adx();
+
+                // 계산한 값을 적절하게 chart에 합치기
+
+                // 매니저에 차트 추가
+                dealManager.AddChart(symbol, chart);
+			}
+
+            for(int i=240; i < evaluateCount; i++)
+            {
+				foreach (var symbol in symbols)
+				{
+					dealManager.EvaluateMacdV2LongNextCandleCUDA(symbol, i);
+					dealManager.EvaluateMacdV2ShortNextCandleCUDA(symbol, i);
+				}
+
+				if (i % 288 == 0)
+				{
+					var content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.EstimatedMoney.Round(2)}" + Environment.NewLine;
+					File.AppendAllText(MercuryPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), content);
+				}
+			}
+
+			var _content = $"{dealManager.Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{dealManager.Win},{dealManager.Lose},{dealManager.WinRate.Round(2)},{dealManager.LongPositionCount},{dealManager.ShortPositionCount},{dealManager.EstimatedMoney.Round(2)}" + Environment.NewLine + Environment.NewLine;
+			File.AppendAllText(MercuryPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), _content);
+
+			foreach (var h in dealManager.PositionHistories)
+			{
+				File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"),
+					$"{h.EntryTime},{h.Symbol},{h.Side},{h.Time},{h.Result},{Math.Round(h.Income, 4)}" + Environment.NewLine
+					);
+			}
+			File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"), Environment.NewLine + Environment.NewLine);
+
+			var resultChartView = new BacktestResultChartView();
+			resultChartView.Init(dealManager.PositionHistories, interval);
+			resultChartView.Show();
+		}
+
+		/// <summary>
+		/// MACD V2 개별 테스트
+		/// </summary>
+		/// <param name="symbols"></param>
+		/// <param name="interval"></param>
+		/// <param name="startDate"></param>
+		/// <param name="endDate"></param>
+		private void Strategy14(string[] symbols, KlineInterval interval, DateTime startDate, DateTime endDate)
         {
             foreach (var symbol in symbols)
             {
