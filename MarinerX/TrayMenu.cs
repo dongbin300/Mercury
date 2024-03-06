@@ -917,7 +917,9 @@ namespace MarinerX
         {
             try
             {
-                var benchmarkView = new SymbolBenchmarkingView();
+				BinanceMarket.Init();
+
+				var benchmarkView = new SymbolBenchmarkingView();
                 benchmarkView.Init(BinanceMarket.Benchmarks);
                 benchmarkView.Show();
             }

@@ -68,7 +68,7 @@ namespace Mercury.Charts
 				KlineInterval.SixHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 6), 0, 0),
 				KlineInterval.EightHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 8), 0, 0),
 				KlineInterval.TwelveHour => new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour - (dateTime.Hour % 12), 0, 0),
-				KlineInterval.OneWeek => new DateTime(dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Year, dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Month, dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Day, 0, 0, 0),
+				KlineInterval.OneWeek => new DateTime(dateTime.AddDays(-((int)dateTime.DayOfWeek + 6) % 7).Year, dateTime.AddDays(-((int)dateTime.DayOfWeek + 6) % 7).Month, dateTime.AddDays(-((int)dateTime.DayOfWeek + 6) % 7).Day, 0, 0, 0),
 				KlineInterval.OneMonth => new DateTime(dateTime.Year, dateTime.Month, 1, 0, 0, 0),
 				_ => throw new ArgumentException("Invalid interval"),
 			};
@@ -86,7 +86,7 @@ namespace Mercury.Charts
 				KlineInterval.SixHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 6}",
 				KlineInterval.EightHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 8}",
 				KlineInterval.TwelveHour => $"{dateTime.Year}-{dateTime.Month}-{dateTime.Day}-{dateTime.Hour / 12}",
-				KlineInterval.OneWeek => $"{dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Year}-{dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Month}-{dateTime.AddDays(-(int)dateTime.DayOfWeek - 6).Day}",
+				KlineInterval.OneWeek => $"{dateTime.AddDays(-((int)dateTime.DayOfWeek + 6) % 7).Year}-{dateTime.AddDays(-((int)dateTime.DayOfWeek + 6) % 7).Month}-{dateTime.AddDays(-((int)dateTime.DayOfWeek + 6) % 7).Day}",
 				KlineInterval.OneMonth => $"{dateTime.Year}-{dateTime.Month}",
 				_ => throw new ArgumentException("Invalid interval"),
 			};

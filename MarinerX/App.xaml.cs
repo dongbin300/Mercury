@@ -25,7 +25,6 @@ namespace MarinerX
             BinanceRestApi.Init();
             BinanceSocketApi.Init();
             TradingModelPath.Init();
-            BinanceMarket.Init();
         }
     }
 }

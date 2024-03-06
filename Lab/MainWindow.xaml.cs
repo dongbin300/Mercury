@@ -19,14 +19,14 @@ namespace Lab
         {
             InitializeComponent();
 
-            DateTime? startDate = new DateTime(2023, 2, 22, 0, 2, 0);
-			DateTime? endDate = new DateTime(2023, 3, 23, 10, 51, 0);
+            DateTime? startDate = null;
+            DateTime? endDate = null;
 
-			ChartLoader.InitCharts("BTCUSDT", Binance.Net.Enums.KlineInterval.OneWeek
+			ChartLoader.InitCharts("BTCUSDT", Binance.Net.Enums.KlineInterval.OneMonth
                 , startDate, endDate);
-			var charts = ChartLoader.GetChartPack("BTCUSDT", Binance.Net.Enums.KlineInterval.OneWeek).Charts;
-            //charts.UseEma(20);
-            //var ema = charts.Charts.Select(x => x.Ema1).ToArray();
+			var charts = ChartLoader.GetChartPack("BTCUSDT", Binance.Net.Enums.KlineInterval.OneMonth);
+            charts.UseEma(20);
+            var ema = charts.Charts.Select(x => x.Ema1).ToArray();
 
 			//int blockSize = 1;
    //         int threadSize = 1;

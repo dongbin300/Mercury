@@ -1,12 +1,12 @@
 ﻿namespace Mercury.Charts
 {
-    public class ChartInfo
-    {
-        public string Symbol { get; set; }
-        public DateTime DateTime => Quote.Date;
-        public Quote Quote { get; set; }
+    public class ChartInfo(string symbol, Quote quote)
+	{
+		public string Symbol { get; set; } = symbol;
+		public DateTime DateTime => Quote.Date;
+		public Quote Quote { get; set; } = quote;
 
-        public double Sma1 { get; set; }
+		public double Sma1 { get; set; }
         public double Sma2 { get; set; }
         public double Sma3 { get; set; }
         public double Ema1 { get; set; }
@@ -47,15 +47,6 @@
         public double CustomPioneer { get; set; }
         public double CustomPlayer { get; set; }
 
-        public ChartInfo(string symbol, Quote quote)
-        {
-            Symbol = symbol;
-            Quote = quote;
-        }
-
-        public override string ToString()
-        {
-            return $"{Symbol}, {DateTime}, {Quote.Open}:{Quote.High}:{Quote.Low}:{Quote.Close}:{Quote.Volume}";
-        }
-    }
+		public override string ToString() => $"{Symbol} | {DateTime} | {Quote.Open} | {Quote.High} | {Quote.Low} | {Quote.Close} | {Quote.Volume}";
+	}
 }
