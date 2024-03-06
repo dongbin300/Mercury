@@ -1,0 +1,51 @@
+﻿<Window x:Class="Backtester.BacktesterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Backtester"
+        mc:Ignorable="d"
+        Title="BACKTEST" Height="510" Width="250" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Style="{StaticResource Description}">Symbol</TextBlock>
+                <TextBlock x:Name="SymbolCountText" TextAlignment="Right" VerticalAlignment="Center" Width="40" Foreground="{StaticResource Long}"></TextBlock>
+            </StackPanel>
+            <TextBox x:Name="SymbolTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper" TextChanged="SymbolTextBox_TextChanged"/>
+            <TextBlock Style="{StaticResource Description}">Start Date</TextBlock>
+            <TextBox x:Name="StartDateTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="2022-01-01"/>
+            <TextBlock Style="{StaticResource Description}">End Date</TextBlock>
+            <TextBox x:Name="EndDateTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="2023-06-07"/>
+            <TextBlock Style="{StaticResource Description}">Interval</TextBlock>
+            <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
+                <ComboBoxItem>1m</ComboBoxItem>
+                <ComboBoxItem>3m</ComboBoxItem>
+                <ComboBoxItem>5m</ComboBoxItem>
+                <ComboBoxItem>15m</ComboBoxItem>
+                <ComboBoxItem>30m</ComboBoxItem>
+                <ComboBoxItem>1H</ComboBoxItem>
+                <ComboBoxItem>1D</ComboBoxItem>
+            </ComboBox>
+            <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
+            <ComboBox x:Name="StrategyComboBox" SelectedIndex="0">
+                <ComboBoxItem>MACD2</ComboBoxItem>
+            </ComboBox>
+            <TextBlock Style="{StaticResource Description}">Backtest Type</TextBlock>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <RadioButton x:Name="BacktestAllRadioButton" Margin="15 0" IsChecked="True">All</RadioButton>
+                <RadioButton x:Name="BacktestSymbolRadioButton">By Symbol</RadioButton>
+            </StackPanel>
+            <TextBlock Style="{StaticResource Description}">File Name</TextBlock>
+            <TextBox x:Name="FileNameTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="Test1"/>
+        </StackPanel>
+
+        <ProgressBar Grid.Row="1" x:Name="BacktestProgress" Margin="5 0" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
+            <Button Grid.Row="2" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
+    </Grid>
+</Window>

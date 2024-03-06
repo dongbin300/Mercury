@@ -176,5 +176,37 @@ namespace Mercury.Charts
 				Charts[i].Ema1 = ema.ElementAt(i);
 			}
 		}
+
+		public void UseMacd(int fastPeriod = 12, int slowPeriod = 26, int signalPeriod = 9)
+		{
+			var macd = Charts.Select(x => x.Quote).GetMacd(fastPeriod, slowPeriod, signalPeriod);
+			var value = macd.Select(x => x.Macd);
+			var signal = macd.Select(x => x.Signal);
+			var hist = macd.Select(x => x.Hist);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Macd = value.ElementAt(i);
+				Charts[i].MacdSignal = signal.ElementAt(i);
+				Charts[i].MacdHist = hist.ElementAt(i);
+			}
+		}
+
+		public void UseAdx(int adxPeriod = 14, int diPeriod = 14)
+		{
+			var adx = Charts.Select(x => x.Quote).GetAdx(adxPeriod, diPeriod).Select(x => x.Adx);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Adx = adx.ElementAt(i);
+			}
+		}
+
+		public void UseSupertrend(int atrPeriod, double factor)
+		{
+			var supertrend = Charts.Select(x => x.Quote).GetSupertrend(atrPeriod, factor).Select(x => x.Supertrend);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Supertrend1 = supertrend.ElementAt(i);
+			}
+		}
 	}
 }

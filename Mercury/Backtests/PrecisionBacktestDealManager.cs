@@ -2659,6 +2659,38 @@ namespace Mercury.Backtests
 			return false;
 		}
 
+		public bool IsMacdV2GoldenCrossCUDA(List<ChartInfo> charts, int lookback, int index)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (c0.Macd < 0 && c0.Macd > c0.MacdSignal && c1.Macd < c1.MacdSignal && c0.Adx > 30)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public bool IsMacdV2DeadCrossCUDA(List<ChartInfo> charts, int lookback, int index)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (c0.Macd > 0 && c0.Macd < c0.MacdSignal && c1.Macd > c1.MacdSignal && c0.Adx > 30)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void EvaluateMacdV2LongNextCandle()
 		{
 			var side = PositionSide.Long;
@@ -2846,8 +2878,8 @@ namespace Mercury.Backtests
 			var c0 = charts[i];
 			var c1 = charts[i - 1];
 			var c1CandleLength = Math.Abs(Calculator.Roe(side, c1.Quote.Open, c1.Quote.Close));
-			var minPrice = charts.SkipLast(1).TakeLast(14).Min(x => x.Quote.Low);
-			var maxPrice = charts.SkipLast(1).TakeLast(14).Max(x => x.Quote.High);
+			var minPrice = charts.Skip(i - 14).Take(14).Min(x => x.Quote.Low);
+			var maxPrice = charts.Skip(i - 14).Take(14).Max(x => x.Quote.High);
 			var slPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 1.1m;
 			var tpPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 0.9m;
 
@@ -2858,7 +2890,7 @@ namespace Mercury.Backtests
 					return;
 				}
 
-				if (IsMacdV2GoldenCross(charts, 5) &&
+				if (IsMacdV2GoldenCrossCUDA(charts, 5, i) &&
 					c1.Supertrend1 > 0 &&
 					c1CandleLength < 0.5m &&
 					slPer < -0.8m &&
@@ -2931,8 +2963,8 @@ namespace Mercury.Backtests
 			var c0 = charts[i];
 			var c1 = charts[i - 1];
 			var c1CandleLength = Math.Abs(Calculator.Roe(side, c1.Quote.Open, c1.Quote.Close));
-			var minPrice = charts.SkipLast(1).TakeLast(14).Min(x => x.Quote.Low);
-			var maxPrice = charts.SkipLast(1).TakeLast(14).Max(x => x.Quote.High);
+			var minPrice = charts.Skip(i - 14).Take(14).Min(x => x.Quote.Low);
+			var maxPrice = charts.Skip(i - 14).Take(14).Max(x => x.Quote.High);
 			var slPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 1.1m;
 			var tpPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 0.9m;
 
@@ -2943,7 +2975,7 @@ namespace Mercury.Backtests
 					return;
 				}
 
-				if (IsMacdV2DeadCross(charts, 5) &&
+				if (IsMacdV2DeadCrossCUDA(charts, 5, i) &&
 					c1.Supertrend1 < 0 &&
 					c1CandleLength < 0.5m &&
 					slPer < -0.8m &&

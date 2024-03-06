@@ -1,10 +1,15 @@
-﻿namespace Mercury.Charts
+﻿using Binance.Net.Enums;
+
+using Mercury.Maths;
+
+namespace Mercury.Charts
 {
-    public class ChartInfo(string symbol, Quote quote)
+	public class ChartInfo(string symbol, Quote quote)
 	{
 		public string Symbol { get; set; } = symbol;
 		public DateTime DateTime => Quote.Date;
 		public Quote Quote { get; set; } = quote;
+        public decimal BodyLength(PositionSide side) => Math.Abs(Calculator.Roe(side, Quote.Open, Quote.Close));
 
 		public double Sma1 { get; set; }
         public double Sma2 { get; set; }

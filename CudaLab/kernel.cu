@@ -70,9 +70,9 @@ __global__ void calculate_ema_kernel(double* r, double* close, int length, int p
 /// <param name="a"></param>
 /// <param name="size"></param>
 /// <returns></returns>
-extern "C" __declspec(dllexport) void use_cuda(double *r, double* close, int length, int period, unsigned int b_size, unsigned int t_size)
+extern "C" __declspec(dllexport) void use_cuda(double** r, double** close, int num_arrays, int length, int period, unsigned int b_size, unsigned int t_size)
 {
-	double* d_r;
+	/*double* d_r;
 	double* d_close;
 
 	cudaSetDevice(0);
@@ -91,5 +91,44 @@ extern "C" __declspec(dllexport) void use_cuda(double *r, double* close, int len
 	cudaMemcpy(r, d_r, r_size, cudaMemcpyDeviceToHost);
 
 	cudaFree(d_r);
-	cudaFree(d_close);
+	cudaFree(d_close);*/
+
+
+	double** d_r;
+	double** d_close;
+
+	cudaSetDevice(0);
+
+	d_r = (double**)malloc(num_arrays * sizeof(double*));
+	d_close = (double**)malloc(num_arrays * sizeof(double*));
+
+	size_t r_size = b_size * t_size * length * sizeof(double);
+	size_t close_size = b_size * t_size * length * sizeof(double);
+
+	for (int i = 0; i < num_arrays; ++i) {
+		cudaMalloc((void**)&d_r[i], r_size);
+		cudaMalloc((void**)&d_close[i], close_size);
+		cudaMemcpy(d_close[i], close[i], close_size, cudaMemcpyHostToDevice);
+	}
+
+	// Launch kernel for each array
+	for (int i = 0; i < num_arrays; ++i) {
+		calculate_ema_kernel << <b_size, t_size >> > (d_r[i], d_close[i], length, period);
+	}
+
+	cudaGetLastError();
+	cudaDeviceSynchronize();
+
+	// Copy results back to host
+	for (int i = 0; i < num_arrays; ++i) {
+		cudaMemcpy(r[i], d_r[i], r_size, cudaMemcpyDeviceToHost);
+	}
+
+	// Free device memory
+	for (int i = 0; i < num_arrays; ++i) {
+		cudaFree(d_r[i]);
+		cudaFree(d_close[i]);
+	}
+	free(d_r);
+	free(d_close);
 }
