@@ -36,6 +36,7 @@
             <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
             <ComboBox x:Name="StrategyComboBox" SelectedIndex="0">
                 <ComboBoxItem>MACD2</ComboBoxItem>
+                <ComboBoxItem>Triple_RSI</ComboBoxItem>
             </ComboBox>
             <TextBlock Style="{StaticResource Description}">Backtest Type</TextBlock>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

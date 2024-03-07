@@ -38,6 +38,7 @@ namespace Backtester
 			StartDateTextBox.Text = Settings.Default.StartDate;
 			EndDateTextBox.Text = Settings.Default.EndDate;
 			FileNameTextBox.Text = Settings.Default.FileName;
+			StrategyComboBox.SelectedIndex = Settings.Default.StrategyIndex;
 		}
 
 		private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -64,6 +65,7 @@ namespace Backtester
 				Settings.Default.StartDate = StartDateTextBox.Text;
 				Settings.Default.EndDate = EndDateTextBox.Text;
 				Settings.Default.FileName = FileNameTextBox.Text;
+				Settings.Default.StrategyIndex = StrategyComboBox.SelectedIndex;
 				Settings.Default.Save();
 
 				symbols = SymbolTextBox.Text.Split(';');

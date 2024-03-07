@@ -179,7 +179,7 @@ namespace Mercury.Charts
 				var rsi3 = Charts.Select(x => x.Quote).GetRsi(period3.Value).Select(x => x.Rsi);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Rsi3 = rsi1.ElementAt(i);
+					Charts[i].Rsi3 = rsi3.ElementAt(i);
 				}
 			}
 		}

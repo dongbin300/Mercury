@@ -1,8 +1,12 @@
 ﻿using Binance.Net.Enums;
 
+using CryptoExchange.Net.CommonObjects;
+
 using Mercury.Charts;
 using Mercury.Enums;
 using Mercury.Maths;
+
+using System.Drawing;
 
 namespace Mercury.Backtests
 {
@@ -47,6 +51,13 @@ namespace Mercury.Backtests
 						chartPack.UseAdx();
 						chartPack.UseSupertrend(10, 1.5);
 						break;
+
+					case "triple_rsi":
+						chartPack.UseRsi(7, 14, 21);
+						chartPack.UseEma(50);
+						chartPack.UseAdx(14, 14);
+						chartPack.UseSupertrend(10, 1.5);
+						break;
 				}
 				Charts.Add(symbol, [.. chartPack.Charts]);
 			}
@@ -85,10 +96,11 @@ namespace Mercury.Backtests
 
 					var c0 = charts[i];
 					var c1 = charts[i - 1];
+					var c2 = charts[i - 2];
 					currentTime = c0.DateTime;
 					var c1LongBodyLength = c1.BodyLength(PositionSide.Long);
-					var minPrice = charts.Skip(i - 14).Take(14).Min(x => x.Quote.Low);
-					var maxPrice = charts.Skip(i - 14).Take(14).Max(x => x.Quote.High);
+					var minPrice = GetMinPrice(charts, 14, i);
+					var maxPrice = GetMaxPrice(charts, 14, i);
 					var longStopLossPercent = Calculator.Roe(PositionSide.Long, c0.Quote.Open, minPrice) * 1.1m;
 					var longTakeProfitPercent = Calculator.Roe(PositionSide.Long, c0.Quote.Open, maxPrice) * 0.9m;
 
@@ -114,19 +126,20 @@ namespace Mercury.Backtests
 										longStopLossPercent < -0.8m &&
 										longTakeProfitPercent > 0.8m)
 									{
-										var price = c0.Quote.Open;
-										var stopLossPrice = Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longStopLossPercent);
-										var takeProfitPrice = Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longTakeProfitPercent);
-										var quantity = BaseOrderSize / price;
-										Money -= price * quantity;
-										var newPosition = new Position(c0.DateTime, symbol, PositionSide.Long, price)
-										{
-											TakeProfitPrice = takeProfitPrice,
-											StopLossPrice = stopLossPrice,
-											Quantity = quantity,
-											EntryAmount = price * quantity
-										};
-										Positions.Add(newPosition);
+										EntryPosition(PositionSide.Long, c0,
+											c0.Quote.Open,
+											Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longStopLossPercent),
+											Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longTakeProfitPercent));
+									}
+									break;
+
+								case "triple_rsi":
+									if (c1.Rsi3 > 50 && c1.Rsi1 > c1.Rsi2 && c1.Rsi2 > c1.Rsi3 && c1.Quote.Close > (decimal)c1.Ema1 && c1.Adx > 20)
+									{
+										EntryPosition(PositionSide.Long, c0,
+											c0.Quote.Open,
+											minPrice - (maxPrice - minPrice) * 0.1m,
+											maxPrice - (maxPrice - minPrice) * 0.1m);
 									}
 									break;
 							}
@@ -148,7 +161,18 @@ namespace Mercury.Backtests
 								}
 								if (longPosition.Stage == 1 && c0.Supertrend1 < 0)
 								{
+									TakeProfitHalf2(longPosition, c0);
+								}
+								break;
+
+							case "triple_rsi":
+								if (c1.Quote.High >= longPosition.TakeProfitPrice)
+								{
 									TakeProfit(longPosition, c0);
+								}
+								else if (c1.Quote.Low <= longPosition.StopLossPrice)
+								{
+									StopLoss(longPosition, c0);
 								}
 								break;
 						}
@@ -182,19 +206,20 @@ namespace Mercury.Backtests
 										shortStopLossPercent < -0.8m &&
 										shortTakeProfitPercent > 0.8m)
 									{
-										var price = c0.Quote.Open;
-										var stopLossPrice = Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortStopLossPercent);
-										var takeProfitPrice = Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortTakeProfitPercent);
-										var quantity = BaseOrderSize / price;
-										Money += price * quantity;
-										var newPosition = new Position(c0.DateTime, symbol, PositionSide.Short, price)
-										{
-											StopLossPrice = stopLossPrice,
-											TakeProfitPrice = takeProfitPrice,
-											Quantity = quantity,
-											EntryAmount = price * quantity
-										};
-										Positions.Add(newPosition);
+										EntryPosition(PositionSide.Short, c0,
+											c0.Quote.Open,
+											Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortStopLossPercent),
+											Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortTakeProfitPercent));
+									}
+									break;
+
+								case "triple_rsi":
+									if (c1.Rsi3 < 50 && c1.Rsi1 < c1.Rsi2 && c1.Rsi2 < c1.Rsi3 && c1.Quote.Close < (decimal)c1.Ema1 && c1.Adx > 20)
+									{
+										EntryPosition(PositionSide.Short, c0,
+											c0.Quote.Open,
+											maxPrice + (maxPrice - minPrice) * 0.1m,
+											minPrice + (maxPrice - minPrice) * 0.1m);
 									}
 									break;
 							}
@@ -216,7 +241,19 @@ namespace Mercury.Backtests
 								}
 								if (shortPosition.Stage == 1 && c0.Supertrend1 > 0)
 								{
+									TakeProfitHalf2(shortPosition, c0);
+								}
+								break;
+
+							case "triple_rsi":
+								if (c1.Quote.Low <= shortPosition.TakeProfitPrice)
+								{
 									TakeProfit(shortPosition, c0);
+								}
+
+								if (c1.Quote.High >= shortPosition.StopLossPrice)
+								{
+									StopLoss(shortPosition, c0);
 								}
 								break;
 						}
@@ -277,6 +314,33 @@ namespace Mercury.Backtests
 			return false;
 		}
 
+		/// <summary>
+		/// 포지션 진입
+		/// </summary>
+		/// <param name="side"></param>
+		/// <param name="currentChart"></param>
+		/// <param name="entryPrice"></param>
+		/// <param name="stopLossPrice"></param>
+		/// <param name="takeProfitPrice"></param>
+		void EntryPosition(PositionSide side, ChartInfo currentChart, decimal entryPrice, decimal stopLossPrice, decimal takeProfitPrice)
+		{
+			var quantity = BaseOrderSize / entryPrice;
+			Money += side == PositionSide.Long ? -entryPrice * quantity : entryPrice * quantity;
+			var newPosition = new Position(currentChart.DateTime, currentChart.Symbol, side, entryPrice)
+			{
+				TakeProfitPrice = takeProfitPrice,
+				StopLossPrice = stopLossPrice,
+				Quantity = quantity,
+				EntryAmount = entryPrice * quantity
+			};
+			Positions.Add(newPosition);
+		}
+
+		/// <summary>
+		/// 전량 손절
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="currentChart"></param>
 		void StopLoss(Position position, ChartInfo currentChart)
 		{
 			var price = position.StopLossPrice;
@@ -292,6 +356,10 @@ namespace Mercury.Backtests
 			Money -= FeeSize;
 		}
 
+		/// <summary>
+		/// 반 익절
+		/// </summary>
+		/// <param name="position"></param>
 		void TakeProfitHalf(Position position)
 		{
 			var price = position.TakeProfitPrice;
@@ -302,7 +370,12 @@ namespace Mercury.Backtests
 			position.Stage = 1;
 		}
 
-		void TakeProfit(Position position, ChartInfo currentChart)
+		/// <summary>
+		/// 나머지 반 익절
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="currentChart"></param>
+		void TakeProfitHalf2(Position position, ChartInfo currentChart)
 		{
 			var price = currentChart.Quote.Close;
 			var quantity = position.Quantity;
@@ -316,5 +389,30 @@ namespace Mercury.Backtests
 			Win++;
 			Money -= FeeSize;
 		}
+
+		/// <summary>
+		/// 전량 익절
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="currentChart"></param>
+		void TakeProfit(Position position, ChartInfo currentChart)
+		{
+			var price = position.TakeProfitPrice;
+			var quantity = position.Quantity;
+			Money += position.Side == PositionSide.Long ? price * quantity : -price * quantity;
+			Positions.Remove(position);
+			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, PositionResult.Win)
+			{
+				EntryAmount = position.EntryAmount,
+				ExitAmount = price * quantity
+			});
+			Win++;
+			Money -= FeeSize;
+		}
+
+		decimal GetMinPrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Low);
+		decimal GetMaxPrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Max(x => x.Quote.High);
+		decimal GetMinClosePrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Close);
+		decimal GetMaxClosePrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Max(x => x.Quote.Close);
 	}
 }
