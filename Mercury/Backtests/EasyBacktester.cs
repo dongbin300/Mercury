@@ -4,8 +4,6 @@ using Mercury.Charts;
 using Mercury.Enums;
 using Mercury.Maths;
 
-using System.ComponentModel;
-
 namespace Mercury.Backtests
 {
 	public class EasyBacktester(string strategyId, List<string> symbols, KlineInterval interval)
@@ -54,19 +52,40 @@ namespace Mercury.Backtests
 			}
 		}
 
-		public void Run(Action<int> reportProgress, string reportFileName, int reportInterval)
+		public void RunSymbol(Action<int> reportProgress, string reportFileName, string symbol, int startIndex)
 		{
 			var maxChartCount = Charts.Max(c => c.Value.Count);
-			for (int i = 240; i < maxChartCount; i++)
+			for (int i = startIndex; i < maxChartCount; i++)
 			{
 				reportProgress((int)(50 + (double)i / maxChartCount * 50));
+
+			}
+		}
+
+		public void Run(BacktestType backtestType, Action<int> reportProgress, string reportFileName, int reportInterval, int startIndex)
+		{
+			var currentTime = DateTime.Now;
+			var maxChartCount = Charts.Max(c => c.Value.Count);
+			for (int i = startIndex; i < maxChartCount; i++)
+			{
+				if (backtestType == BacktestType.All)
+				{
+					reportProgress((int)(50 + (double)i / maxChartCount * 50));
+				}
 				foreach (var symbol in Symbols)
 				{
 					/* LONG POSITION */
 					var longPosition = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(PositionSide.Long));
 					var charts = Charts[symbol];
+
+					if (charts.Count <= i)
+					{
+						continue;
+					}
+
 					var c0 = charts[i];
 					var c1 = charts[i - 1];
+					currentTime = c0.DateTime;
 					var c1LongBodyLength = c1.BodyLength(PositionSide.Long);
 					var minPrice = charts.Skip(i - 14).Take(14).Min(x => x.Quote.Low);
 					var maxPrice = charts.Skip(i - 14).Take(14).Max(x => x.Quote.High);
@@ -75,40 +94,42 @@ namespace Mercury.Backtests
 
 					if (longPosition == null)
 					{
-						if (MaxActiveDealsType == MaxActiveDealsType.Each && LongPositionCount >= MaxActiveDeals)
+						if (backtestType == BacktestType.All && MaxActiveDealsType == MaxActiveDealsType.Each && LongPositionCount >= MaxActiveDeals)
 						{
-							continue;
-						}
-						else if (MaxActiveDealsType == MaxActiveDealsType.Total && LongPositionCount + ShortPositionCount >= MaxActiveDeals)
-						{
-							continue;
-						}
 
-						/* LONG POSITION - ENTRY */
-						switch (StrategyId.ToLower())
+						}
+						else if (backtestType == BacktestType.All && MaxActiveDealsType == MaxActiveDealsType.Total && LongPositionCount + ShortPositionCount >= MaxActiveDeals)
 						{
-							case "macd2":
-								if (IsMacd2GoldenCross(charts, 5, i) &&
-									c1.Supertrend1 > 0 &&
-									c1LongBodyLength < 0.5m &&
-									longStopLossPercent < -0.8m &&
-									longTakeProfitPercent > 0.8m)
-								{
-									var price = c0.Quote.Open;
-									var stopLossPrice = Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longStopLossPercent);
-									var takeProfitPrice = Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longTakeProfitPercent);
-									var quantity = BaseOrderSize / price;
-									Money -= price * quantity;
-									var newPosition = new Position(c0.DateTime, symbol, PositionSide.Long, price)
+
+						}
+						else
+						{
+							/* LONG POSITION - ENTRY */
+							switch (StrategyId.ToLower())
+							{
+								case "macd2":
+									if (IsMacd2GoldenCross(charts, 5, i) &&
+										c1.Supertrend1 > 0 &&
+										c1LongBodyLength < 0.5m &&
+										longStopLossPercent < -0.8m &&
+										longTakeProfitPercent > 0.8m)
 									{
-										TakeProfitPrice = takeProfitPrice,
-										StopLossPrice = stopLossPrice,
-										Quantity = quantity,
-										EntryAmount = price * quantity
-									};
-									Positions.Add(newPosition);
-								}
-								break;
+										var price = c0.Quote.Open;
+										var stopLossPrice = Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longStopLossPercent);
+										var takeProfitPrice = Calculator.TargetPrice(PositionSide.Long, c0.Quote.Open, longTakeProfitPercent);
+										var quantity = BaseOrderSize / price;
+										Money -= price * quantity;
+										var newPosition = new Position(c0.DateTime, symbol, PositionSide.Long, price)
+										{
+											TakeProfitPrice = takeProfitPrice,
+											StopLossPrice = stopLossPrice,
+											Quantity = quantity,
+											EntryAmount = price * quantity
+										};
+										Positions.Add(newPosition);
+									}
+									break;
+							}
 						}
 					}
 					else
@@ -141,40 +162,42 @@ namespace Mercury.Backtests
 
 					if (shortPosition == null)
 					{
-						if (MaxActiveDealsType == MaxActiveDealsType.Each && ShortPositionCount >= MaxActiveDeals)
+						if (backtestType == BacktestType.All && MaxActiveDealsType == MaxActiveDealsType.Each && ShortPositionCount >= MaxActiveDeals)
 						{
-							continue;
-						}
-						else if (MaxActiveDealsType == MaxActiveDealsType.Total && LongPositionCount + ShortPositionCount >= MaxActiveDeals)
-						{
-							continue;
-						}
 
-						/* SHORT POSITION - ENTRY */
-						switch (StrategyId.ToLower())
+						}
+						else if (backtestType == BacktestType.All && MaxActiveDealsType == MaxActiveDealsType.Total && LongPositionCount + ShortPositionCount >= MaxActiveDeals)
 						{
-							case "macd2":
-								if (IsMacd2DeadCross(charts, 5, i) &&
-									c1.Supertrend1 < 0 &&
-									c1ShortBodyLength < 0.5m &&
-									shortStopLossPercent < -0.8m &&
-									shortTakeProfitPercent > 0.8m)
-								{
-									var price = c0.Quote.Open;
-									var stopLossPrice = Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortStopLossPercent);
-									var takeProfitPrice = Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortTakeProfitPercent);
-									var quantity = BaseOrderSize / price;
-									Money += price * quantity;
-									var newPosition = new Position(c0.DateTime, symbol, PositionSide.Short, price)
+
+						}
+						else
+						{
+							/* SHORT POSITION - ENTRY */
+							switch (StrategyId.ToLower())
+							{
+								case "macd2":
+									if (IsMacd2DeadCross(charts, 5, i) &&
+										c1.Supertrend1 < 0 &&
+										c1ShortBodyLength < 0.5m &&
+										shortStopLossPercent < -0.8m &&
+										shortTakeProfitPercent > 0.8m)
 									{
-										StopLossPrice = stopLossPrice,
-										TakeProfitPrice = takeProfitPrice,
-										Quantity = quantity,
-										EntryAmount = price * quantity
-									};
-									Positions.Add(newPosition);
-								}
-								break;
+										var price = c0.Quote.Open;
+										var stopLossPrice = Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortStopLossPercent);
+										var takeProfitPrice = Calculator.TargetPrice(PositionSide.Short, c0.Quote.Open, shortTakeProfitPercent);
+										var quantity = BaseOrderSize / price;
+										Money += price * quantity;
+										var newPosition = new Position(c0.DateTime, symbol, PositionSide.Short, price)
+										{
+											StopLossPrice = stopLossPrice,
+											TakeProfitPrice = takeProfitPrice,
+											Quantity = quantity,
+											EntryAmount = price * quantity
+										};
+										Positions.Add(newPosition);
+									}
+									break;
+							}
 						}
 					}
 					else
@@ -200,21 +223,26 @@ namespace Mercury.Backtests
 					}
 				}
 
-				if (i % reportInterval == 0)
+				if (backtestType == BacktestType.All && i % reportInterval == 0)
 				{
-					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"), $"{Charts[symbols[0]][i].DateTime:yyyy-MM-dd HH:mm:ss},{Win},{Lose},{WinRate.Round(2)},{LongPositionCount},{ShortPositionCount},{EstimatedMoney.Round(2)}" + Environment.NewLine);
+					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"), $"{currentTime:yyyy-MM-dd HH:mm:ss},{Win},{Lose},{WinRate.Round(2)},{LongPositionCount},{ShortPositionCount},{EstimatedMoney.Round(2)}" + Environment.NewLine);
 				}
 			}
 
-			File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"), $"{Charts[symbols[0]][^1].DateTime:yyyy-MM-dd HH:mm:ss},{Win},{Lose},{WinRate.Round(2)},{LongPositionCount},{ShortPositionCount},{EstimatedMoney.Round(2)}" + Environment.NewLine + Environment.NewLine);
+			File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"),
+				backtestType == BacktestType.All ? Environment.NewLine + Environment.NewLine :
+				$"{Symbols[0]},{Win},{Lose},{WinRate.Round(2)},{EstimatedMoney.Round(2)}" + Environment.NewLine);
 
-			foreach (var h in PositionHistories)
+			if (backtestType == BacktestType.All)
 			{
-				File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"),
-					$"{h.EntryTime},{h.Symbol},{h.Side},{h.Time},{h.Result},{Math.Round(h.Income, 4)}" + Environment.NewLine
-					);
+				foreach (var h in PositionHistories)
+				{
+					File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"),
+						$"{h.EntryTime:yyyy-MM-dd HH:mm:ss},{h.Symbol},{h.Side},{h.Time:yyyy-MM-dd HH:mm:ss},{h.Result},{Math.Round(h.Income, 4)}" + Environment.NewLine
+						);
+				}
+				File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"), Environment.NewLine + Environment.NewLine);
 			}
-			File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"), Environment.NewLine + Environment.NewLine);
 		}
 
 		bool IsMacd2GoldenCross(List<ChartInfo> charts, int lookback, int index)

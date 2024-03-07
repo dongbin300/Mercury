@@ -1,10 +1,9 @@
-﻿using Backtester.Enums;
-
-using Binance.Net.Enums;
+﻿using Binance.Net.Enums;
 
 using Mercury;
 using Mercury.Backtests;
 using Mercury.Charts;
+using Mercury.Enums;
 
 using System;
 using System.ComponentModel;
@@ -101,18 +100,29 @@ namespace Backtester
 					for (int i = 0; i < symbols.Length; i++)
 					{
 						Common.ReportProgress((int)((double)i / symbols.Length * 50));
-						var symbol = symbols[i];
-						ChartLoader.InitCharts(symbol, interval, startDate, endDate);
+						ChartLoader.InitCharts(symbols[i], interval, startDate, endDate);
 					}
 
 					var backtester = new EasyBacktester(strategyId, [.. symbols], interval);
-					backtester.SetMaxActiveDeals(Mercury.Enums.MaxActiveDealsType.Each, 10);
+					backtester.SetMaxActiveDeals(MaxActiveDealsType.Each, 10);
 					backtester.InitIndicators();
-					backtester.Run(Common.ReportProgress, reportFileName, 288);
+					backtester.Run(backtestType, Common.ReportProgress, reportFileName, 288, 240);
 				}
 				else if (backtestType == BacktestType.BySymbol)
 				{
+					for (int i = 0; i < symbols.Length; i++)
+					{
+						Common.ReportProgress((int)((double)i / symbols.Length * 50));
+						ChartLoader.InitCharts(symbols[i], interval, startDate, endDate);
+					}
 
+					for (int i = 0; i < symbols.Length; i++)
+					{
+						Common.ReportProgress(50 + (int)((double)i / symbols.Length * 50));
+						var backtester = new EasyBacktester(strategyId, [symbols[i]], interval);
+						backtester.InitIndicators();
+						backtester.Run(backtestType, Common.ReportProgress, reportFileName, 1, 240);
+					}
 				}
 			}
 			catch (Exception ex)

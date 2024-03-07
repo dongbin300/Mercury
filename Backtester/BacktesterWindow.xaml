@@ -5,11 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Backtester"
         mc:Ignorable="d"
-        Title="BACKTEST" Height="510" Width="250" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+        Title="BACKTEST" Height="520" Width="250" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Row="0">
@@ -18,6 +18,7 @@
                 <TextBlock x:Name="SymbolCountText" TextAlignment="Right" VerticalAlignment="Center" Width="40" Foreground="{StaticResource Long}"></TextBlock>
             </StackPanel>
             <TextBox x:Name="SymbolTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper" TextChanged="SymbolTextBox_TextChanged"/>
+
             <TextBlock Style="{StaticResource Description}">Start Date</TextBlock>
             <TextBox x:Name="StartDateTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="2022-01-01"/>
             <TextBlock Style="{StaticResource Description}">End Date</TextBlock>
@@ -45,7 +46,7 @@
             <TextBox x:Name="FileNameTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="Test1"/>
         </StackPanel>
 
-        <ProgressBar Grid.Row="1" x:Name="BacktestProgress" Margin="5 0" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
-            <Button Grid.Row="2" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
+        <ProgressBar Grid.Row="1" x:Name="BacktestProgress" Margin="5 2" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
+        <Button Grid.Row="2" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
     </Grid>
 </Window>

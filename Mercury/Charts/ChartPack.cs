@@ -159,12 +159,28 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseRsi(int period = 14)
+		public void UseRsi(int period1 = 14, int? period2 = null, int? period3 = null)
 		{
-			var rsi = Charts.Select(x => x.Quote).GetRsi(period).Select(x => x.Rsi);
+			var rsi1 = Charts.Select(x => x.Quote).GetRsi(period1).Select(x => x.Rsi);
 			for (int i = 0; i < Charts.Count; i++)
 			{
-				Charts[i].Rsi1 = rsi.ElementAt(i);
+				Charts[i].Rsi1 = rsi1.ElementAt(i);
+			}
+			if (period2 != null)
+			{
+				var rsi2 = Charts.Select(x => x.Quote).GetRsi(period2.Value).Select(x => x.Rsi);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Rsi2 = rsi2.ElementAt(i);
+				}
+			}
+			if (period3 != null)
+			{
+				var rsi3 = Charts.Select(x => x.Quote).GetRsi(period3.Value).Select(x => x.Rsi);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Rsi3 = rsi1.ElementAt(i);
+				}
 			}
 		}
 

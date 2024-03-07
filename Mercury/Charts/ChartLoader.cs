@@ -72,7 +72,7 @@ namespace Mercury.Charts
 						KlineInterval.OneWeek => "1D",
 						KlineInterval.OneMonth => "1D",
 						_ => $"1m\\{symbol}"
-					})).Where(f=>f.Contains(symbol));
+					})).Where(f=>f.GetFileName().StartsWith(symbol));
 
 				if (startDate == null && endDate == null)
 				{

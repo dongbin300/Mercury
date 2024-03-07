@@ -72,9 +72,9 @@ namespace ChartViewer
             SymbolTextBox.Focus();
 
             /* init */
-            SymbolTextBox.Text = "BTCUSDT";
-            DateTextBox.Text = "2022-02-22";
-            CandleCountTextBox.Text = "360";
+            SymbolTextBox.Text = Settings.Default.Symbol;
+            DateTextBox.Text = Settings.Default.Date;
+            CandleCountTextBox.Text = Settings.Default.CandleCount;
             CandleCountTextBox.Focus();
             Ema1CheckBox.IsChecked = true;
             Ema2CheckBox.IsChecked = true;
@@ -114,6 +114,10 @@ namespace ChartViewer
         {
             if (e.Key == Key.Enter)
             {
+                Settings.Default.Symbol = SymbolTextBox.Text;
+                Settings.Default.Date = DateTextBox.Text;
+                Settings.Default.CandleCount = CandleCountTextBox.Text;
+                Settings.Default.Save();
                 LoadChart();
             }
         }

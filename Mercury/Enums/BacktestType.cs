@@ -1,4 +1,4 @@
-﻿namespace Backtester.Enums
+﻿namespace Mercury.Enums
 {
 	public enum BacktestType
 	{
