@@ -130,5 +130,17 @@ namespace Backtester {
                 this["StrategyIndex"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int IntervalIndex {
+            get {
+                return ((int)(this["IntervalIndex"]));
+            }
+            set {
+                this["IntervalIndex"] = value;
+            }
+        }
     }
 }

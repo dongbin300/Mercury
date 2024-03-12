@@ -3,15 +3,9 @@
     /// <summary>
     /// Time Segmented Volume Result
     /// </summary>
-    public class TsvResult
-    {
-        public DateTime Date { get; set; }
-        public double Tsv { get; set; }
-
-        public TsvResult(DateTime date, double tsv)
-        {
-            Date = date;
-            Tsv = tsv;
-        }
-    }
+    public class TsvResult(DateTime date, double tsv)
+	{
+		public DateTime Date { get; set; } = date;
+		public double Tsv { get; set; } = tsv;
+	}
 }

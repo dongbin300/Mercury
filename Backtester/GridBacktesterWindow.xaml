@@ -1,11 +1,11 @@
-﻿<Window x:Class="Backtester.BacktesterWindow"
+﻿<Window x:Class="Backtester.GridBacktesterWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Backtester"
+                xmlns:local="clr-namespace:Backtester"
         mc:Ignorable="d"
-        Title="BACKTEST" Height="600" Width="250" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+        Title="GRID BACKTEST" Height="600" Width="250" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -17,7 +17,7 @@
                 <TextBlock Style="{StaticResource Description}">Symbol</TextBlock>
                 <TextBlock x:Name="SymbolCountText" TextAlignment="Right" VerticalAlignment="Center" Width="40" Foreground="{StaticResource Long}"></TextBlock>
             </StackPanel>
-            <TextBox x:Name="SymbolTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper" TextChanged="SymbolTextBox_TextChanged"/>
+            <TextBox x:Name="SymbolTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="BTCUSDT;ETHUSDT;DOGEUSDT" CharacterCasing="Upper"/>
 
             <TextBlock Style="{StaticResource Description}">Start Date</TextBlock>
             <TextBox x:Name="StartDateTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="2022-01-01"/>
@@ -33,7 +33,7 @@
                 <ComboBoxItem>1H</ComboBoxItem>
                 <ComboBoxItem>1D</ComboBoxItem>
             </ComboBox>
-            <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
+            <!--<TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
             <ComboBox x:Name="StrategyComboBox" SelectedIndex="0">
                 <ComboBoxItem>MACD2</ComboBoxItem>
                 <ComboBoxItem>Triple_RSI</ComboBoxItem>
@@ -43,7 +43,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <RadioButton x:Name="BacktestAllRadioButton" Margin="15 0" IsChecked="True">All</RadioButton>
                 <RadioButton x:Name="BacktestSymbolRadioButton">By Symbol</RadioButton>
-            </StackPanel>
+            </StackPanel>-->
             <TextBlock Style="{StaticResource Description}">File Name</TextBlock>
             <TextBox x:Name="FileNameTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="Test1"/>
             <Button x:Name="FileOpenButton" Click="FileOpenButton_Click">Open</Button>

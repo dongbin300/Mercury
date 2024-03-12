@@ -1,14 +1,8 @@
 ﻿namespace Mercury.Indicators
 {
-    public class StochResult
-    {
-        public DateTime Date { get; set; }
-        public double Stoch { get; set; }
-
-        public StochResult(DateTime date, double stoch)
-        {
-            Date = date;
-            Stoch = stoch;
-        }
-    }
+    public class StochResult(DateTime date, double stoch)
+	{
+		public DateTime Date { get; set; } = date;
+		public double Stoch { get; set; } = stoch;
+	}
 }

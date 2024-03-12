@@ -40,6 +40,7 @@ namespace Mercury.Charts
         public double MacdSignal2 { get; set; }
         public double MacdHist2 { get; set; }
         public double Adx { get; set; }
+        public double Atr { get; set; }
         public double Bb1Upper { get; set; }
         public double Bb1Lower { get; set; }
         public double Bb2Upper { get; set; }

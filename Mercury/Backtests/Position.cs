@@ -2,30 +2,32 @@
 
 namespace Mercury.Backtests
 {
-    public class Position
-    {
-        public DateTime Time { get; set; }
-        public string Symbol { get; set; }
-        public PositionSide Side { get; set; }
-        public decimal EntryPrice { get; set; }
+    public class Position(DateTime time, string symbol, PositionSide side, decimal entryPrice)
+	{
+		public DateTime Time { get; set; } = time;
+		public string Symbol { get; set; } = symbol;
+		public PositionSide Side { get; set; } = side;
+		public decimal EntryPrice { get; set; } = entryPrice;
 
-        public decimal Quantity { get; set; }
+		/// <summary>
+		/// Always (+)
+		/// </summary>
+		public decimal Quantity { get; set; }
         public decimal StopLossPrice { get; set; }
         public decimal TakeProfitPrice { get; set; }
         public int Stage { get; set; } = 0;
 
+        /// <summary>
+        /// Always (+)
+        /// </summary>
         public decimal EntryAmount { get; set; }
+        /// <summary>
+        /// Always (+)
+        /// </summary>
         public decimal ExitAmount { get; set; }
 
         public int EntryCount { get; set; } = 0;
 
-
-        public Position(DateTime time, string symbol, PositionSide side, decimal entryPrice)
-        {
-            Time = time;
-            Symbol = symbol;
-            Side = side;
-            EntryPrice = entryPrice;
-        }
-    }
+        public decimal Income => Side == PositionSide.Long ? ExitAmount - EntryAmount : EntryAmount - ExitAmount;
+	}
 }

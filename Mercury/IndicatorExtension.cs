@@ -344,7 +344,24 @@ namespace Mercury
             return result;
         }
 
-        public static IEnumerable<TsvResult> GetTsv(this IEnumerable<Quote> quotes, int period)
+		public static IEnumerable<AtrResult> GetAtr(this IEnumerable<Quote> quotes, int period = 14)
+		{
+			var result = new List<AtrResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			var atr = ArrayCalculator.Atr(high, low, close, period);
+
+			for (int i = 0; i < atr.Length; i++)
+			{
+				result.Add(new AtrResult(quotes.ElementAt(i).Date, atr[i]));
+			}
+
+			return result;
+		}
+
+		public static IEnumerable<TsvResult> GetTsv(this IEnumerable<Quote> quotes, int period)
         {
             var result = new List<TsvResult>();
 

@@ -7,6 +7,7 @@ using Mercury.Enums;
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -97,6 +98,7 @@ namespace Backtester
 		{
 			try
 			{
+				ChartLoader.Charts = [];
 				if (backtestType == BacktestType.All)
 				{
 					for (int i = 0; i < symbols.Length; i++)
@@ -131,6 +133,15 @@ namespace Backtester
 			{
 				MessageBox.Show(ex.Message);
 			}
+		}
+
+		private void FileOpenButton_Click(object sender, RoutedEventArgs e)
+		{
+			Process.Start(new ProcessStartInfo()
+			{
+				FileName = MercuryPath.Desktop.Down($"{FileNameTextBox.Text}.csv"),
+				UseShellExecute = true
+			});
 		}
 	}
 }

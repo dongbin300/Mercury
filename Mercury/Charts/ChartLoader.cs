@@ -4,7 +4,7 @@ namespace Mercury.Charts
 {
 	public class ChartLoader
 	{
-		public static List<ChartPack> Charts { get; set; } = new();
+		public static List<ChartPack> Charts { get; set; } = [];
 		public static ChartPack GetChartPack(string symbol, KlineInterval interval) => Charts.Find(x => x.Symbol.Equals(symbol) && x.Interval.Equals(interval)) ?? default!;
 
 		static bool IsFileWithinDateRange(string filePath, DateTime? startDate, DateTime? endDate)

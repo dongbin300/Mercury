@@ -3,17 +3,10 @@
     /// <summary>
     /// Stochastic RSI Result
     /// </summary>
-    public class StochasticRsiResult
-    {
-        public DateTime Date { get; set; }
-        public double K { get; set; }
-        public double D { get; set; }
-
-        public StochasticRsiResult(DateTime date, double k, double d)
-        {
-            Date = date;
-            K = k;
-            D = d;
-        }
-    }
+    public class StochasticRsiResult(DateTime date, double k, double d)
+	{
+		public DateTime Date { get; set; } = date;
+		public double K { get; set; } = k;
+		public double D { get; set; } = d;
+	}
 }

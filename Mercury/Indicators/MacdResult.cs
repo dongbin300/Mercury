@@ -1,18 +1,10 @@
 ﻿namespace Mercury.Indicators
 {
-    public class MacdResult
-    {
-        public DateTime Date { get; set; }
-        public double Macd { get; set; }
-        public double Signal { get; set; }
-        public double Hist { get; set; }
-
-        public MacdResult(DateTime date, double macd, double signal, double hist)
-        {
-            Date = date;
-            Macd = macd;
-            Signal = signal;
-            Hist = hist;
-        }
-    }
+    public class MacdResult(DateTime date, double macd, double signal, double hist)
+	{
+		public DateTime Date { get; set; } = date;
+		public double Macd { get; set; } = macd;
+		public double Signal { get; set; } = signal;
+		public double Hist { get; set; } = hist;
+	}
 }

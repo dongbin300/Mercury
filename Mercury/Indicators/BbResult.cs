@@ -1,18 +1,10 @@
 ﻿namespace Mercury.Indicators
 {
-    public class BbResult
-    {
-        public DateTime Date { get; set; }
-        public double Sma { get; set; }
-        public double Upper { get; set; }
-        public double Lower { get; set; }
-
-        public BbResult(DateTime date, double sma, double upper, double lower)
-        {
-            Date = date;
-            Sma = sma;
-            Upper = upper;
-            Lower = lower;
-        }
-    }
+    public class BbResult(DateTime date, double sma, double upper, double lower)
+	{
+		public DateTime Date { get; set; } = date;
+		public double Sma { get; set; } = sma;
+		public double Upper { get; set; } = upper;
+		public double Lower { get; set; } = lower;
+	}
 }

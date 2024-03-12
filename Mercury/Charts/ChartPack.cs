@@ -184,6 +184,15 @@ namespace Mercury.Charts
 			}
 		}
 
+		public void UseSma(int period)
+		{
+			var sma = Charts.Select(x => x.Quote).GetSma(period).Select(x => x.Sma);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Sma1 = sma.ElementAt(i);
+			}
+		}
+
 		public void UseEma(int period)
 		{
 			var ema = Charts.Select(x => x.Quote).GetEma(period).Select(x => x.Ema);
@@ -222,6 +231,28 @@ namespace Mercury.Charts
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].Supertrend1 = supertrend.ElementAt(i);
+			}
+		}
+
+		public void UseBollingerBands(int period = 20, double deviation = 2.0)
+		{
+			var bollingerBands = Charts.Select(x => x.Quote).GetBollingerBands(period, deviation);
+			var upper = bollingerBands.Select(x => x.Upper);
+			var lower = bollingerBands.Select(x => x.Lower);
+			var sma = bollingerBands.Select(x => x.Sma);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Bb1Upper = upper.ElementAt(i);
+				Charts[i].Bb1Lower = lower.ElementAt(i);
+			}
+		}
+
+		public void UseAtr(int period = 14)
+		{
+			var atr = Charts.Select(x => x.Quote).GetAtr(period).Select(x => x.Atr);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Atr = atr.ElementAt(i);
 			}
 		}
 	}

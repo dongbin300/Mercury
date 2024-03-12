@@ -3,15 +3,9 @@
     /// <summary>
     /// Rubber Index result by Gaten
     /// </summary>
-    public class RiResult
-    {
-        public DateTime Date { get; set; }
-        public double Ri { get; set; }
-
-        public RiResult(DateTime date, double ri)
-        {
-            Date = date;
-            Ri = ri;
-        }
-    }
+    public class RiResult(DateTime date, double ri)
+	{
+		public DateTime Date { get; set; } = date;
+		public double Ri { get; set; } = ri;
+	}
 }

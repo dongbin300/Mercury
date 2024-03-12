@@ -58,6 +58,12 @@ namespace Mercury.Backtests
 						chartPack.UseAdx(14, 14);
 						chartPack.UseSupertrend(10, 1.5);
 						break;
+
+					case "goldbb":
+						chartPack.UseBollingerBands();
+						chartPack.UseSma(10);
+						chartPack.UseEma(10);
+						break;
 				}
 				Charts.Add(symbol, [.. chartPack.Charts]);
 			}
@@ -142,6 +148,13 @@ namespace Mercury.Backtests
 											maxPrice - (maxPrice - minPrice) * 0.1m);
 									}
 									break;
+
+								case "goldbb":
+									if(c1.Quote.Close > (decimal)c1.Bb1Upper)
+									{
+										EntryPosition(PositionSide.Long, c0, c0.Quote.Open);
+									}
+									break;
 							}
 						}
 					}
@@ -173,6 +186,13 @@ namespace Mercury.Backtests
 								else if (c1.Quote.Low <= longPosition.StopLossPrice)
 								{
 									StopLoss(longPosition, c0);
+								}
+								break;
+
+							case "goldbb":
+								if (c1.Quote.Close < (decimal)c1.Ema1)
+								{
+									ExitPosition(longPosition, c0, c0.Quote.Open);
 								}
 								break;
 						}
@@ -222,6 +242,13 @@ namespace Mercury.Backtests
 											minPrice + (maxPrice - minPrice) * 0.1m);
 									}
 									break;
+
+								case "goldbb":
+									if (c1.Quote.Close < (decimal)c1.Bb1Lower)
+									{
+										EntryPosition(PositionSide.Short, c0, c0.Quote.Open);
+									}
+									break;
 							}
 						}
 					}
@@ -254,6 +281,13 @@ namespace Mercury.Backtests
 								if (c1.Quote.High >= shortPosition.StopLossPrice)
 								{
 									StopLoss(shortPosition, c0);
+								}
+								break;
+
+							case "goldbb":
+								if (c1.Quote.Close > (decimal)c1.Ema1)
+								{
+									ExitPosition(shortPosition, c0, c0.Quote.Open);
 								}
 								break;
 						}
@@ -322,17 +356,26 @@ namespace Mercury.Backtests
 		/// <param name="entryPrice"></param>
 		/// <param name="stopLossPrice"></param>
 		/// <param name="takeProfitPrice"></param>
-		void EntryPosition(PositionSide side, ChartInfo currentChart, decimal entryPrice, decimal stopLossPrice, decimal takeProfitPrice)
+		void EntryPosition(PositionSide side, ChartInfo currentChart, decimal entryPrice, decimal? stopLossPrice = null, decimal? takeProfitPrice = null)
 		{
 			var quantity = BaseOrderSize / entryPrice;
 			Money += side == PositionSide.Long ? -entryPrice * quantity : entryPrice * quantity;
 			var newPosition = new Position(currentChart.DateTime, currentChart.Symbol, side, entryPrice)
 			{
-				TakeProfitPrice = takeProfitPrice,
-				StopLossPrice = stopLossPrice,
 				Quantity = quantity,
 				EntryAmount = entryPrice * quantity
 			};
+
+			if (takeProfitPrice != null)
+			{
+				newPosition.TakeProfitPrice = takeProfitPrice.Value;
+			}
+
+			if (stopLossPrice != null)
+			{
+				newPosition.StopLossPrice = stopLossPrice.Value;
+			}
+
 			Positions.Add(newPosition);
 		}
 
@@ -407,6 +450,31 @@ namespace Mercury.Backtests
 				ExitAmount = price * quantity
 			});
 			Win++;
+			Money -= FeeSize;
+		}
+
+		/// <summary>
+		/// 포지션 탈출
+		/// </summary>
+		/// <param name="position"></param>
+		/// <param name="currentChart"></param>
+		/// <param name="exitPrice"></param>
+		void ExitPosition(Position position, ChartInfo currentChart, decimal exitPrice)
+		{
+			var quantity = position.Quantity;
+			Money += position.Side == PositionSide.Long ? exitPrice * quantity : -exitPrice * quantity;
+			var result = position.Income > 0 ? PositionResult.Win : PositionResult.Lose;
+			Positions.Remove(position);
+			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, result)
+			{
+				EntryAmount = position.EntryAmount,
+				ExitAmount = exitPrice * quantity
+			});
+			switch (result)
+			{
+				case PositionResult.Win: Win++; break;
+				case PositionResult.Lose: Lose++; break;
+			}
 			Money -= FeeSize;
 		}
 

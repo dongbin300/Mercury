@@ -3,15 +3,9 @@
     /// <summary>
     /// Supertrend Result
     /// </summary>
-    public class SupertrendResult
-    {
-        public DateTime Date { get; set; }
-        public double Supertrend { get; set; }
-
-        public SupertrendResult(DateTime date, double supertrend)
-        {
-            Date = date;
-            Supertrend = supertrend;
-        }
-    }
+    public class SupertrendResult(DateTime date, double supertrend)
+	{
+		public DateTime Date { get; set; } = date;
+		public double Supertrend { get; set; } = supertrend;
+	}
 }

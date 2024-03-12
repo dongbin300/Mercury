@@ -1,14 +1,8 @@
 ﻿namespace Mercury.Indicators
 {
-    public class JmaSlopeResult
-    {
-        public DateTime Date { get; set; }
-        public double JmaSlope { get; set; }
-
-        public JmaSlopeResult(DateTime date, double jmaSlope)
-        {
-            Date = date;
-            JmaSlope = jmaSlope;
-        }
-    }
+    public class JmaSlopeResult(DateTime date, double jmaSlope)
+	{
+		public DateTime Date { get; set; } = date;
+		public double JmaSlope { get; set; } = jmaSlope;
+	}
 }
