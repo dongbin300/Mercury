@@ -276,7 +276,7 @@ namespace Backtester
 						break;
 
 					case 6:
-						Strategy7(symbols, interval, startDate, endDate, takeProfitRoe, 22, 48, 11, 24);
+						Strategy7(symbols, interval, startDate, endDate, takeProfitRoe);
 						break;
 
 					case 7:
@@ -1153,7 +1153,7 @@ namespace Backtester
 		/// <param name="startDate"></param>
 		/// <param name="endDate"></param>
 		/// <param name="takeProfitRoe"></param>
-		private void Strategy7(string[] symbols, KlineInterval interval, DateTime startDate, DateTime endDate, decimal takeProfitRoe, int v1, int v2, int v3, int v4)
+		private void Strategy7(string[] symbols, KlineInterval interval, DateTime startDate, DateTime endDate, decimal takeProfitRoe)
 		{
 			decimal min = 99999999;
 			decimal max = 0;
@@ -1174,7 +1174,7 @@ namespace Backtester
 				}
 			}
 
-			File.AppendAllText(MercuryPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), $"MACD1 ({v1},{v2}) MACD2 ({v3},{v4})" + Environment.NewLine);
+			File.AppendAllText(MercuryPath.Desktop.Down($"{FileNameTextBoxPB.Text}.csv"), $"MACD 4.1.14.2" + Environment.NewLine);
 
 			var dealManager = new PrecisionBacktestDealManager(startDate, endDate, 5, takeProfitRoe, takeProfitRoe / -2.0m, 0.2m)
 			{
@@ -1199,7 +1199,7 @@ namespace Backtester
 					dealManager.RemoveOldChart();
 				}
 
-				dealManager.CalculateIndicatorsMacd(v1, v2, v3, v4);
+				dealManager.CalculateIndicatorsMacd();
 				dealManager.EvaluateMacdV3LongNextCandle();
 				dealManager.EvaluateMacdV3ShortNextCandle();
 
@@ -1289,7 +1289,7 @@ namespace Backtester
 						dealManager.RemoveOldChart();
 					}
 
-					dealManager.CalculateIndicatorsMacd(1, 1, 1, 1);
+					dealManager.CalculateIndicatorsMacd();
 					dealManager.EvaluateMacdV3LongNextCandle();
 					dealManager.EvaluateMacdV3ShortNextCandle();
 				}
@@ -1550,7 +1550,7 @@ namespace Backtester
 					dealManager.RemoveOldChart();
 				}
 
-				dealManager.CalculateIndicatorsMacd(12, 26, 1, 1);
+				dealManager.CalculateIndicatorsMacd();
 				dealManager.EvaluateMacdV2LongNextCandle();
 				dealManager.EvaluateMacdV2ShortNextCandle();
 
@@ -1691,7 +1691,7 @@ namespace Backtester
 						dealManager.RemoveOldChart();
 					}
 
-					dealManager.CalculateIndicatorsMacd(1, 1, 1, 1);
+					dealManager.CalculateIndicatorsMacd();
 					dealManager.EvaluateMacdV2LongNextCandle();
 					dealManager.EvaluateMacdV2ShortNextCandle();
 				}

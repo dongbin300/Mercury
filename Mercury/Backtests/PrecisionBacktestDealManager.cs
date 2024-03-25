@@ -1692,15 +1692,15 @@ namespace Mercury.Backtests
 			return charts.SkipLast(1).TakeLast(period).Max(x => x.Quote.Close);
 		}
 
-		public void CalculateIndicatorsMacd(int MACDF, int MACDS, int MACD2F, int MACD2S)
+		public void CalculateIndicatorsMacd()
 		{
 			foreach (var chart in Charts)
 			{
 				var quotes = chart.Value.Select(x => x.Quote);
-				var macd = quotes.GetMacd(MACDF, MACDS, 9);
+				var macd = quotes.GetMacd(12, 26, 9);
 				var m = macd.Select(x => x.Macd);
 				var s = macd.Select(x => x.Signal);
-				var macd2 = quotes.GetMacd(MACD2F, MACD2S, 7);
+				var macd2 = quotes.GetMacd(9, 20, 7);
 				var m2 = macd2.Select(x => x.Macd);
 				var s2 = macd2.Select(x => x.Signal);
 				var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
@@ -1949,9 +1949,9 @@ namespace Mercury.Backtests
                      * 5. Macd1(18,39) Macd2(12,26) 조정
                      * 
                      * */
-					if (//IsPowerGoldenCross(charts, 14, c1.Macd) &&
-						//IsPowerGoldenCross2(charts, 14, c1.Macd2) &&
-						c1.Macd < 0 && c1.Macd2 < 0 && c1.Macd2 > c1.Macd && c2.Macd2 < c2.Macd && c1.Supertrend1 > 0 && c1.Adx > 40
+					if (IsPowerGoldenCross(charts, 14, c1.Macd) &&
+						IsPowerGoldenCross2(charts, 14, c1.Macd2) &&
+						tpPer > 1.0m
 						//c1.Supertrend1 > 0 &&
 						//c1.Macd < 0 &&
 						//c1.Macd2 < 0 &&
@@ -2050,9 +2050,9 @@ namespace Mercury.Backtests
 					//var maxClosePrice = GetMaxClosePrice(charts, 7);
 					//var maxClosePricePer = Calculator.Roe(side, maxClosePrice, c0.Quote.Open);
 
-					if (//IsPowerDeadCross(charts, 14, c1.Macd) &&
-						//IsPowerDeadCross2(charts, 14, c1.Macd2) &&
-						c1.Macd > 0 && c1.Macd2 > 0 && c1.Macd2 < c1.Macd && c2.Macd2 > c2.Macd && c1.Supertrend1 < 0 && c1.Adx > 40
+					if (IsPowerDeadCross(charts, 14, c1.Macd) &&
+						IsPowerDeadCross2(charts, 14, c1.Macd2) &&
+						tpPer > 1.0m
 						//c1.Supertrend1 < 0 &&
 						//c1.Macd > 0 && 
 						//c1.Macd2 > 0 &&

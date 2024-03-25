@@ -36,6 +36,7 @@
             <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
             <ComboBox x:Name="StrategyComboBox" SelectedIndex="0">
                 <ComboBoxItem>MACD2</ComboBoxItem>
+                <ComboBoxItem>MACD4.1.14.2</ComboBoxItem>
                 <ComboBoxItem>Triple_RSI</ComboBoxItem>
                 <ComboBoxItem>GoldBB</ComboBoxItem>
             </ComboBox>

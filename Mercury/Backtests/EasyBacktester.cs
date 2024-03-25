@@ -1,12 +1,8 @@
 ﻿using Binance.Net.Enums;
 
-using CryptoExchange.Net.CommonObjects;
-
 using Mercury.Charts;
 using Mercury.Enums;
 using Mercury.Maths;
-
-using System.Drawing;
 
 namespace Mercury.Backtests
 {
@@ -48,6 +44,12 @@ namespace Mercury.Backtests
 				{
 					case "macd2":
 						chartPack.UseMacd();
+						chartPack.UseAdx();
+						chartPack.UseSupertrend(10, 1.5);
+						break;
+
+					case "macd4.1.14.2":
+						chartPack.UseMacd(12, 26, 9, 9, 20, 7);
 						chartPack.UseAdx();
 						chartPack.UseSupertrend(10, 1.5);
 						break;
@@ -139,6 +141,17 @@ namespace Mercury.Backtests
 									}
 									break;
 
+								case "macd4.1.14.2":
+									var slPrice = minPrice - (maxPrice - minPrice) * 0.1m;
+									var tpPrice = maxPrice - (maxPrice - minPrice) * 0.1m;
+									var slPer = Calculator.Roe(PositionSide.Long, c0.Quote.Open, slPrice);
+									var tpPer = Calculator.Roe(PositionSide.Long, c0.Quote.Open, tpPrice);
+									if (IsPowerGoldenCross(charts, 14, i, c1.Macd) && IsPowerGoldenCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)
+									{
+										EntryPosition(PositionSide.Long, c0, c0.Quote.Open, slPrice, tpPrice);
+									}
+									break;
+
 								case "triple_rsi":
 									if (c1.Rsi3 > 50 && c1.Rsi1 > c1.Rsi2 && c1.Rsi2 > c1.Rsi3 && c1.Quote.Close > (decimal)c1.Ema1 && c1.Adx > 20)
 									{
@@ -173,6 +186,21 @@ namespace Mercury.Backtests
 									TakeProfitHalf(longPosition);
 								}
 								if (longPosition.Stage == 1 && c0.Supertrend1 < 0)
+								{
+									TakeProfitHalf2(longPosition, c0);
+								}
+								break;
+
+							case "macd4.1.14.2":
+								if (longPosition.Stage == 0 && c1.Quote.Low <= longPosition.StopLossPrice)
+								{
+									StopLoss(longPosition, c1);
+								}
+								else if (longPosition.Stage == 0 && c1.Quote.High >= longPosition.TakeProfitPrice)
+								{
+									TakeProfitHalf(longPosition);
+								}
+								if (longPosition.Stage == 1 && c1.Supertrend1 < 0)
 								{
 									TakeProfitHalf2(longPosition, c0);
 								}
@@ -233,6 +261,18 @@ namespace Mercury.Backtests
 									}
 									break;
 
+								case "macd4.1.14.2":
+									var slPrice = maxPrice + (maxPrice - minPrice) * 0.1m;
+									var tpPrice = minPrice + (maxPrice - minPrice) * 0.1m;
+									var slPer = Calculator.Roe(PositionSide.Short, c0.Quote.Open, slPrice);
+									var tpPer = Calculator.Roe(PositionSide.Short, c0.Quote.Open, tpPrice);
+
+									if(IsPowerDeadCross(charts, 14, i, c1.Macd) && IsPowerDeadCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)
+									{
+										EntryPosition(PositionSide.Short, c0, c0.Quote.Open, slPrice, tpPrice);
+									}
+									break;
+
 								case "triple_rsi":
 									if (c1.Rsi3 < 50 && c1.Rsi1 < c1.Rsi2 && c1.Rsi2 < c1.Rsi3 && c1.Quote.Close < (decimal)c1.Ema1 && c1.Adx > 20)
 									{
@@ -267,6 +307,21 @@ namespace Mercury.Backtests
 									TakeProfitHalf(shortPosition);
 								}
 								if (shortPosition.Stage == 1 && c0.Supertrend1 > 0)
+								{
+									TakeProfitHalf2(shortPosition, c0);
+								}
+								break;
+
+							case "macd4.1.14.2":
+								if (shortPosition.Stage == 0 && c1.Quote.High >= shortPosition.StopLossPrice)
+								{
+									StopLoss(shortPosition, c1);
+								}
+								else if (shortPosition.Stage == 0 && c1.Quote.Low <= shortPosition.TakeProfitPrice)
+								{
+									TakeProfitHalf(shortPosition);
+								}
+								if (shortPosition.Stage == 1 && c1.Supertrend1 > 0)
 								{
 									TakeProfitHalf2(shortPosition, c0);
 								}
@@ -332,6 +387,58 @@ namespace Mercury.Backtests
 			return false;
 		}
 
+		bool IsPowerGoldenCross(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd < 0 && c0.Macd > c0.MacdSignal && c1.Macd < c1.MacdSignal && c0.Adx > 30 && c0.Supertrend1 > 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd < 0 && c0.Macd > c0.MacdSignal && c1.Macd < c1.MacdSignal && c0.Adx > 30 && c0.Supertrend1 > 0 && c0.Macd < currentMacd)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		bool IsPowerGoldenCross2(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd2 < 0 && c0.Macd2 > c0.MacdSignal2 && c1.Macd2 < c1.MacdSignal2 && c0.Adx > 30 && c0.Supertrend1 > 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd2 < 0 && c0.Macd2 > c0.MacdSignal2 && c1.Macd2 < c1.MacdSignal && c0.Adx > 30 && c0.Supertrend1 > 0 && c0.Macd2 < currentMacd)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		bool IsMacd2DeadCross(List<ChartInfo> charts, int lookback, int index)
 		{
 			// Starts at charts[index - 1]
@@ -343,6 +450,58 @@ namespace Mercury.Backtests
 				if (c0.Macd > 0 && c0.Macd < c0.MacdSignal && c1.Macd > c1.MacdSignal && c0.Adx > 30)
 				{
 					return true;
+				}
+			}
+			return false;
+		}
+
+		bool IsPowerDeadCross(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd > 0 && c0.Macd < c0.MacdSignal && c1.Macd > c1.MacdSignal && c0.Adx > 30 && c0.Supertrend1 < 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd > 0 && c0.Macd < c0.MacdSignal && c1.Macd > c1.MacdSignal && c0.Adx > 30 && c0.Supertrend1 < 0 && c0.Macd > currentMacd)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		bool IsPowerDeadCross2(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd2 > 0 && c0.Macd2 < c0.MacdSignal2 && c1.Macd2 > c1.MacdSignal2 && c0.Adx > 30 && c0.Supertrend1 < 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd2 > 0 && c0.Macd2 < c0.MacdSignal2 && c1.Macd2 > c1.MacdSignal2 && c0.Adx > 30 && c0.Supertrend1 < 0 && c0.Macd > currentMacd)
+					{
+						return true;
+					}
 				}
 			}
 			return false;

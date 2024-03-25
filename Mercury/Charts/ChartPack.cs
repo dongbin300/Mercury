@@ -202,9 +202,9 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseMacd(int fastPeriod = 12, int slowPeriod = 26, int signalPeriod = 9)
+		public void UseMacd(int fastPeriod1 = 12, int slowPeriod1 = 26, int signalPeriod1 = 9, int? fastPeriod2 = null, int? slowPeriod2 = null, int? signalPeriod2 = null)
 		{
-			var macd = Charts.Select(x => x.Quote).GetMacd(fastPeriod, slowPeriod, signalPeriod);
+			var macd = Charts.Select(x => x.Quote).GetMacd(fastPeriod1, slowPeriod1, signalPeriod1);
 			var value = macd.Select(x => x.Macd);
 			var signal = macd.Select(x => x.Signal);
 			var hist = macd.Select(x => x.Hist);
@@ -213,6 +213,23 @@ namespace Mercury.Charts
 				Charts[i].Macd = value.ElementAt(i);
 				Charts[i].MacdSignal = signal.ElementAt(i);
 				Charts[i].MacdHist = hist.ElementAt(i);
+			}
+
+			if (fastPeriod2 != null)
+			{
+				var fastPeriod = fastPeriod2 ?? default!;
+				var slowPeriod = slowPeriod2 ?? default!;
+				var signalPeriod = signalPeriod2 ?? default!;
+				var macd2 = Charts.Select(x => x.Quote).GetMacd(fastPeriod, slowPeriod, signalPeriod);
+				var value2 = macd.Select(x => x.Macd);
+				var signal2 = macd.Select(x => x.Signal);
+				var hist2 = macd.Select(x => x.Hist);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Macd2 = value2.ElementAt(i);
+					Charts[i].MacdSignal2 = signal2.ElementAt(i);
+					Charts[i].MacdHist2 = hist2.ElementAt(i);
+				}
 			}
 		}
 
