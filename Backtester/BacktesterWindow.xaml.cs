@@ -108,7 +108,7 @@ namespace Backtester
 					}
 
 					var backtester = new EasyBacktester(strategyId, [.. symbols], interval);
-					backtester.SetMaxActiveDeals(MaxActiveDealsType.Each, 10);
+					backtester.SetMaxActiveDeals(MaxActiveDealsType.Total, 10);
 					backtester.InitIndicators();
 					backtester.Run(backtestType, Common.ReportProgress, reportFileName, 288, 240);
 				}

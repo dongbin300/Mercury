@@ -126,7 +126,7 @@ namespace Mercury.Backtests
 							switch (StrategyId.ToLower())
 							{
 								case "macd2":
-									if (IsMacd2GoldenCross(charts, 5, i) &&
+									if (IsMacd2GoldenCross(charts, 14, i) &&
 										c1.Supertrend1 > 0 &&
 										c1LongBodyLength < 0.5m &&
 										longStopLossPercent < -0.8m &&
@@ -220,7 +220,7 @@ namespace Mercury.Backtests
 							switch (StrategyId.ToLower())
 							{
 								case "macd2":
-									if (IsMacd2DeadCross(charts, 5, i) &&
+									if (IsMacd2DeadCross(charts, 14, i) &&
 										c1.Supertrend1 < 0 &&
 										c1ShortBodyLength < 0.5m &&
 										shortStopLossPercent < -0.8m &&

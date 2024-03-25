@@ -156,6 +156,26 @@ namespace MarinerX.Apis
             return quotes;
         }
 
+        public static List<AggregatedTrade> GetAggregatedTradesForOneDay(string symbol, DateTime date)
+        {
+            return GetAggregatedTrades(symbol, date, date.AddSeconds(86399), null);
+        }
+
+        public static List<AggregatedTrade> GetAggregatedTrades(string symbol, DateTime? startTime, DateTime? endTime, int? limit)
+        {
+            var result = binanceClient.UsdFuturesApi.ExchangeData.GetAggregatedTradeHistoryAsync(symbol, null, startTime, endTime, limit);
+            result.Wait();
+
+            var aggregatedTrades = new List<AggregatedTrade>();
+
+            foreach(var data in result.Result.Data)
+            {
+                aggregatedTrades.Add(new AggregatedTrade(data.TradeTime, data.Price, data.Quantity));
+            }
+
+            return aggregatedTrades;
+        }
+
         public static double GetCurrentBnbPrice()
         {
             var result = binanceClient.SpotApi.ExchangeData.GetCurrentAvgPriceAsync("BNBUSDT");

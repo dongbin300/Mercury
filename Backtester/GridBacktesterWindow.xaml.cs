@@ -89,12 +89,15 @@ namespace Backtester
 
 				Common.ReportProgress(5);
 				ChartLoader.InitCharts(symbol, KlineInterval.OneWeek);
-				ChartLoader.InitCharts(symbol, KlineInterval.FiveMinutes);
+				ChartLoader.InitCharts(symbol, KlineInterval.OneDay);
+				ChartLoader.InitCharts(symbol, KlineInterval.ThirtyMinutes);
 
 				Common.ReportProgress(15);
 				var oneWeekChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.OneWeek);
 				oneWeekChartPack.UseAtr();
-				var fiveMinuteChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.FiveMinutes);
+				var oneDayChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.OneDay);
+				oneDayChartPack.UseMacd();
+				var fiveMinuteChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.ThirtyMinutes);
 				fiveMinuteChartPack.UseAtr();
 
 				Common.ReportProgress(30);
@@ -102,22 +105,13 @@ namespace Backtester
 
 				Common.ReportProgress(50);
 				var chartPack = ChartLoader.GetChartPack(symbol, interval);
-				var firstChart = chartPack.Charts[0];
-				var lastWeekAtr = (decimal)oneWeekChartPack.Charts.Where(d => d.DateTime <= firstChart.DateTime).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
-				var lastMinuteAtr = (decimal)fiveMinuteChartPack.Charts.Where(d => d.DateTime <= firstChart.DateTime).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
 
-				var upperPrice = firstChart.Quote.Open + lastWeekAtr;
-				var lowerPrice = firstChart.Quote.Open - lastWeekAtr;
-				var upperStopLossPrice = firstChart.Quote.Close + lastWeekAtr * 1.1M;
-				var lowerStopLossPrice = firstChart.Quote.Close - lastWeekAtr * 1.1M;
-				var gridInterval = lastMinuteAtr;
-
-				var backtester = new GridBacktester([.. chartPack.Charts], interval, upperPrice, lowerPrice, gridInterval, 1, GridType.Neutral, upperStopLossPrice, lowerStopLossPrice);
-				backtester.Run(Common.ReportProgress, reportFileName, 0, 0);
+				var backtester = new GridBacktester([.. chartPack.Charts], [.. oneWeekChartPack.Charts], [.. oneDayChartPack.Charts], [.. fiveMinuteChartPack.Charts], interval, 1.0M, GridType.Neutral);
+				backtester.Run(Common.ReportProgress, reportFileName, 1440, 0);
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message);
+				MessageBox.Show(ex.ToString());
 			}
 		}
 
