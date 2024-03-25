@@ -15,10 +15,33 @@ namespace Mercury.Charts
 			if (fileNameParts.Length != 2)
 			{
 				return false;
-
 			}
 
 			if (DateTime.TryParse(fileNameParts[1], out DateTime fileDate))
+			{
+				if (startDate == null)
+				{
+					return fileDate <= endDate;
+				}
+				else if (endDate == null)
+				{
+					return fileDate >= startDate;
+				}
+				else
+				{
+					return fileDate >= startDate && fileDate <= endDate;
+				}
+			}
+
+			return false;
+		}
+
+		static bool IsFileWithinDateRangeAggTrades(string filePath, DateTime? startDate, DateTime? endDate)
+		{
+			string fileName = Path.GetFileNameWithoutExtension(filePath);
+			string[] fileNameParts = fileName.Split('-');
+
+			if (DateTime.TryParse(fileNameParts[2] + "-" + fileNameParts[3] + "-" + fileNameParts[4], out DateTime fileDate))
 			{
 				if (startDate == null)
 				{
@@ -56,7 +79,8 @@ namespace Mercury.Charts
 				var chartPack = new ChartPack(interval);
 
 				var files = Directory.GetFiles(MercuryPath.BinanceFuturesData.Down(
-					interval switch {
+					interval switch
+					{
 						KlineInterval.OneMinute => $"1m\\{symbol}",
 						KlineInterval.ThreeMinutes => $"1m\\{symbol}",
 						KlineInterval.FiveMinutes => "5m",
@@ -72,7 +96,7 @@ namespace Mercury.Charts
 						KlineInterval.OneWeek => "1D",
 						KlineInterval.OneMonth => "1D",
 						_ => $"1m\\{symbol}"
-					})).Where(f=>f.GetFileName().StartsWith(symbol));
+					})).Where(f => f.GetFileName().StartsWith(symbol));
 
 				if (startDate == null && endDate == null)
 				{
@@ -130,6 +154,69 @@ namespace Mercury.Charts
 				chartPack.ConvertCandle();
 
 				Charts.Add(chartPack);
+			}
+			catch
+			{
+				throw;
+			}
+		}
+
+		public static List<Price> GetAggregatedTrades(string symbol, DateTime? startDate = null, DateTime? endDate = null)
+		{
+			try
+			{
+				var prices = new List<Price>();
+
+				var files = Directory.GetFiles(MercuryPath.BinanceFuturesData.Down("trade", symbol)).Where(f => f.GetFileName().StartsWith(symbol));
+
+				if (startDate == null && endDate == null)
+				{
+					foreach (var file in files)
+					{
+						var data = File.ReadAllLines(file);
+
+						foreach (var line in data)
+						{
+							var e = line.Split(',');
+							try
+							{
+								var price = new Price(e[5].ToLong().ToDateTime(), e[1].ToDecimal());
+								prices.Add(price);
+							}
+							catch
+							{
+							}
+						}
+					}
+				}
+				else
+				{
+					var rangeFiles = files.Where(f => IsFileWithinDateRangeAggTrades(f, startDate, endDate));
+
+					foreach (var file in rangeFiles)
+					{
+						using var reader = new StreamReader(file);
+						string? line;
+						while ((line = reader.ReadLine()) != null)
+						{
+							var e = line.Split(',');
+							try
+							{
+								var date = e[5].ToLong().ToDateTime();
+								if ((startDate == null || date >= startDate) && (endDate == null || date <= endDate))
+								{
+									var price = new Price(date, e[1].ToDecimal());
+									prices.Add(price);
+								}
+							}
+							catch
+							{
+							}
+						}
+					}
+				}
+
+				return prices;
 			}
 			catch
 			{

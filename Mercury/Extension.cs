@@ -13,8 +13,10 @@
         public static int ToInt(this string value) => int.Parse(value);
         public static double ToDouble(this string value) => double.Parse(value);
         public static decimal ToDecimal(this string value) => decimal.Parse(value);
+        public static long ToLong(this string value) => long.Parse(value);
         public static DateTime ToDateTime(this string value) => DateTime.Parse(value);
-        public static string Down(this string path, params string[] downPaths) => Path.Combine(path, Path.Combine(downPaths));
+        public static DateTime ToDateTime(this long timestamp) => DateTimeOffset.FromUnixTimeMilliseconds(timestamp).UtcDateTime;
+		public static string Down(this string path, params string[] downPaths) => Path.Combine(path, Path.Combine(downPaths));
         public static void TryCreate(this string path)
         {
             if (!File.Exists(path))

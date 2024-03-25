@@ -25,6 +25,7 @@
             <TextBox x:Name="EndDateTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="2023-06-07"/>
             <TextBlock Style="{StaticResource Description}">Interval</TextBlock>
             <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
+                <ComboBoxItem>price</ComboBoxItem>
                 <ComboBoxItem>1m</ComboBoxItem>
                 <ComboBoxItem>3m</ComboBoxItem>
                 <ComboBoxItem>5m</ComboBoxItem>

@@ -8,14 +8,14 @@ namespace Mercury.Backtests
 	/// <summary>
 	/// Grid Bot Backtester
 	/// </summary>
-	/// <param name="charts"></param>
+	/// <param name="prices"></param>
 	/// <param name="longTermCharts"></param>
 	/// <param name="midTermCharts"></param>
 	/// <param name="shortTermCharts"></param>
 	/// <param name="interval"></param>
 	/// <param name="gridIntervalRatio"></param>
 	/// <param name="gridType"></param>
-	public class GridBacktester(List<ChartInfo> charts, List<ChartInfo> longTermCharts, List<ChartInfo> midTermCharts, List<ChartInfo> shortTermCharts, decimal gridIntervalRatio, GridType gridType)
+	public class GridDetailBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> midTermCharts, List<ChartInfo> shortTermCharts, decimal gridIntervalRatio, GridType gridType)
 	{
 		public decimal Money = 1_000_000;
 		public decimal UpperPrice { get; set; }
@@ -28,12 +28,10 @@ namespace Mercury.Backtests
 		public GridType GridType { get; set; } = gridType;
 		public decimal UpperStopLossPrice { get; set; }
 		public decimal LowerStopLossPrice { get; set; }
-
-		//public decimal BaseQuantity = 1;
 		public decimal FeeRate = 0.0002M; // 0.02%
 
-		public string Symbol => Charts[0].Symbol;
-		public List<ChartInfo> Charts { get; set; } = charts;
+		public string Symbol { get; set; } = symbol;
+		public List<Price> Prices { get; set; } = prices;
 		/// <summary>
 		/// For Grid Range
 		/// </summary>
@@ -48,6 +46,8 @@ namespace Mercury.Backtests
 		public List<ChartInfo> ShortTermCharts { get; set; } = shortTermCharts;
 		public List<Order> LongOrders { get; set; } = [];
 		public List<Order> ShortOrders { get; set; } = [];
+		public Order NearestLongOrder => LongOrders.Find(x => x.Price.Equals(LongOrders.Max(x => x.Price))) ?? default!;
+		public Order NearestShortOrder => ShortOrders.Find(x => x.Price.Equals(ShortOrders.Min(x => x.Price))) ?? default!;
 		public decimal CoinQuantity { get; set; } = 0;
 		public int LongFillCount = 0;
 		public int ShortFillCount = 0;
@@ -118,7 +118,7 @@ namespace Mercury.Backtests
 			}
 		}
 
-		public void Run(Action<int> reportProgress, string reportFileName, int reportInterval, int startIndex)
+		public void Run(Action<int> reportProgress, string reportFileName, int startIndex)
 		{
 			/* Init */
 			SetGrid(startIndex);
@@ -126,9 +126,12 @@ namespace Mercury.Backtests
 			SetOrder(startIndex);
 
 			decimal maxRisk = 0;
-			for (int i = startIndex; i < Charts.Count; i++)
+			DateTime displayDate = Prices[startIndex].Date;
+			for (int i = startIndex; i < Prices.Count; i++)
 			{
-				reportProgress((int)(50 + (double)i / Charts.Count * 50));
+				reportProgress((int)(50 + (double)i / Prices.Count * 50));
+
+				var price = Prices[i];
 
 				if (SetGridType(i))
 				{ // Grid type changed
@@ -138,40 +141,34 @@ namespace Mercury.Backtests
 					SetOrder(i);
 				}
 
-				for (int j = 0; j < LongOrders.Count; j++)
+				if (NearestLongOrder != null && NearestLongOrder.Price >= price.Value)
 				{
-					if (LongOrders[j].Price > Charts[i].Quote.Low)
-					{
-						Fill(LongOrders[j]);
-						j--;
-					}
+					Fill(NearestLongOrder);
 				}
-				for (int j = 0; j < ShortOrders.Count; j++)
+				if (NearestShortOrder != null && NearestShortOrder.Price <= price.Value)
 				{
-					if (ShortOrders[j].Price < Charts[i].Quote.High)
-					{
-						Fill(ShortOrders[j]);
-						j--;
-					}
+					Fill(NearestShortOrder);
 				}
 
-				TrailingOrder(i);
+				TrailingOrder(price.Value);
 
-				if (i % reportInterval == 0)
+				if (price.Date >= displayDate)
 				{
-					var _estimatedMoney = Money + CoinQuantity * Charts[i].Quote.Close;
+					displayDate = displayDate.AddDays(1);
+
+					var _estimatedMoney = Money + CoinQuantity * Prices[i].Value;
 					var risk = Math.Abs(_estimatedMoney - Money) / _estimatedMoney * 100;
 					if (risk > maxRisk)
 					{
 						maxRisk = risk;
 					}
 					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"),
-					$"{Charts[i].DateTime:yyyy-MM-dd HH:mm:ss},{CoinQuantity.Round(2)},{GridType},{LongFillCount},{ShortFillCount},{risk.Round(2)}%,{_estimatedMoney.Round(2)}" + Environment.NewLine);
+					$"{Prices[i].Date:yyyy-MM-dd HH:mm:ss},{CoinQuantity.Round(2)},{GridType},{LongFillCount},{ShortFillCount},{risk.Round(2)}%,{_estimatedMoney.Round(2)}" + Environment.NewLine);
 				}
 			}
 
-			var estimatedMoney = Money + CoinQuantity * Charts[^1].Quote.Close;
-			var period = (Charts[^1].DateTime - Charts[0].DateTime).Days;
+			var estimatedMoney = Money + CoinQuantity * Prices[^1].Value;
+			var period = (Prices[^1].Date - Prices[0].Date).Days;
 			var tradePerDay = (double)(LongFillCount + ShortFillCount) / period;
 			File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"),
 					$"{Symbol},{period}Days,{tradePerDay.Round(1)}/d,{maxRisk.Round(2)}%,{estimatedMoney.Round(2)}" + Environment.NewLine + Environment.NewLine);
@@ -179,8 +176,8 @@ namespace Mercury.Backtests
 
 		public bool SetGridType(int chartIndex)
 		{
-			var chart = Charts[chartIndex];
-			var midTermOrderByDescendingCharts = MidTermCharts.Where(d => d.DateTime <= chart.DateTime).OrderByDescending(d => d.DateTime);
+			var price = Prices[chartIndex];
+			var midTermOrderByDescendingCharts = MidTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
 			var midTermCharts1 = midTermOrderByDescendingCharts.ElementAt(1);
 			var midTermCharts2 = midTermOrderByDescendingCharts.ElementAt(2);
 
@@ -202,12 +199,12 @@ namespace Mercury.Backtests
 			}
 			else if (GridType == GridType.Neutral)
 			{
-				if (chart.Quote.High > UpperStopLossPrice)
+				if (price.Value > UpperStopLossPrice)
 				{
 					GridType = GridType.Long;
 					return true;
 				}
-				else if (chart.Quote.Low < LowerStopLossPrice)
+				else if (price.Value < LowerStopLossPrice)
 				{
 					GridType = GridType.Short;
 					return true;
@@ -218,26 +215,26 @@ namespace Mercury.Backtests
 
 		public void CloseAllPositions(int chartIndex)
 		{
-			Money += CoinQuantity * Charts[chartIndex].Quote.Open;
+			Money += CoinQuantity * Prices[chartIndex].Value;
 			CoinQuantity = 0;
 		}
 
 		public void SetGrid(int chartIndex)
 		{
-			var chart = Charts[chartIndex];
-			var longTermLastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= chart.DateTime).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
-			var shortTermLastAtr = (decimal)ShortTermCharts.Where(d => d.DateTime <= chart.DateTime).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
+			var price = Prices[chartIndex];
+			var longTermLastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
+			var shortTermLastAtr = (decimal)ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
 
-			UpperPrice = chart.Quote.Open + longTermLastAtr;
-			LowerPrice = chart.Quote.Open - longTermLastAtr;
-			UpperStopLossPrice = chart.Quote.Open + longTermLastAtr * 1.1M;
-			LowerStopLossPrice = chart.Quote.Open - longTermLastAtr * 1.1M;
+			UpperPrice = price.Value + longTermLastAtr;
+			LowerPrice = price.Value - longTermLastAtr;
+			UpperStopLossPrice = price.Value + longTermLastAtr * 1.1M;
+			LowerStopLossPrice = price.Value - longTermLastAtr * 1.1M;
 			GridInterval = shortTermLastAtr;
 		}
 
 		public void SetStandardPrice(int chartIndex)
 		{
-			var currentPrice = Charts[chartIndex].Quote.Open;
+			var currentPrice = Prices[chartIndex].Value;
 			var lower = LowerPrice;
 			var upper = LowerPrice + GridInterval;
 
@@ -256,7 +253,7 @@ namespace Mercury.Backtests
 
 		public void SetOrder(int chartIndex)
 		{
-			var currentPrice = Charts[chartIndex].Quote.Open;
+			var currentPrice = Prices[chartIndex].Value;
 			LongOrders.Clear();
 			ShortOrders.Clear();
 			if (GridType == GridType.Neutral)
@@ -289,7 +286,7 @@ namespace Mercury.Backtests
 			}
 		}
 
-		public void TrailingOrder(int chartIndex)
+		public void TrailingOrder(decimal price)
 		{
 			if (GridType == GridType.Neutral)
 			{
@@ -298,38 +295,28 @@ namespace Mercury.Backtests
 
 			if (GridType == GridType.Long)
 			{
-				var currentHigh = Charts[chartIndex].Quote.High;
-
-				// 가장 가까운(가격이 높은) 롱 주문
-				var nearestOrder = LongOrders.Find(x => x.Price.Equals(LongOrders.Max(x => x.Price))) ?? default!;
-
-				if (nearestOrder == null)
+				if (NearestLongOrder == null)
 				{
 					return;
 				}
 
 				// 가장 가까운 롱 주문으로부터 2인터벌 이상 멀어지면 롱 주문 추가
-				if (currentHigh > nearestOrder.Price + 2 * GridInterval)
+				if (price > NearestLongOrder.Price + 2 * GridInterval)
 				{
-					MakeOrder(PositionSide.Long, nearestOrder.Price + GridInterval);
+					MakeOrder(PositionSide.Long, NearestLongOrder.Price + GridInterval);
 				}
 			}
 			else if (GridType == GridType.Short)
 			{
-				var currentLow = Charts[chartIndex].Quote.Low;
-
-				// 가장 가까운(가격이 낮은) 숏 주문
-				var nearestOrder = ShortOrders.Find(x => x.Price.Equals(ShortOrders.Min(x => x.Price))) ?? default!;
-
-				if (nearestOrder == null)
+				if (NearestShortOrder == null)
 				{
 					return;
 				}
 
 				// 가장 가까운 숏 주문으로부터 2인터벌 이상 멀어지면 숏 주문 추가
-				if (currentLow < nearestOrder.Price - 2 * GridInterval)
+				if (price < NearestShortOrder.Price - 2 * GridInterval)
 				{
-					MakeOrder(PositionSide.Short, nearestOrder.Price - GridInterval);
+					MakeOrder(PositionSide.Short, NearestShortOrder.Price - GridInterval);
 				}
 			}
 		}

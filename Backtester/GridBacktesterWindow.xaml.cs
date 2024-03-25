@@ -28,8 +28,6 @@ namespace Backtester
 		KlineInterval interval;
 		DateTime startDate;
 		DateTime endDate;
-		//BacktestType backtestType;
-		//string strategyId = string.Empty;
 		string reportFileName = string.Empty;
 
 		public GridBacktesterWindow()
@@ -41,7 +39,6 @@ namespace Backtester
 			EndDateTextBox.Text = Settings.Default.EndDate;
 			FileNameTextBox.Text = Settings.Default.FileName;
 			IntervalComboBox.SelectedIndex = Settings.Default.IntervalIndex;
-			//StrategyComboBox.SelectedIndex = Settings.Default.StrategyIndex;
 		}
 
 		private void BacktestButton_Click(object sender, RoutedEventArgs e)
@@ -53,21 +50,26 @@ namespace Backtester
 				Settings.Default.EndDate = EndDateTextBox.Text;
 				Settings.Default.FileName = FileNameTextBox.Text;
 				Settings.Default.IntervalIndex = IntervalComboBox.SelectedIndex;
-				//Settings.Default.StrategyIndex = StrategyComboBox.SelectedIndex;
 				Settings.Default.Save();
 
 				symbol = SymbolTextBox.Text;
-				interval = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m").ToKlineInterval();
-				//strategyId = (StrategyComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "macd2";
 				startDate = StartDateTextBox.Text.ToDateTime();
 				endDate = EndDateTextBox.Text.ToDateTime();
-				//backtestType = BacktestSymbolRadioButton.IsChecked ?? false ? BacktestType.BySymbol : BacktestType.All;
 				reportFileName = FileNameTextBox.Text;
 
 				BacktestProgress.Value = 0;
 				BacktestProgress.Maximum = 100;
 
-				worker.DoWork += Worker_DoWork;
+				var intervalString = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m");
+				if(intervalString == "price")
+				{
+					worker.DoWork += Worker_DoWorkPrice;
+				}
+				else
+				{
+					interval = intervalString.ToKlineInterval();
+					worker.DoWork += Worker_DoWork;
+				}
 				worker.ProgressChanged += (sender, e) =>
 				{
 					BacktestProgress.Value = e.ProgressPercentage;
@@ -78,6 +80,37 @@ namespace Backtester
 			catch (Exception ex)
 			{
 				MessageBox.Show(ex.Message);
+			}
+		}
+		private void Worker_DoWorkPrice(object? sender, DoWorkEventArgs e)
+		{
+			try
+			{
+				ChartLoader.Charts = [];
+
+				Common.ReportProgress(5);
+				ChartLoader.InitCharts(symbol, KlineInterval.OneWeek);
+				ChartLoader.InitCharts(symbol, KlineInterval.OneDay);
+				ChartLoader.InitCharts(symbol, KlineInterval.ThirtyMinutes);
+
+				Common.ReportProgress(15);
+				var oneWeekChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.OneWeek);
+				oneWeekChartPack.UseAtr();
+				var oneDayChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.OneDay);
+				oneDayChartPack.UseMacd();
+				var fiveMinuteChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.ThirtyMinutes);
+				fiveMinuteChartPack.UseAtr();
+
+				Common.ReportProgress(30);
+				var aggregatedTrades = ChartLoader.GetAggregatedTrades(symbol, startDate, endDate);
+
+				Common.ReportProgress(50);
+				var backtester = new GridDetailBacktester(symbol, aggregatedTrades, [.. oneWeekChartPack.Charts], [.. oneDayChartPack.Charts], [.. fiveMinuteChartPack.Charts], 1.0M, GridType.Neutral);
+				backtester.Run(Common.ReportProgress, reportFileName, 0);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
 			}
 		}
 
@@ -106,7 +139,7 @@ namespace Backtester
 				Common.ReportProgress(50);
 				var chartPack = ChartLoader.GetChartPack(symbol, interval);
 
-				var backtester = new GridBacktester([.. chartPack.Charts], [.. oneWeekChartPack.Charts], [.. oneDayChartPack.Charts], [.. fiveMinuteChartPack.Charts], interval, 1.0M, GridType.Neutral);
+				var backtester = new GridBacktester([.. chartPack.Charts], [.. oneWeekChartPack.Charts], [.. oneDayChartPack.Charts], [.. fiveMinuteChartPack.Charts], 1.0M, GridType.Neutral);
 				backtester.Run(Common.ReportProgress, reportFileName, 1440, 0);
 			}
 			catch (Exception ex)

@@ -1,23 +1,15 @@
 ﻿using Binance.Net.Enums;
 
-using Microsoft.VisualBasic;
-
 namespace Mercury.Charts
 {
-	public class ChartPack
+	public class ChartPack(KlineInterval interval)
 	{
 		public string Symbol => Charts.First().Symbol;
-		public KlineInterval Interval = KlineInterval.OneMinute;
-		public IList<ChartInfo> Charts { get; set; } = new List<ChartInfo>();
+		public KlineInterval Interval = interval;
+		public IList<ChartInfo> Charts { get; set; } = [];
 		public DateTime StartTime => Charts.Min(x => x.DateTime);
 		public DateTime EndTime => Charts.Max(x => x.DateTime);
-		public ChartInfo? CurrentChart;
-
-		public ChartPack(KlineInterval interval)
-		{
-			Interval = interval;
-			CurrentChart = null;
-		}
+		public ChartInfo? CurrentChart = null;
 
 		public void AddChart(ChartInfo chart)
 		{
