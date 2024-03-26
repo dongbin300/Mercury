@@ -132,6 +132,8 @@ namespace MarinerX
 			menu1.DropDownItems.Add(new ToolStripSeparator());
 			menu1.DropDownItems.Add("Binance 1분봉 데이터 체크", null, new EventHandler(GetBinanceCandleDataCheckEvent));
 			menu1.DropDownItems.Add("Binance 1분봉 매뉴얼 데이터 수집", null, new EventHandler(GetBinanceCandleDataManualEvent));
+			menu1.DropDownItems.Add(new ToolStripSeparator());
+			menu1.DropDownItems.Add("Binance 가격 데이터 추출", null, new EventHandler(ExtractPriceEvent));
 			menuStrip.Items.Add(menu1);
 
 			var menu2 = new ToolStripMenuItem("데이터 로드");
@@ -402,6 +404,32 @@ namespace MarinerX
 						DispatcherService.Invoke(progressView.Hide);
 
 						MessageBox.Show("바이낸스 1분봉 매뉴얼 데이터 수집 완료");
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show(ex.Message);
+					}
+				}
+			};
+			worker.Start();
+		}
+
+		public static void ExtractPriceEvent(object? sender, EventArgs e)
+		{
+			progressView.Show();
+			var worker = new Worker()
+			{
+				ProgressBar = progressView.ProgressBar,
+				Action = (worker, obj) =>
+				{
+					try
+					{
+						ChartLoader.ExtractPricesFromAggregatedTrades("BTCUSDT", worker,
+							new DateTime(2023, 1, 1),
+							new DateTime(2023, 1, 31));
+						DispatcherService.Invoke(progressView.Hide);
+
+						MessageBox.Show("바이낸스 가격 데이터 추출 완료");
 					}
 					catch (Exception ex)
 					{
