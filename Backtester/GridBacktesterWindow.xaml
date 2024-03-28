@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="25"/>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" Grid.Row="0">
@@ -50,7 +51,8 @@
             <Button x:Name="FileOpenButton" Click="FileOpenButton_Click">Open</Button>
         </StackPanel>
 
-        <ProgressBar Grid.Row="1" x:Name="BacktestProgress" Margin="5 2" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
-        <Button Grid.Row="2" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
+        <TextBlock Grid.Row="1" x:Name="BacktestProgressText" Margin="5 2"  HorizontalAlignment="Center"/>
+        <ProgressBar Grid.Row="2" x:Name="BacktestProgress" Margin="5 2" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
+        <Button Grid.Row="3" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
     </Grid>
 </Window>

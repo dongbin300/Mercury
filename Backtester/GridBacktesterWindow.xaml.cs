@@ -8,7 +8,6 @@ using Mercury.Enums;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -75,6 +74,13 @@ namespace Backtester
 					BacktestProgress.Value = e.ProgressPercentage;
 				};
 				Common.ReportProgress = worker.ReportProgress;
+				Common.ReportProgressCount = (i, m) =>
+				{
+					DispatcherService.Invoke(() =>
+					{
+						BacktestProgressText.Text = $"{i} / {m}";
+					});
+				};
 				worker.RunWorkerAsync();
 			}
 			catch (Exception ex)
@@ -88,25 +94,25 @@ namespace Backtester
 			{
 				ChartLoader.Charts = [];
 
-				Common.ReportProgress(5);
-				ChartLoader.InitCharts(symbol, KlineInterval.OneWeek);
-				ChartLoader.InitCharts(symbol, KlineInterval.OneDay);
-				ChartLoader.InitCharts(symbol, KlineInterval.ThirtyMinutes);
+				var longInterval = KlineInterval.OneDay;
+				var shortInterval = KlineInterval.ThirtyMinutes;
 
-				Common.ReportProgress(15);
-				var oneWeekChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.OneWeek);
-				oneWeekChartPack.UseAtr();
-				var oneDayChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.OneDay);
-				oneDayChartPack.UseMacd();
-				var fiveMinuteChartPack = ChartLoader.GetChartPack(symbol, KlineInterval.ThirtyMinutes);
-				fiveMinuteChartPack.UseAtr();
+				Common.ReportProgress(10);
+				ChartLoader.InitCharts(symbol, longInterval);
+				ChartLoader.InitCharts(symbol, shortInterval);
 
-				Common.ReportProgress(30);
-				var aggregatedTrades = ChartLoader.GetAggregatedTrades(symbol, startDate, endDate);
+				Common.ReportProgress(25);
+				var longChartPack = ChartLoader.GetChartPack(symbol, longInterval);
+				longChartPack.UseEma(20);
+				var shortChartPack = ChartLoader.GetChartPack(symbol, shortInterval);
+				shortChartPack.UseAtr();
 
 				Common.ReportProgress(50);
-				var backtester = new GridDetailBacktester(symbol, aggregatedTrades, [.. oneWeekChartPack.Charts], [.. oneDayChartPack.Charts], [.. fiveMinuteChartPack.Charts], 1.0M, GridType.Neutral);
-				backtester.Run(Common.ReportProgress, reportFileName, 0);
+				var aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
+
+				Common.ReportProgress(100);
+				var backtester = new GridEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, GridTypeChange.ShortToNeutral, reportFileName);
+				backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
 			}
 			catch (Exception ex)
 			{

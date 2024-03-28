@@ -3,46 +3,37 @@
 using Mercury.Charts;
 using Mercury.Enums;
 
+using System.Diagnostics;
+
 namespace Mercury.Backtests
 {
 	/// <summary>
-	/// Grid Bot Backtester
+	/// Grid Bot EMA Backtester
 	/// </summary>
+	/// <param name="symbol"></param>
 	/// <param name="prices"></param>
 	/// <param name="longTermCharts"></param>
 	/// <param name="midTermCharts"></param>
 	/// <param name="shortTermCharts"></param>
-	/// <param name="interval"></param>
 	/// <param name="gridIntervalRatio"></param>
 	/// <param name="gridType"></param>
-	public class GridDetailBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> midTermCharts, List<ChartInfo> shortTermCharts, decimal gridIntervalRatio, GridType gridType)
+	public class GridEmaBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> shortTermCharts, GridType gridType, GridTypeChange gridTypeChange, string reportFileName)
 	{
+		public decimal Seed = 1_000_000;
 		public decimal Money = 1_000_000;
 		public decimal UpperPrice { get; set; }
 		public decimal LowerPrice { get; set; }
 		public decimal GridInterval { get; set; }
-		/// <summary>
-		/// 수량 공비
-		/// </summary>
-		public decimal GridIntervalRatio { get; set; } = gridIntervalRatio;
 		public GridType GridType { get; set; } = gridType;
+		public GridTypeChange GridTypeChange { get; set; } = gridTypeChange;
+		public string ReportFileName { get; set; } = reportFileName;
 		public decimal UpperStopLossPrice { get; set; }
 		public decimal LowerStopLossPrice { get; set; }
 		public decimal FeeRate = 0.0002M; // 0.02%
 
 		public string Symbol { get; set; } = symbol;
 		public List<Price> Prices { get; set; } = prices;
-		/// <summary>
-		/// For Grid Range
-		/// </summary>
 		public List<ChartInfo> LongTermCharts { get; set; } = longTermCharts;
-		/// <summary>
-		/// For MACD Cross
-		/// </summary>
-		public List<ChartInfo> MidTermCharts { get; set; } = midTermCharts;
-		/// <summary>
-		/// For Grid Interval
-		/// </summary>
 		public List<ChartInfo> ShortTermCharts { get; set; } = shortTermCharts;
 		public List<Order> LongOrders { get; set; } = [];
 		public List<Order> ShortOrders { get; set; } = [];
@@ -53,33 +44,21 @@ namespace Mercury.Backtests
 		public int ShortFillCount = 0;
 
 		/// <summary>
-		/// Long 포지션 표준 가격
+		/// 표준 주문 사이즈
 		/// </summary>
-		public decimal StandardLongPrice { get; set; }
-		/// <summary>
-		/// Long 포지션 표준 수량
-		/// </summary>
-		public decimal StandardLongQuantity { get; set; } = 1.0M;
-		/// <summary>
-		/// Short 포지션 표준 가격
-		/// </summary>
-		public decimal StandardShortPrice { get; set; }
-		/// <summary>
-		/// Short 포지션 표준 수량
-		/// </summary>
-		public decimal StandardShortQuantity { get; set; } = 1.0M;
+		public decimal StandardBaseOrderSize { get; set; }
 
 
 		void MakeOrder(PositionSide side, decimal price)
 		{
 			if (side == PositionSide.Long)
 			{
-				var quantity = StandardLongQuantity * (decimal)Math.Pow((double)GridIntervalRatio, (int)((StandardLongPrice - price) / GridInterval));
+				var quantity = StandardBaseOrderSize / price;
 				LongOrders.Add(new Order(Symbol, PositionSide.Long, price, quantity));
 			}
 			else
 			{
-				var quantity = StandardShortQuantity * (decimal)Math.Pow((double)GridIntervalRatio, (int)((price - StandardShortPrice) / GridInterval));
+				var quantity = StandardBaseOrderSize / price;
 				ShortOrders.Add(new Order(Symbol, PositionSide.Short, price, quantity));
 			}
 
@@ -126,18 +105,18 @@ namespace Mercury.Backtests
 			NearestShortOrder = ShortOrders.Find(x => x.Price.Equals(ShortOrders.Min(x => x.Price))) ?? default!;
 		}
 
-		public void Run(Action<int> reportProgress, Action<int, int> reportProgressCount, string reportFileName, int startIndex)
+		public void Run(Action<int> reportProgress, Action<int, int> reportProgressCount, int startIndex)
 		{
 			/* Init */
 			SetGrid(startIndex);
-			SetStandardPrice(startIndex);
+			SetStandardBaseOrderSize(startIndex);
 			SetOrder(startIndex);
 
 			decimal maxRisk = 0;
 			DateTime displayDate = Prices[startIndex].Date;
 			for (int i = startIndex; i < Prices.Count; i++)
 			{
-				reportProgress((int)(50 + (double)i / Prices.Count * 50));
+				reportProgress((int)((double)i / Prices.Count * 100));
 				reportProgressCount(i, Prices.Count);
 
 				var price = Prices[i];
@@ -146,8 +125,17 @@ namespace Mercury.Backtests
 				{ // Grid type changed
 					CloseAllPositions(i);
 					SetGrid(i);
-					SetStandardPrice(i);
+					SetStandardBaseOrderSize(i);
 					SetOrder(i);
+
+					var _estimatedMoney = Money + CoinQuantity * Prices[i].Value;
+					var risk = Math.Abs(_estimatedMoney - Money) / _estimatedMoney * 100;
+					if (risk > maxRisk)
+					{
+						maxRisk = risk;
+					}
+					File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
+					$"{Prices[i].Date:yyyy-MM-dd HH:mm:ss},{CoinQuantity.Round(2)},{GridType},{LongFillCount},{ShortFillCount},{risk.Round(2)}%,{_estimatedMoney.Round(2)}" + Environment.NewLine);
 				}
 
 				if (NearestLongOrder != null && NearestLongOrder.Price >= price.Value)
@@ -171,7 +159,7 @@ namespace Mercury.Backtests
 					{
 						maxRisk = risk;
 					}
-					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"),
+					File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
 					$"{Prices[i].Date:yyyy-MM-dd HH:mm:ss},{CoinQuantity.Round(2)},{GridType},{LongFillCount},{ShortFillCount},{risk.Round(2)}%,{_estimatedMoney.Round(2)}" + Environment.NewLine);
 				}
 			}
@@ -179,43 +167,45 @@ namespace Mercury.Backtests
 			var estimatedMoney = Money + CoinQuantity * Prices[^1].Value;
 			var period = (Prices[^1].Date - Prices[0].Date).Days;
 			var tradePerDay = (double)(LongFillCount + ShortFillCount) / period;
-			File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"),
+			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
 					$"{Symbol},{period}Days,{tradePerDay.Round(1)}/d,{maxRisk.Round(2)}%,{estimatedMoney.Round(2)}" + Environment.NewLine + Environment.NewLine);
 		}
 
 		public bool SetGridType(int chartIndex)
 		{
 			var price = Prices[chartIndex];
-			var midTermOrderByDescendingCharts = MidTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
-			var midTermCharts1 = midTermOrderByDescendingCharts.ElementAt(1);
-			var midTermCharts2 = midTermOrderByDescendingCharts.ElementAt(2);
+			var longTermEma = (decimal)LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
 
 			if (GridType == GridType.Long)
 			{
-				if (chartIndex > 0 && midTermCharts2.Macd > midTermCharts2.MacdSignal && midTermCharts1.Macd < midTermCharts1.MacdSignal)
+				if (price.Value <= longTermEma)
 				{
 					GridType = GridType.Neutral;
+					GridTypeChange = GridTypeChange.LongToNeutral;
 					return true;
 				}
 			}
 			else if (GridType == GridType.Short)
 			{
-				if (chartIndex > 0 && midTermCharts2.Macd < midTermCharts2.MacdSignal && midTermCharts1.Macd > midTermCharts1.MacdSignal)
+				if (price.Value >= longTermEma)
 				{
 					GridType = GridType.Neutral;
+					GridTypeChange = GridTypeChange.ShortToNeutral;
 					return true;
 				}
 			}
 			else if (GridType == GridType.Neutral)
 			{
-				if (price.Value > UpperStopLossPrice)
+				if (price.Value >= UpperStopLossPrice)
 				{
 					GridType = GridType.Long;
+					GridTypeChange = GridTypeChange.NeutralToLong;
 					return true;
 				}
-				else if (price.Value < LowerStopLossPrice)
+				else if (price.Value <= LowerStopLossPrice)
 				{
 					GridType = GridType.Short;
+					GridTypeChange = GridTypeChange.NeutralToShort;
 					return true;
 				}
 			}
@@ -231,33 +221,76 @@ namespace Mercury.Backtests
 		public void SetGrid(int chartIndex)
 		{
 			var price = Prices[chartIndex];
-			var longTermLastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
-			var shortTermLastAtr = (decimal)ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
+			var stopLossMargin = 0.2m; // 20%
 
-			UpperPrice = price.Value + longTermLastAtr;
-			LowerPrice = price.Value - longTermLastAtr;
-			UpperStopLossPrice = price.Value + longTermLastAtr * 1.1M;
-			LowerStopLossPrice = price.Value - longTermLastAtr * 1.1M;
-			GridInterval = shortTermLastAtr;
+			var longTermChartsOrderByDescending = LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
+			var longTermEma = (decimal)longTermChartsOrderByDescending.ElementAt(1).Ema1;
+			var longTermHighPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Max(x => x.Quote.High);
+			var longTermLowPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Min(x => x.Quote.Low);
+
+			var shortTermAverageAtr = (decimal)ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).Skip(1).Take(48).Average(x => x.Atr);
+
+			if (GridType == GridType.Long)
+			{
+				UpperPrice = decimal.MaxValue;
+				LowerPrice = longTermEma;
+				UpperStopLossPrice = decimal.MaxValue;
+				LowerStopLossPrice = decimal.MinValue;
+				GridInterval = shortTermAverageAtr;
+			}
+			else if (GridType == GridType.Short)
+			{
+				UpperPrice = longTermEma;
+				LowerPrice = decimal.MinValue;
+				UpperStopLossPrice = decimal.MaxValue;
+				LowerStopLossPrice = decimal.MinValue;
+				GridInterval = shortTermAverageAtr;
+			}
+			else if (GridTypeChange == GridTypeChange.LongToNeutral)
+			{
+				var diffFromEma = longTermHighPrice - longTermEma;
+				UpperPrice = longTermHighPrice;
+				LowerPrice = longTermEma - diffFromEma;
+				UpperStopLossPrice = UpperPrice + diffFromEma * stopLossMargin;
+				LowerStopLossPrice = LowerPrice - diffFromEma * stopLossMargin;
+				GridInterval = shortTermAverageAtr;
+			}
+			else if (GridTypeChange == GridTypeChange.ShortToNeutral)
+			{
+				var diffFromEma = longTermEma - longTermLowPrice;
+				UpperPrice = longTermEma + diffFromEma;
+				LowerPrice = longTermLowPrice;
+				UpperStopLossPrice = UpperPrice + diffFromEma * stopLossMargin;
+				LowerStopLossPrice = LowerPrice - diffFromEma * stopLossMargin;
+				GridInterval = shortTermAverageAtr;
+			}
+
+			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
+			$"{price.Date:yyyy-MM-dd HH:mm:ss},{GridTypeChange},Upper:{UpperPrice.Round(2)},Lower:{LowerPrice.Round(2)},UpperStopLoss:{UpperStopLossPrice.Round(2)},LowerStopLoss:{LowerStopLossPrice.Round(2)},GridInterval:{GridInterval.Round(2)}" + Environment.NewLine);
 		}
 
-		public void SetStandardPrice(int chartIndex)
+		public void SetStandardBaseOrderSize(int chartIndex)
 		{
 			var currentPrice = Prices[chartIndex].Value;
-			var lower = LowerPrice;
-			var upper = LowerPrice + GridInterval;
-
-			while (upper <= UpperPrice)
+			var upperPrice = GridType switch {
+				GridType.Long => currentPrice,
+				GridType.Short => UpperPrice,
+				GridType.Neutral => UpperPrice,
+				_ => UpperPrice
+			};
+			var lowerPrice = GridType switch
 			{
-				if (currentPrice >= lower && currentPrice <= upper)
-				{
-					StandardLongPrice = Math.Abs(currentPrice - lower) <= Math.Abs(currentPrice - upper) ? lower : upper - GridInterval;
-					StandardShortPrice = StandardLongPrice + GridInterval;
-					break;
-				}
-				lower = upper;
-				upper += GridInterval;
-			}
+				GridType.Long => LowerPrice,
+				GridType.Short => currentPrice,
+				GridType.Neutral => LowerPrice,
+				_ => LowerPrice
+			};
+			var gridCount = (int)((upperPrice - lowerPrice) / GridInterval) + 1;
+
+			StandardBaseOrderSize = Seed / gridCount; // Max risk 100%
+
+			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
+			$"{Prices[chartIndex].Date:yyyy-MM-dd HH:mm:ss},CurrentPrice:{currentPrice.Round(2)},GridCount:{gridCount},StandardBaseOrderSize:{StandardBaseOrderSize.Round(2)}" + Environment.NewLine);
 		}
 
 		public void SetOrder(int chartIndex)
@@ -281,14 +314,14 @@ namespace Mercury.Backtests
 			}
 			else if (GridType == GridType.Long)
 			{
-				for (decimal i = LowerPrice; i <= StandardLongPrice; i += GridInterval)
+				for (decimal i = LowerPrice; i <= currentPrice; i += GridInterval)
 				{
 					MakeOrder(PositionSide.Long, i);
 				}
 			}
 			else if (GridType == GridType.Short)
 			{
-				for (decimal i = StandardShortPrice; i <= UpperPrice; i += GridInterval)
+				for (decimal i = currentPrice; i <= UpperPrice; i += GridInterval)
 				{
 					MakeOrder(PositionSide.Short, i);
 				}

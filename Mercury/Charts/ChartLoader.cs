@@ -161,7 +161,7 @@ namespace Mercury.Charts
 			}
 		}
 
-		public static List<Price> GetAggregatedTrades(string symbol, DateTime? startDate = null, DateTime? endDate = null)
+		public static List<Price> GetAggregatedTrades(Action<int, int> reportProgressCount, string symbol, DateTime? startDate = null, DateTime? endDate = null)
 		{
 			try
 			{
@@ -171,17 +171,34 @@ namespace Mercury.Charts
 
 				if (startDate == null && endDate == null)
 				{
-					foreach (var file in files)
+					for (var i = 0; i < files.Count(); i++)
 					{
+						reportProgressCount(i, files.Count());
+
+						var file = files.ElementAt(i);
 						var data = File.ReadAllLines(file);
+						var prevPrice1 = 0m;
+						var prevPrice2 = 0m;
+						DateTime prevTime = default!;
 
 						foreach (var line in data)
 						{
 							var e = line.Split(',');
 							try
 							{
-								var price = new Price(e[5].ToLong().ToDateTime(), e[1].ToDecimal());
-								prices.Add(price);
+								var _price = e[1].ToDecimal();
+								var _time = e[5].ToLong().ToDateTime();
+								if (//(_time - prevTime).TotalMilliseconds > 500 && 
+									_price != prevPrice1 && 
+									_price != prevPrice2)
+								{
+									var price = new Price(_time, _price);
+									prices.Add(price);
+
+									prevPrice2 = prevPrice1;
+									prevPrice1 = _price;
+									prevTime = _time;
+								}
 							}
 							catch
 							{
@@ -193,20 +210,37 @@ namespace Mercury.Charts
 				{
 					var rangeFiles = files.Where(f => IsFileWithinDateRangeAggTrades(f, startDate, endDate));
 
-					foreach (var file in rangeFiles)
+					for (var i = 0; i < rangeFiles.Count(); i++)
 					{
+						reportProgressCount(i, rangeFiles.Count());
+
+						var file = rangeFiles.ElementAt(i);
 						using var reader = new StreamReader(file);
+						var prevPrice1 = 0m;
+						var prevPrice2 = 0m;
+						DateTime prevTime = default!;
+
 						string? line;
 						while ((line = reader.ReadLine()) != null)
 						{
 							var e = line.Split(',');
 							try
 							{
-								var date = e[5].ToLong().ToDateTime();
-								if ((startDate == null || date >= startDate) && (endDate == null || date <= endDate))
+								var _time = e[5].ToLong().ToDateTime();
+								if ((startDate == null || _time >= startDate) && (endDate == null || _time <= endDate))
 								{
-									var price = new Price(date, e[1].ToDecimal());
-									prices.Add(price);
+									var _price = e[1].ToDecimal();
+									if (//(_time - prevTime).TotalMilliseconds > 500 && 
+										_price != prevPrice1 && 
+										_price != prevPrice2)
+									{
+										var price = new Price(_time, _price);
+										prices.Add(price);
+
+										prevPrice2 = prevPrice1;
+										prevPrice1 = _price;
+										prevTime = _time;
+									}
 								}
 							}
 							catch
