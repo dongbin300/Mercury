@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
-        Title="Mariner X Chart Viewer" Height="300" Width="850" Background="{StaticResource Background}"
+        Title="Mariner X Chart Viewer" Height="400" Width="850" Background="{StaticResource Background}"
         MouseMove="Window_MouseMove">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -48,8 +48,8 @@
                         <ComboBoxItem>15m</ComboBoxItem>
                         <ComboBoxItem>30m</ComboBoxItem>
                         <ComboBoxItem>1h</ComboBoxItem>
-                        <ComboBoxItem>1d</ComboBoxItem>
-                        <ComboBoxItem>1w</ComboBoxItem>
+                        <ComboBoxItem>1D</ComboBoxItem>
+                        <ComboBoxItem>1W</ComboBoxItem>
                         <ComboBoxItem>1M</ComboBoxItem>
                     </ComboBox>
                 </StackPanel>
@@ -111,6 +111,10 @@
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="CustomCheckBox">Custom</CheckBox>
                     <TextBox x:Name="CustomPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="TrendLineCheckBox">Trend Line</CheckBox>
+                    <TextBox x:Name="TrendLinePeriodText">14</TextBox>
                 </StackPanel>
             </StackPanel>
         </Grid>

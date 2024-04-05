@@ -283,6 +283,8 @@ namespace MarinerX
 			menuStrip.Items.Add(new ToolStripSeparator());
 
 			var menu7 = new ToolStripMenuItem("테스트");
+			menu7.DropDownItems.Add(new ToolStripMenuItem("바이낸스 API 통신 테스트", null, BinanceApiCommTestEvent));
+			menu7.DropDownItems.Add(new ToolStripSeparator());
 			menu7.DropDownItems.Add(new ToolStripMenuItem("RI Histogram", null, RiHistogramEvent));
 			menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask", null, RunBackTestFlaskEvent));
 			menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask Multi", null, RunBackTestFlaskMultiEvent));
@@ -1051,6 +1053,19 @@ namespace MarinerX
 		#endregion
 
 		#region 테스트
+		private void BinanceApiCommTestEvent(object? sender, EventArgs e)
+		{
+			try
+			{
+				var result = BinanceRestApi.Test();
+				MessageBox.Show(result.ServerTime + result.TimeZone);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
 		private void RiHistogramEvent(object? sender, EventArgs e)
 		{
 			try
@@ -1544,19 +1559,20 @@ namespace MarinerX
 		{
 			try
 			{
-				var startTime = new DateTime(2023, 1, 28);
+				var symbol = "XRPUSDT";
+				var startTime = new DateTime(2022, 7, 1);
 				var currentTime = startTime;
 				var endTime = new DateTime(2023, 12, 31);
 				using var client = new HttpClient();
 
 				while (currentTime <= endTime)
 				{
-					var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/BTCUSDT/BTCUSDT-aggTrades-{currentTime:yyyy-MM-dd}.zip";
+					var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/{symbol}/{symbol}-aggTrades-{currentTime:yyyy-MM-dd}.zip";
 					var response = client.GetAsync(url).Result;
 					if (response.IsSuccessStatusCode)
 					{
 						using Stream responseStream = response.Content.ReadAsStreamAsync().Result;
-						using FileStream fileStream = File.Create(PathUtil.BinanceFuturesData.Down("trade", "BTCUSDT", $"{currentTime:yyyy-MM-dd}.zip"));
+						using FileStream fileStream = File.Create(PathUtil.BinanceFuturesData.Down("trade", symbol, $"{currentTime:yyyy-MM-dd}.zip"));
 						responseStream.CopyTo(fileStream);
 					}
 					currentTime = currentTime.AddDays(1);

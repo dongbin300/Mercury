@@ -1,11 +1,11 @@
-﻿using Backtester.Models;
-using Backtester.Views;
+﻿using Backtester.Views;
 
 using Binance.Net.Enums;
 
 using Mercury;
 using Mercury.Backtests;
 using Mercury.Charts;
+using Mercury.Charts.Technicals;
 using Mercury.Cryptos;
 using Mercury.Maths;
 

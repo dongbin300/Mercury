@@ -95,7 +95,8 @@ namespace Backtester
 				ChartLoader.Charts = [];
 
 				var longInterval = KlineInterval.OneDay;
-				var shortInterval = KlineInterval.ThirtyMinutes;
+				var shortInterval = KlineInterval.FifteenMinutes;
+				var emaPeriod = 20;
 
 				Common.ReportProgress(10);
 				ChartLoader.InitCharts(symbol, longInterval);
@@ -103,7 +104,7 @@ namespace Backtester
 
 				Common.ReportProgress(25);
 				var longChartPack = ChartLoader.GetChartPack(symbol, longInterval);
-				longChartPack.UseEma(20);
+				longChartPack.UseEma(emaPeriod);
 				var shortChartPack = ChartLoader.GetChartPack(symbol, shortInterval);
 				shortChartPack.UseAtr();
 
@@ -113,6 +114,7 @@ namespace Backtester
 				Common.ReportProgress(100);
 				var backtester = new GridEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, GridTypeChange.ShortToNeutral, reportFileName);
 				backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
+				//backtester.RunManual(Common.ReportProgress, Common.ReportProgressCount, 0, 25200.0m, 17184.39m, 26001.56m, 16382.83m, 67.75m);
 			}
 			catch (Exception ex)
 			{

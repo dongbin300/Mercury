@@ -188,7 +188,7 @@ namespace Mercury.Charts
 							{
 								var _price = e[1].ToDecimal();
 								var _time = e[5].ToLong().ToDateTime();
-								if (//(_time - prevTime).TotalMilliseconds > 500 && 
+								if ((_time - prevTime).TotalMilliseconds > 10 && 
 									_price != prevPrice1 && 
 									_price != prevPrice2)
 								{
@@ -230,7 +230,7 @@ namespace Mercury.Charts
 								if ((startDate == null || _time >= startDate) && (endDate == null || _time <= endDate))
 								{
 									var _price = e[1].ToDecimal();
-									if (//(_time - prevTime).TotalMilliseconds > 500 && 
+									if ((_time - prevTime).TotalMilliseconds > 10 && 
 										_price != prevPrice1 && 
 										_price != prevPrice2)
 									{

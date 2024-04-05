@@ -43,6 +43,16 @@ namespace MarinerX.Apis
         }
         #endregion
 
+        #region Test
+        public static BinanceExchangeInfo Test()
+        {
+            var exchangeInfo = binanceClient.SpotApi.ExchangeData.GetExchangeInfoAsync();
+            exchangeInfo.Wait();
+
+            return exchangeInfo.Result.Data;
+        }
+        #endregion
+
         #region Market API
         /// <summary>
         /// 선물 심볼이름만 가져오기
