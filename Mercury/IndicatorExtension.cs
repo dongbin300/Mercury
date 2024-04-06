@@ -395,5 +395,24 @@ namespace Mercury
 
 			return result;
 		}
-    }
+
+		public static IEnumerable<TrendRiderResult> GetTrendRider(this IEnumerable<Quote> quotes, int atrPeriod = 10, double atrMultiplier = 3.0, int rsiPeriod = 14, int macdFastPeriod = 12, int macdSlowPeriod = 26, int macdSignalPeriod = 9)
+		{
+			var result = new List<TrendRiderResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			(var trend, var supertrend, var supertrendDirection) = ArrayCalculator.TrendRider(high, low, close, atrPeriod, atrMultiplier, rsiPeriod, macdFastPeriod, macdSlowPeriod, macdSignalPeriod);
+
+			for (int i = 0; i < trend.Length; i++)
+			{
+				var st = i >= atrPeriod - 1 ? -supertrendDirection[i] * supertrend[i] : 0;
+				var trendRider = new TrendRiderResult(quotes.ElementAt(i).Date, -trend[i], st);
+				result.Add(trendRider);
+			}
+
+			return result;
+		}
+	}
 }

@@ -76,6 +76,7 @@ namespace ChartViewer
 			SymbolTextBox.Text = Settings.Default.Symbol;
 			DateTextBox.Text = Settings.Default.Date;
 			CandleCountTextBox.Text = Settings.Default.CandleCount;
+			IntervalComboBox.SelectedIndex = Settings.Default.Interval;
 			CandleCountTextBox.Focus();
 			Ema1CheckBox.IsChecked = true;
 			Ema2CheckBox.IsChecked = true;
@@ -83,6 +84,7 @@ namespace ChartViewer
 			Supertrend1CheckBox.IsChecked = false;
 			RSupertrend1CheckBox.IsChecked = false;
 			TrendLineCheckBox.IsChecked = true;
+			TrendRiderCheckBox.IsChecked = true;
 		}
 
 		private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -118,6 +120,7 @@ namespace ChartViewer
 				Settings.Default.Symbol = SymbolTextBox.Text;
 				Settings.Default.Date = DateTextBox.Text;
 				Settings.Default.CandleCount = CandleCountTextBox.Text;
+				Settings.Default.Interval = IntervalComboBox.SelectedIndex;
 				Settings.Default.Save();
 				LoadChart();
 			}
@@ -205,6 +208,15 @@ namespace ChartViewer
 				}
 
 				FillTrendLineValue();
+			}
+			if (TrendRiderCheckBox.IsChecked ?? true)
+			{
+				var trendRider = quotes.GetTrendRider();
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].TrendRiderTrend = trendRider.ElementAt(i).Trend;
+					Charts[i].TrendRiderSupertrend = trendRider.ElementAt(i).Supertrend == 0 ? -39909 : trendRider.ElementAt(i).Supertrend;
+				}
 			}
 
 			CandleChart.InvalidateVisual();
@@ -352,6 +364,11 @@ namespace ChartViewer
 			{
 				// 아직은 필요없음
 			}
+			if (TrendRiderCheckBox.IsChecked ?? true)
+			{
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.TrendRiderSupertrend != -39909).Max(x => Math.Abs(x.TrendRiderSupertrend)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.TrendRiderSupertrend != -39909).Min(x => Math.Abs(x.TrendRiderSupertrend)));
+			}
 
 			// Draw Quote and Indicator
 			for (int i = 0; i < Charts.Count; i++)
@@ -421,6 +438,21 @@ namespace ChartViewer
 				{
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].TrendLineUpper : Charts[i - 1].TrendLineUpper, Charts[i].TrendLineUpper, yMax, yMin, new SKColor(41, 98, 255), 2);
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].TrendLineLower : Charts[i - 1].TrendLineLower, Charts[i].TrendLineLower, yMax, yMin, new SKColor(41, 98, 255), 2);
+				}
+				if (TrendRiderCheckBox.IsChecked ?? true)
+				{
+					if (Charts[i].TrendRiderTrend != 0)
+					{
+						canvas.DrawRect(
+						LiveActualItemFullWidth * i,
+						0,
+						LiveActualItemFullWidth,
+						(float)CandleChart.ActualHeight,
+						Charts[i].TrendRiderTrend == 1 ? CandleBuyPointerPaint : CandleSellPointerPaint
+						);
+					}
+
+					DrawSupertrend(canvas, i, i == 0 ? Charts[i].TrendRiderSupertrend : Charts[i - 1].TrendRiderSupertrend, Charts[i].TrendRiderSupertrend, yMax, yMin, Charts[i].TrendRiderSupertrend > 0 ? LongColor : ShortColor);
 				}
 			}
 

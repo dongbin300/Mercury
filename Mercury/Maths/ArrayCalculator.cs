@@ -802,7 +802,7 @@
 					continue;
 				}
 
-				if(i == period - 1)
+				if (i == period - 1)
 				{
 					double sumOpen = 0;
 					double sumHigh = 0;
@@ -830,6 +830,54 @@
 				player[i] = alpha * close[i] + (1 - alpha) * player[i - 1];
 			}
 			return (upper, lower, pioneer, player);
+		}
+
+		public static (double[], double[], double[]) TrendRider(double[] high, double[] low, double[] close, int atrPeriod, double atrMultiplier, int rsiPeriod, int macdFastPeriod, int macdSlowPeriod, int macdSignalPeriod)
+		{
+			var up = new double[high.Length];
+			var dn = new double[high.Length];
+			var di = new double[high.Length];
+			var trend = new double[high.Length];
+			var supertrend = new double[high.Length];
+			var supertrendDirection = new double[high.Length];
+
+			var atr = Atr(high, low, close, atrPeriod);
+			var rsi = Rsi(close, rsiPeriod);
+			var macd = Macd(close, macdFastPeriod, macdSlowPeriod, macdSignalPeriod).Item1;
+
+			for (int i = 0; i < high.Length; i++)
+			{
+				if (i < 1)
+				{
+					up[i] = NA;
+					dn[i] = NA;
+					di[i] = NA;
+					trend[i] = NA;
+					supertrend[i] = NA;
+					supertrendDirection[i] = NA;
+					continue;
+				}
+
+				double mid = (high[i] + low[i]) / 2;
+				up[i] = mid + atrMultiplier * atr[i];
+				dn[i] = mid - atrMultiplier * atr[i];
+				di[i] = (close[i] > up[i - 1]) ? 1 : (close[i] < dn[i - 1]) ? -1 : di[i - 1];
+
+				if (di[i] > 0) // up trend
+				{
+					trend[i] = (rsi[i] > 50 && macd[i] > 0) ? -1 : 0;
+					supertrend[i] = dn[i] = Math.Max(dn[i], dn[i - 1]);
+					supertrendDirection[i] = -1;
+				}
+				else if (di[i] < 0) // down trend
+				{
+					trend[i] = (rsi[i] < 50 && macd[i] < 0) ? 1 : 0;
+					supertrend[i] = up[i] = Math.Min(up[i], up[i - 1]);
+					supertrendDirection[i] = 1;
+				}
+			}
+
+			return (trend, supertrend, supertrendDirection);
 		}
 	}
 }

@@ -53,8 +53,10 @@ namespace Mercury.Charts
         public double CustomPioneer { get; set; }
         public double CustomPlayer { get; set; }
 
-        public double TrendLineUpper { get; set; }
-        public double TrendLineLower { get; set; }
+		public double TrendLineUpper { get; set; }
+		public double TrendLineLower { get; set; }
+		public double TrendRiderTrend { get; set; }
+		public double TrendRiderSupertrend { get; set; }
 
 		public override string ToString() => $"{Symbol} | {DateTime} | {Quote.Open} | {Quote.High} | {Quote.Low} | {Quote.Close} | {Quote.Volume}";
 	}

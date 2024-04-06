@@ -116,6 +116,10 @@
                     <CheckBox x:Name="TrendLineCheckBox">Trend Line</CheckBox>
                     <TextBox x:Name="TrendLinePeriodText">14</TextBox>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="TrendRiderCheckBox">Trend Rider</CheckBox>
+                    <!--<TextBox x:Name="TrendRiderPeriodText">14</TextBox>-->
+                </StackPanel>
             </StackPanel>
         </Grid>
     </Grid>
