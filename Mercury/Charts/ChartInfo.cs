@@ -1,5 +1,6 @@
 ﻿using Binance.Net.Enums;
 
+using Mercury.Enums;
 using Mercury.Maths;
 
 namespace Mercury.Charts
@@ -10,6 +11,7 @@ namespace Mercury.Charts
 		public DateTime DateTime => Quote.Date;
 		public Quote Quote { get; set; } = quote;
         public decimal BodyLength(PositionSide side) => Math.Abs(Calculator.Roe(side, Quote.Open, Quote.Close));
+        public CandlestickType CandlestickType => Quote.Open < Quote.Close ? CandlestickType.Bullish : Quote.Open > Quote.Close ? CandlestickType.Bearish : CandlestickType.Doji;
 
 		public double Sma1 { get; set; }
         public double Sma2 { get; set; }

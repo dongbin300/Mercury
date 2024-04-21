@@ -30,7 +30,7 @@
                 <ComboBoxItem>5m</ComboBoxItem>
                 <ComboBoxItem>15m</ComboBoxItem>
                 <ComboBoxItem>30m</ComboBoxItem>
-                <ComboBoxItem>1H</ComboBoxItem>
+                <ComboBoxItem>1h</ComboBoxItem>
                 <ComboBoxItem>1D</ComboBoxItem>
             </ComboBox>
             <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
@@ -39,6 +39,11 @@
                 <ComboBoxItem>MACD4.1.14.2</ComboBoxItem>
                 <ComboBoxItem>Triple_RSI</ComboBoxItem>
                 <ComboBoxItem>GoldBB</ComboBoxItem>
+                <ComboBoxItem>UpCandle2</ComboBoxItem>
+                <ComboBoxItem>DownCandle2</ComboBoxItem>
+                <ComboBoxItem>UpCandle3</ComboBoxItem>
+                <ComboBoxItem>DownCandle3</ComboBoxItem>
+                <ComboBoxItem>CandleSma</ComboBoxItem>
             </ComboBox>
             <TextBlock Style="{StaticResource Description}">Backtest Type</TextBlock>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

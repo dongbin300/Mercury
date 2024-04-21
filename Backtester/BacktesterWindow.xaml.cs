@@ -40,6 +40,7 @@ namespace Backtester
 			EndDateTextBox.Text = Settings.Default.EndDate;
 			FileNameTextBox.Text = Settings.Default.FileName;
 			StrategyComboBox.SelectedIndex = Settings.Default.StrategyIndex;
+			IntervalComboBox.SelectedIndex = Settings.Default.IntervalIndex;
 		}
 
 		private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -67,6 +68,7 @@ namespace Backtester
 				Settings.Default.EndDate = EndDateTextBox.Text;
 				Settings.Default.FileName = FileNameTextBox.Text;
 				Settings.Default.StrategyIndex = StrategyComboBox.SelectedIndex;
+				Settings.Default.IntervalIndex = IntervalComboBox.SelectedIndex;
 				Settings.Default.Save();
 
 				symbols = SymbolTextBox.Text.Split(';');
@@ -110,7 +112,7 @@ namespace Backtester
 					var backtester = new EasyBacktester(strategyId, [.. symbols], interval);
 					backtester.SetMaxActiveDeals(MaxActiveDealsType.Total, 10);
 					backtester.InitIndicators();
-					backtester.Run(backtestType, Common.ReportProgress, reportFileName, 288, 240);
+					backtester.Run(backtestType, Common.ReportProgress, reportFileName, 24, 240);
 				}
 				else if (backtestType == BacktestType.BySymbol)
 				{

@@ -12,8 +12,8 @@ namespace Mercury.Backtests
 		public int Lose { get; set; } = 0;
 		public decimal WinRate => Win + Lose == 0 ? 0 : (decimal)Win / (Win + Lose) * 100;
 		public decimal Money = 10000;
-		public decimal BaseOrderSize = 1000;
-		public decimal FeeSize = 1.0m;
+		public decimal BaseOrderSize = 10000; //1000;
+		public decimal FeeSize = 0; // 1.0m;
 		public decimal EstimatedMoney => Money
 			+ Positions.Where(x => x.Side.Equals(PositionSide.Long)).Sum(x => x.EntryPrice * x.Quantity)
 			- Positions.Where(x => x.Side.Equals(PositionSide.Short)).Sum(x => x.EntryPrice * x.Quantity);
@@ -66,6 +66,19 @@ namespace Mercury.Backtests
 						chartPack.UseSma(10);
 						chartPack.UseEma(10);
 						break;
+
+					case "upcandle2":
+					case "upcandle3":
+					case "downcandle2":
+					case "downcandle3":
+						break;
+
+					case "candlesma":
+						chartPack.UseSma(20, 60);
+						break;
+
+					default:
+						break;
 				}
 				Charts.Add(symbol, [.. chartPack.Charts]);
 			}
@@ -105,6 +118,7 @@ namespace Mercury.Backtests
 					var c0 = charts[i];
 					var c1 = charts[i - 1];
 					var c2 = charts[i - 2];
+					var c3 = charts[i - 3];
 					currentTime = c0.DateTime;
 					var c1LongBodyLength = c1.BodyLength(PositionSide.Long);
 					var minPrice = GetMinPrice(charts, 14, i);
@@ -163,10 +177,37 @@ namespace Mercury.Backtests
 									break;
 
 								case "goldbb":
-									if(c1.Quote.Close > (decimal)c1.Bb1Upper)
+									if (c1.Quote.Close > (decimal)c1.Bb1Upper)
 									{
 										EntryPosition(PositionSide.Long, c0, c0.Quote.Open);
 									}
+									break;
+
+								case "upcandle2":
+									if (c1.CandlestickType == CandlestickType.Bullish && c2.CandlestickType == CandlestickType.Bullish)
+									{
+										EntryPosition(PositionSide.Long, c0, c0.Quote.Open);
+									}
+									break;
+
+								case "downcandle3":
+									if (c1.CandlestickType == CandlestickType.Bearish && c2.CandlestickType == CandlestickType.Bearish && c3.CandlestickType == CandlestickType.Bearish)
+									{
+										EntryPosition(PositionSide.Long, c0, c0.Quote.Open);
+									}
+									break;
+
+								case "candlesma":
+									if (!(c1.Quote.Close < (decimal)c1.Ema1 && c1.Ema1 < c1.Ema2)) // 위에서부터 60이평, 20이평, 가격 순이면 매수하지 않음
+									{
+										if (c1.CandlestickType == CandlestickType.Bearish && c2.CandlestickType == CandlestickType.Bearish && c3.CandlestickType == CandlestickType.Bearish)
+										{
+											EntryPosition(PositionSide.Long, c0, c0.Quote.Open);
+										}
+									}
+									break;
+
+								default:
 									break;
 							}
 						}
@@ -222,6 +263,21 @@ namespace Mercury.Backtests
 								{
 									ExitPosition(longPosition, c0, c0.Quote.Open);
 								}
+								break;
+
+							case "upcandle2":
+								ExitPosition(longPosition, c1, c1.Quote.Close);
+								break;
+
+							case "downcandle3":
+								ExitPosition(longPosition, c1, c1.Quote.Close);
+								break;
+
+							case "candlesma":
+								ExitPosition(longPosition, c1, c1.Quote.Close);
+								break;
+
+							default:
 								break;
 						}
 					}
@@ -289,6 +345,33 @@ namespace Mercury.Backtests
 										EntryPosition(PositionSide.Short, c0, c0.Quote.Open);
 									}
 									break;
+
+								case "upcandle3":
+									if (c1.CandlestickType == CandlestickType.Bullish && c2.CandlestickType == CandlestickType.Bullish && c3.CandlestickType == CandlestickType.Bullish)
+									{
+										EntryPosition(PositionSide.Short, c0, c0.Quote.Open);
+									}
+									break;
+
+								case "downcandle2":
+									if (c1.CandlestickType == CandlestickType.Bearish && c2.CandlestickType == CandlestickType.Bearish)
+									{
+										EntryPosition(PositionSide.Short, c0, c0.Quote.Open);
+									}
+									break;
+
+								case "candlesma":
+									if (!(c1.Quote.Close > (decimal)c1.Ema1 && c1.Ema1 > c1.Ema2)) // 위에서부터 가격, 20이평, 60이평 순이면 매도하지 않음
+									{
+										if (c1.CandlestickType == CandlestickType.Bullish && c2.CandlestickType == CandlestickType.Bullish && c3.CandlestickType == CandlestickType.Bullish)
+										{
+											EntryPosition(PositionSide.Short, c0, c0.Quote.Open);
+										}
+									}
+									break;
+
+								default:
+									break;
 							}
 						}
 					}
@@ -345,6 +428,21 @@ namespace Mercury.Backtests
 									ExitPosition(shortPosition, c0, c0.Quote.Open);
 								}
 								break;
+
+							case "upcandle3":
+								ExitPosition(shortPosition, c1, c1.Quote.Close);
+								break;
+
+							case "downcandle2":
+								ExitPosition(shortPosition, c1, c1.Quote.Close);
+								break;
+
+							case "candlesma":
+								ExitPosition(shortPosition, c1, c1.Quote.Close);
+								break;
+
+							default:
+								break;
 						}
 					}
 				}
@@ -363,11 +461,11 @@ namespace Mercury.Backtests
 			{
 				foreach (var h in PositionHistories)
 				{
-					File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"),
+					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_positionhistory.csv"),
 						$"{h.EntryTime:yyyy-MM-dd HH:mm:ss},{h.Symbol},{h.Side},{h.Time:yyyy-MM-dd HH:mm:ss},{h.Result},{Math.Round(h.Income, 4)}" + Environment.NewLine
 						);
 				}
-				File.AppendAllText(MercuryPath.Desktop.Down($"positionhistory.csv"), Environment.NewLine + Environment.NewLine);
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_positionhistory.csv"), Environment.NewLine + Environment.NewLine);
 			}
 		}
 
@@ -548,11 +646,12 @@ namespace Mercury.Backtests
 			var price = position.StopLossPrice;
 			var quantity = position.Quantity;
 			Money += position.Side == PositionSide.Long ? price * quantity : -price * quantity;
+			position.ExitAmount = price * quantity;
 			Positions.Remove(position);
 			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, PositionResult.Lose)
 			{
 				EntryAmount = position.EntryAmount,
-				ExitAmount = price * quantity
+				ExitAmount = position.ExitAmount
 			});
 			Lose++;
 			Money -= FeeSize;
@@ -602,11 +701,12 @@ namespace Mercury.Backtests
 			var price = position.TakeProfitPrice;
 			var quantity = position.Quantity;
 			Money += position.Side == PositionSide.Long ? price * quantity : -price * quantity;
+			position.ExitAmount = price * quantity;
 			Positions.Remove(position);
 			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, PositionResult.Win)
 			{
 				EntryAmount = position.EntryAmount,
-				ExitAmount = price * quantity
+				ExitAmount = position.ExitAmount
 			});
 			Win++;
 			Money -= FeeSize;
@@ -622,12 +722,13 @@ namespace Mercury.Backtests
 		{
 			var quantity = position.Quantity;
 			Money += position.Side == PositionSide.Long ? exitPrice * quantity : -exitPrice * quantity;
+			position.ExitAmount = exitPrice * quantity;
 			var result = position.Income > 0 ? PositionResult.Win : PositionResult.Lose;
 			Positions.Remove(position);
 			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, result)
 			{
 				EntryAmount = position.EntryAmount,
-				ExitAmount = exitPrice * quantity
+				ExitAmount = position.ExitAmount
 			});
 			switch (result)
 			{

@@ -50,6 +50,7 @@ namespace Mercury.Backtests
 		public decimal StandardBaseOrderSize { get; set; }
 
 		public readonly int ATR_COUNT = 24;
+		public readonly int GRID_COUNT = 50;
 		public readonly decimal STOP_LOSS_MARGIN = 0.2m;
 		public readonly int BASE_ORDER_SIZE_DIVISION = 1; // T: 2, F: 1
 
@@ -427,7 +428,7 @@ namespace Mercury.Backtests
 				LowerPrice = longTermEma;
 				UpperStopLossPrice = decimal.MaxValue;
 				LowerStopLossPrice = decimal.MinValue;
-				GridInterval = shortTermAverageAtr;
+				GridInterval = (price.Value - LowerPrice) / GRID_COUNT;
 			}
 			else if (GridType == GridType.Short)
 			{
@@ -435,7 +436,7 @@ namespace Mercury.Backtests
 				LowerPrice = decimal.MinValue;
 				UpperStopLossPrice = decimal.MaxValue;
 				LowerStopLossPrice = decimal.MinValue;
-				GridInterval = shortTermAverageAtr;
+				GridInterval = (UpperPrice - price.Value) / GRID_COUNT;
 			}
 			else if (GridTypeChange == GridTypeChange.LongToNeutral)
 			{
@@ -444,7 +445,7 @@ namespace Mercury.Backtests
 				LowerPrice = longTermEma - diffFromEma;
 				UpperStopLossPrice = UpperPrice + diffFromEma * STOP_LOSS_MARGIN;
 				LowerStopLossPrice = LowerPrice - diffFromEma * STOP_LOSS_MARGIN;
-				GridInterval = shortTermAverageAtr;
+				GridInterval = (UpperPrice - LowerPrice) / GRID_COUNT / 2;
 			}
 			else if (GridTypeChange == GridTypeChange.ShortToNeutral)
 			{
@@ -453,7 +454,7 @@ namespace Mercury.Backtests
 				LowerPrice = longTermLowPrice;
 				UpperStopLossPrice = UpperPrice + diffFromEma * STOP_LOSS_MARGIN;
 				LowerStopLossPrice = LowerPrice - diffFromEma * STOP_LOSS_MARGIN;
-				GridInterval = shortTermAverageAtr;
+				GridInterval = (UpperPrice - LowerPrice) / GRID_COUNT / 2;
 			}
 
 			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),

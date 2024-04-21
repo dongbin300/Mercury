@@ -19,11 +19,12 @@ namespace Lab
 		{
 			InitializeComponent();
 
-			ChartLoader.InitCharts("BTCUSDT", Binance.Net.Enums.KlineInterval.OneMonth);
-			var chartPack = ChartLoader.GetChartPack("BTCUSDT", Binance.Net.Enums.KlineInterval.OneMonth);
-			chartPack.UseAtr();
+			ChartLoader.InitCharts("BTCUSDT", Binance.Net.Enums.KlineInterval.OneDay);
+			var chartPack = ChartLoader.GetChartPack("BTCUSDT", Binance.Net.Enums.KlineInterval.OneDay);
+			chartPack.UseEma(20);
 
-			var atr = chartPack.Charts.Select(x => x.Atr);
+			var ema = chartPack.Charts.Select(x => x.Ema1);
+			var close = chartPack.Charts.Select(x => x.Quote.Close);
 		}
 	}
 }

@@ -139,6 +139,30 @@ namespace ChartViewer
 
 			// Calculate Indicators
 			var quotes = Charts.Select(x => x.Quote);
+			if (Ma1CheckBox.IsChecked ?? true)
+			{
+				var ma = quotes.GetSma(Ma1Text.Text.ToInt()).Select(x => x.Sma);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Sma1 = ma.ElementAt(i) == 0 ? -39909 : ma.ElementAt(i);
+				}
+			}
+			if (Ma2CheckBox.IsChecked ?? true)
+			{
+				var ma = quotes.GetSma(Ma2Text.Text.ToInt()).Select(x => x.Sma);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Sma2 = ma.ElementAt(i) == 0 ? -39909 : ma.ElementAt(i);
+				}
+			}
+			if (Ma3CheckBox.IsChecked ?? true)
+			{
+				var ma = quotes.GetSma(Ma3Text.Text.ToInt()).Select(x => x.Sma);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Sma3 = ma.ElementAt(i) == 0 ? -39909 : ma.ElementAt(i);
+				}
+			}
 			if (Ema1CheckBox.IsChecked ?? true)
 			{
 				var ema = quotes.GetEma(Ema1Text.Text.ToInt()).Select(x => x.Ema);
@@ -407,6 +431,18 @@ namespace ChartViewer
 					);
 				#endregion
 
+				if (Ma1CheckBox.IsChecked ?? true)
+				{
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Sma1 : Charts[i - 1].Sma1, Charts[i].Sma1, yMax, yMin, new SKColor(128, 128, 128));
+				}
+				if (Ma2CheckBox.IsChecked ?? true)
+				{
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Sma2 : Charts[i - 1].Sma2, Charts[i].Sma2, yMax, yMin, new SKColor(128, 128, 160));
+				}
+				if (Ma3CheckBox.IsChecked ?? true)
+				{
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Sma3 : Charts[i - 1].Sma3, Charts[i].Sma3, yMax, yMin, new SKColor(128, 128, 192));
+				}
 				if (Ema1CheckBox.IsChecked ?? true)
 				{
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].Ema1 : Charts[i - 1].Ema1, Charts[i].Ema1, yMax, yMin, new SKColor(128, 128, 128));

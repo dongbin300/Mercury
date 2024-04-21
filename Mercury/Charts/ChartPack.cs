@@ -176,21 +176,53 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseSma(int period)
+		public void UseSma(int period1, int? period2 = null, int? period3 = null)
 		{
-			var sma = Charts.Select(x => x.Quote).GetSma(period).Select(x => x.Sma);
+			var sma = Charts.Select(x => x.Quote).GetSma(period1).Select(x => x.Sma);
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].Sma1 = sma.ElementAt(i);
 			}
+			if (period2 != null)
+			{
+				var sma2 = Charts.Select(x => x.Quote).GetSma(period2.Value).Select(x => x.Sma);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Sma2 = sma2.ElementAt(i);
+				}
+			}
+			if (period3 != null)
+			{
+				var sma3 = Charts.Select(x => x.Quote).GetSma(period3.Value).Select(x => x.Sma);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Sma3 = sma3.ElementAt(i);
+				}
+			}
 		}
 
-		public void UseEma(int period)
+		public void UseEma(int period1, int? period2 = null, int? period3 = null)
 		{
-			var ema = Charts.Select(x => x.Quote).GetEma(period).Select(x => x.Ema);
+			var ema = Charts.Select(x => x.Quote).GetEma(period1).Select(x => x.Ema);
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].Ema1 = ema.ElementAt(i);
+			}
+			if (period2 != null)
+			{
+				var ema2 = Charts.Select(x => x.Quote).GetEma(period2.Value).Select(x => x.Ema);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Ema2 = ema2.ElementAt(i);
+				}
+			}
+			if (period3 != null)
+			{
+				var ema3 = Charts.Select(x => x.Quote).GetEma(period3.Value).Select(x => x.Ema);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Ema3 = ema3.ElementAt(i);
+				}
 			}
 		}
 
@@ -262,6 +294,18 @@ namespace Mercury.Charts
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].Atr = atr.ElementAt(i);
+			}
+		}
+
+		public void UseTrendRider(int atrPeriod = 10, double atrMultiplier = 3.0, int rsiPeriod = 14, int macdFastPeriod = 12, int macdSlowPeriod = 26, int macdSignalPeriod = 9)
+		{
+			var trendRider = Charts.Select(x => x.Quote).GetTrendRider(atrPeriod, atrMultiplier, rsiPeriod, macdFastPeriod, macdSlowPeriod, macdSignalPeriod);
+			var trend = trendRider.Select(x => x.Trend);
+			var supertrend = trendRider.Select(x => x.Supertrend);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].TrendRiderTrend = trend.ElementAt(i);
+				Charts[i].TrendRiderSupertrend = supertrend.ElementAt(i);
 			}
 		}
 	}

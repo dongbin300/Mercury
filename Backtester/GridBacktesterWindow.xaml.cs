@@ -8,6 +8,7 @@ using Mercury.Enums;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -114,7 +115,6 @@ namespace Backtester
 				Common.ReportProgress(100);
 				var backtester = new GridEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, GridTypeChange.ShortToNeutral, reportFileName);
 				backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
-				//backtester.RunManual(Common.ReportProgress, Common.ReportProgressCount, 0, 25200.0m, 17184.39m, 26001.56m, 16382.83m, 67.75m);
 			}
 			catch (Exception ex)
 			{
