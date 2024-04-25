@@ -61,7 +61,7 @@ namespace Backtester
 				BacktestProgress.Maximum = 100;
 
 				var intervalString = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m");
-				if(intervalString == "price")
+				if (intervalString == "price")
 				{
 					worker.DoWork += Worker_DoWorkPrice;
 				}
@@ -96,24 +96,24 @@ namespace Backtester
 				ChartLoader.Charts = [];
 
 				var longInterval = KlineInterval.OneDay;
-				var shortInterval = KlineInterval.FifteenMinutes;
+				//var shortInterval = KlineInterval.FifteenMinutes;
 				var emaPeriod = 20;
 
 				Common.ReportProgress(10);
 				ChartLoader.InitCharts(symbol, longInterval);
-				ChartLoader.InitCharts(symbol, shortInterval);
+				//ChartLoader.InitCharts(symbol, shortInterval);
 
 				Common.ReportProgress(25);
 				var longChartPack = ChartLoader.GetChartPack(symbol, longInterval);
 				longChartPack.UseEma(emaPeriod);
-				var shortChartPack = ChartLoader.GetChartPack(symbol, shortInterval);
-				shortChartPack.UseAtr();
+				//var shortChartPack = ChartLoader.GetChartPack(symbol, shortInterval);
+				//shortChartPack.UseAtr();
 
 				Common.ReportProgress(50);
 				var aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
 
 				Common.ReportProgress(100);
-				var backtester = new GridEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, GridTypeChange.ShortToNeutral, reportFileName);
+				var backtester = new GridDailyEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], GridType.Neutral, GridTypeChange.ShortToNeutral, reportFileName);
 				backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
 			}
 			catch (Exception ex)
