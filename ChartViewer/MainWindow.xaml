@@ -120,6 +120,11 @@
                     <CheckBox x:Name="TrendRiderCheckBox">Trend Rider</CheckBox>
                     <!--<TextBox x:Name="TrendRiderPeriodText">14</TextBox>-->
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="EmaAtrCheckBox">EMA+ATR</CheckBox>
+                    <TextBox x:Name="EmaAtrEmaPeriodText">20</TextBox>
+                    <TextBox x:Name="EmaAtrAtrPeriodText">14</TextBox>
+                </StackPanel>
             </StackPanel>
         </Grid>
     </Grid>

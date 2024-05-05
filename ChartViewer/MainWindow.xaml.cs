@@ -81,10 +81,7 @@ namespace ChartViewer
 			Ema1CheckBox.IsChecked = true;
 			Ema2CheckBox.IsChecked = true;
 			Ema3CheckBox.IsChecked = true;
-			Supertrend1CheckBox.IsChecked = false;
-			RSupertrend1CheckBox.IsChecked = false;
-			TrendLineCheckBox.IsChecked = true;
-			TrendRiderCheckBox.IsChecked = true;
+			EmaAtrCheckBox.IsChecked = true;
 		}
 
 		private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -242,6 +239,23 @@ namespace ChartViewer
 					Charts[i].TrendRiderSupertrend = trendRider.ElementAt(i).Supertrend == 0 ? -39909 : trendRider.ElementAt(i).Supertrend;
 				}
 			}
+			if (EmaAtrCheckBox.IsChecked ?? true)
+			{
+				var ema = quotes.GetEma(EmaAtrEmaPeriodText.Text.ToInt());
+				var atr = quotes.GetAtr(EmaAtrAtrPeriodText.Text.ToInt());
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					if (i == 0)
+					{
+						Charts[i].EmaAtrLower = -39909;
+						Charts[i].EmaAtrUpper = -39909;
+						continue;
+					}
+
+					Charts[i].EmaAtrLower = ema.ElementAt(i).Ema == 0 ? -39909 : ema.ElementAt(i).Ema - atr.ElementAt(i).Atr;
+					Charts[i].EmaAtrUpper = ema.ElementAt(i).Ema == 0 ? -39909 : ema.ElementAt(i).Ema + atr.ElementAt(i).Atr;
+				}
+			}
 
 			CandleChart.InvalidateVisual();
 		}
@@ -393,6 +407,11 @@ namespace ChartViewer
 				yMax = Math.Max(yMax, (double)Charts.Where(x => x.TrendRiderSupertrend != -39909).Max(x => Math.Abs(x.TrendRiderSupertrend)));
 				yMin = Math.Min(yMin, (double)Charts.Where(x => x.TrendRiderSupertrend != -39909).Min(x => Math.Abs(x.TrendRiderSupertrend)));
 			}
+			if (EmaAtrCheckBox.IsChecked ?? true)
+			{
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.EmaAtrUpper != -39909).Max(x => Math.Abs(x.EmaAtrUpper)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.EmaAtrLower != -39909).Min(x => Math.Abs(x.EmaAtrLower)));
+			}
 
 			// Draw Quote and Indicator
 			for (int i = 0; i < Charts.Count; i++)
@@ -489,6 +508,11 @@ namespace ChartViewer
 					}
 
 					DrawSupertrend(canvas, i, i == 0 ? Charts[i].TrendRiderSupertrend : Charts[i - 1].TrendRiderSupertrend, Charts[i].TrendRiderSupertrend, yMax, yMin, Charts[i].TrendRiderSupertrend > 0 ? LongColor : ShortColor);
+				}
+				if (EmaAtrCheckBox.IsChecked ?? true)
+				{
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].EmaAtrUpper : Charts[i - 1].EmaAtrUpper, Charts[i].EmaAtrUpper, yMax, yMin, SKColors.White);
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].EmaAtrLower : Charts[i - 1].EmaAtrLower, Charts[i].EmaAtrLower, yMax, yMin, SKColors.White);
 				}
 			}
 

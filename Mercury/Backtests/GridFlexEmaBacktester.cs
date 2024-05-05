@@ -6,7 +6,7 @@ using Mercury.Enums;
 namespace Mercury.Backtests
 {
 	/// <summary>
-	/// Grid Bot Daily EMA Backtester
+	/// Grid Bot Flex EMA Backtester
 	/// </summary>
 	/// <param name="symbol"></param>
 	/// <param name="prices"></param>
@@ -14,7 +14,7 @@ namespace Mercury.Backtests
 	/// <param name="gridType"></param>
 	/// <param name="gridTypeChange"></param>
 	/// <param name="reportFileName"></param>
-	public class GridDailyEmaBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, GridType gridType, GridTypeChange gridTypeChange, string reportFileName)
+	public class GridFlexEmaBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> shortTermCharts, GridType gridType, GridTypeChange gridTypeChange, string reportFileName)
 	{
 		public decimal Seed = 1_000_000;
 		public decimal Money = 1_000_000;
@@ -33,6 +33,7 @@ namespace Mercury.Backtests
 		public string Symbol { get; set; } = symbol;
 		public List<Price> Prices { get; set; } = prices;
 		public List<ChartInfo> LongTermCharts { get; set; } = longTermCharts;
+		public List<ChartInfo> ShortTermCharts { get; set; } = shortTermCharts;
 		public List<Order> LongOrders { get; set; } = [];
 		public List<Order> ShortOrders { get; set; } = [];
 		public Order NearestLongOrder = default!;
@@ -47,11 +48,13 @@ namespace Mercury.Backtests
 		/// </summary>
 		public decimal StandardBaseOrderSize { get; set; }
 
-		public readonly int SL_DIFFEMA_TYPE = 3; // 1: close, 2: open+close/2, 3: maxdiff(high,low)
-		public readonly int SL_DIFFEMA_COUNT = 50;
-		public readonly int ATR_COUNT = 28;
-		public readonly int GRID_COUNT = 80;
-		//public readonly decimal STOP_LOSS_MARGIN = 0.2m;
+		public decimal LastEma; // 이전 EMA
+		public decimal LastAtr; // 이전 ATR
+
+		public readonly int GRID_COUNT = 60;
+		public readonly decimal SL_MARGIN = 1.3m;
+		//public readonly int SL_DIFFEMA_COUNT = 50;
+		//public readonly int ATR_COUNT = 28;
 		public readonly int BASE_ORDER_SIZE_DIVISION = 1; // T: 2, F: 1
 
 
@@ -294,8 +297,16 @@ namespace Mercury.Backtests
 		public void Run(Action<int> reportProgress, Action<int, int> reportProgressCount, int startIndex)
 		{
 			decimal maxRisk = 0;
-			DateTime displayDate = Prices[startIndex].Date;
-			DateTime gridResetDate = Prices[startIndex].Date;
+			var startTime = Prices[startIndex].Date;
+			DateTime displayDate = startTime;
+			DateTime gridResetDate = startTime;
+			LastEma = (decimal)ShortTermCharts.Where(d => d.DateTime <= startTime).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
+			LastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= startTime).OrderByDescending(d => d.DateTime).ElementAt(1).Atr;
+
+			SetGrid(startIndex);
+			SetStandardBaseOrderSize(startIndex);
+			SetOrder(startIndex);
+
 			for (int i = startIndex; i < Prices.Count; i++)
 			{
 				reportProgress((int)((double)i / Prices.Count * 100));
@@ -304,24 +315,43 @@ namespace Mercury.Backtests
 				var time = Prices[i].Date;
 				var price = Prices[i].Value;
 
-				// 매일 오전 9시에 그리드 설정 초기화
-				if (time >= gridResetDate)
+				// 하루 이상이 지나고 EMA 크로스하면 정리 후 그리드 설정 초기화
+				if (!(gridResetDate.Month == time.Month && gridResetDate.Day == time.Day))
 				{
-					gridResetDate = gridResetDate.AddDays(1);
+					if (i > 0)
+					{
+						if ((Prices[i - 1].Value < LastEma && price > LastEma) || (Prices[i - 1].Value > LastEma && price < LastEma))
+						{
+							gridResetDate = time;
 
-					//CloseAllPositions(i);
-					SetGridType(i);
+							CloseAllPositions(i);
+							//SetGridType(i);
+							GridType = GridType.Neutral;
+							SetGrid(i);
+							SetStandardBaseOrderSize(i);
+							SetOrder(i);
+						}
+					}
+				}
+
+				// 스탑로스
+				if (price >= UpperStopLossPrice)
+				{
+					CloseAllPositions(i);
+					GridType = GridType.Long;
+					GridTypeChange = GridTypeChange.NeutralToLong;
 					SetGrid(i);
 					SetStandardBaseOrderSize(i);
 					SetOrder(i);
 				}
-
-				// 스탑로스에 닿으면 즉시 손절하고 그 날은 매매 중지
-				if (price >= UpperStopLossPrice || price <= LowerStopLossPrice)
+				else if(price <= LowerStopLossPrice)
 				{
 					CloseAllPositions(i);
-					LongOrders = [];
-					ShortOrders = [];
+					GridType = GridType.Short;
+					GridTypeChange = GridTypeChange.NeutralToShort;
+					SetGrid(i);
+					SetStandardBaseOrderSize(i);
+					SetOrder(i);
 				}
 
 				// 매매 Filled
@@ -340,6 +370,10 @@ namespace Mercury.Backtests
 				if (time >= displayDate)
 				{
 					displayDate = displayDate.AddDays(1);
+
+					// 하루가 지나면 1일봉 EMA, 1주봉 ATR 재계산
+					LastEma = (decimal)ShortTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
+					LastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Atr;
 
 					var _estimatedMoney = GetEstimatedAsset(price);
 					var risk = GetRisk(price);
@@ -418,60 +452,29 @@ namespace Mercury.Backtests
 		{
 			var price = Prices[chartIndex];
 
-			var longTermChartsOrderByDescending = LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
-			var longTermEma = (decimal)longTermChartsOrderByDescending.ElementAt(1).Ema1;
-			var longTermClosePrice = longTermChartsOrderByDescending.ElementAt(1).Quote.Close;
-			var longTermHighPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Max(x => x.Quote.High);
-			var longTermLowPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Min(x => x.Quote.Low);
-
-			// 1-1.(추후)
-			// 1-2.
-			var longTermMaxDiffToEma =
-				SL_DIFFEMA_TYPE switch
-				{
-					1 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Abs((decimal)x.Ema1 - x.Quote.Close)),
-					2 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Abs((decimal)x.Ema1 - (x.Quote.Open + x.Quote.Close) / 2)),
-					3 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Max(Math.Abs((decimal)x.Ema1 - x.Quote.High), Math.Abs((decimal)x.Ema1 - x.Quote.Low))),
-					_ => 1
-				};
-
-			// 2-1.
-			var longTermLastAtr = (decimal)longTermChartsOrderByDescending.ElementAt(1).Atr;
-			// 2-2.
-			var longTermAverageAtr = (decimal)longTermChartsOrderByDescending.Skip(1).Take(ATR_COUNT).Average(x => x.Atr);
-			// 2-3.
-			var longTermAverageDiffToEma = longTermChartsOrderByDescending.Skip(1).Take(ATR_COUNT).Average(x => Math.Max(Math.Abs((decimal)x.Ema1 - x.Quote.Open), Math.Abs((decimal)x.Ema1 - x.Quote.Close)));
-
 			if (GridType == GridType.Long)
 			{
 				UpperPrice = decimal.MaxValue;
-				LowerPrice = longTermEma;
+				LowerPrice = LastEma;
 				UpperStopLossPrice = decimal.MaxValue;
 				LowerStopLossPrice = decimal.MinValue;
-				GridInterval = (longTermClosePrice - LowerPrice) / GRID_COUNT;
+				GridInterval = (price.Value - LowerPrice) / GRID_COUNT;
 			}
 			else if (GridType == GridType.Short)
 			{
-				UpperPrice = longTermEma;
+				UpperPrice = LastEma;
 				LowerPrice = decimal.MinValue;
 				UpperStopLossPrice = decimal.MaxValue;
 				LowerStopLossPrice = decimal.MinValue;
-				GridInterval = (UpperPrice - longTermClosePrice) / GRID_COUNT;
+				GridInterval = (UpperPrice - price.Value) / GRID_COUNT;
 			}
-			else if (GridTypeChange == GridTypeChange.LongToNeutral)
+			else if (GridType == GridType.Neutral)
 			{
-				UpperPrice = longTermClosePrice + longTermLastAtr;
-				LowerPrice = longTermClosePrice - longTermLastAtr;
-				UpperStopLossPrice = longTermEma + longTermMaxDiffToEma;
-				LowerStopLossPrice = longTermEma - longTermMaxDiffToEma;
-				GridInterval = (UpperPrice - LowerPrice) / GRID_COUNT / 2;
-			}
-			else if (GridTypeChange == GridTypeChange.ShortToNeutral)
-			{
-				UpperPrice = longTermClosePrice + longTermLastAtr;
-				LowerPrice = longTermClosePrice - longTermLastAtr;
-				UpperStopLossPrice = longTermEma + longTermMaxDiffToEma;
-				LowerStopLossPrice = longTermEma - longTermMaxDiffToEma;
+				UpperPrice = price.Value + LastAtr;
+				LowerPrice = price.Value - LastAtr;
+				// 스탑로스 구간은 좀 더 고민해봐야 할듯
+				UpperStopLossPrice = price.Value + LastAtr * SL_MARGIN;
+				LowerStopLossPrice = price.Value - LastAtr * SL_MARGIN;
 				GridInterval = (UpperPrice - LowerPrice) / GRID_COUNT / 2;
 			}
 
