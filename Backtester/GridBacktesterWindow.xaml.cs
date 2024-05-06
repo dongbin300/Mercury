@@ -97,7 +97,7 @@ namespace Backtester
 
 				var longInterval = KlineInterval.OneWeek;
 				var shortInterval = KlineInterval.OneDay;
-				var emaPeriod = 10;
+				var emaPeriod = 20;
 
 				Common.ReportProgress(10);
 				ChartLoader.InitCharts(symbol, longInterval);
@@ -113,7 +113,7 @@ namespace Backtester
 				var aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
 
 				Common.ReportProgress(100);
-				var backtester = new GridFlexEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, GridTypeChange.ShortToNeutral, reportFileName);
+				var backtester = new GridFlexEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, reportFileName);
 				backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
 			}
 			catch (Exception ex)
