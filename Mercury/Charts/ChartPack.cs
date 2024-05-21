@@ -308,5 +308,19 @@ namespace Mercury.Charts
 				Charts[i].TrendRiderSupertrend = supertrend.ElementAt(i);
 			}
 		}
+
+		public void UsePredictiveRanges(int period = 200, double factor = 6.0)
+		{
+			var predictiveRanges = Charts.Select(x => x.Quote).GetPredictiveRanges(period, factor);
+			for(int i=0; i < Charts.Count; i++)
+			{
+				var pr = predictiveRanges.ElementAt(i);
+				Charts[i].PredictiveRangesUpper2 = pr.Upper2;
+				Charts[i].PredictiveRangesUpper = pr.Upper;
+				Charts[i].PredictiveRangesAverage = pr.Average;
+				Charts[i].PredictiveRangesLower = pr.Lower;
+				Charts[i].PredictiveRangesLower2 = pr.Lower2;
+			}
+		}
 	}
 }

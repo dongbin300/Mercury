@@ -10,7 +10,8 @@ namespace Mercury.Charts
 		public string Symbol { get; set; } = symbol;
 		public DateTime DateTime => Quote.Date;
 		public Quote Quote { get; set; } = quote;
-        public decimal BodyLength(PositionSide side) => Math.Abs(Calculator.Roe(side, Quote.Open, Quote.Close));
+        public decimal Change => Calculator.Roe(PositionSide.Long, Quote.Open, Quote.Close);
+        public decimal BodyLength => Math.Abs(Change);
         public CandlestickType CandlestickType => Quote.Open < Quote.Close ? CandlestickType.Bullish : Quote.Open > Quote.Close ? CandlestickType.Bearish : CandlestickType.Doji;
 
 		public double Sma1 { get; set; }
@@ -62,6 +63,12 @@ namespace Mercury.Charts
 
         public double EmaAtrUpper { get; set; }
         public double EmaAtrLower { get; set; }
+
+        public double PredictiveRangesUpper2 { get; set; }
+        public double PredictiveRangesUpper { get; set; }
+        public double PredictiveRangesAverage { get; set; }
+        public double PredictiveRangesLower { get; set; }
+        public double PredictiveRangesLower2 { get; set; }
 
 		public override string ToString() => $"{Symbol} | {DateTime} | {Quote.Open} | {Quote.High} | {Quote.Low} | {Quote.Close} | {Quote.Volume}";
 	}

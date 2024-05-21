@@ -120,7 +120,7 @@ namespace Mercury.Backtests
 					var c2 = charts[i - 2];
 					var c3 = charts[i - 3];
 					currentTime = c0.DateTime;
-					var c1LongBodyLength = c1.BodyLength(PositionSide.Long);
+					var c1LongBodyLength = c1.BodyLength;
 					var minPrice = GetMinPrice(charts, 14, i);
 					var maxPrice = GetMaxPrice(charts, 14, i);
 					var longStopLossPercent = Calculator.Roe(PositionSide.Long, c0.Quote.Open, minPrice) * 1.1m;
@@ -284,7 +284,7 @@ namespace Mercury.Backtests
 
 					/* SHORT POSITION */
 					var shortPosition = Positions.Find(x => x.Symbol.Equals(symbol) && x.Side.Equals(PositionSide.Short));
-					var c1ShortBodyLength = c1.BodyLength(PositionSide.Short);
+					var c1ShortBodyLength = c1.BodyLength;
 					var shortStopLossPercent = Calculator.Roe(PositionSide.Short, c0.Quote.Open, maxPrice) * 1.1m;
 					var shortTakeProfitPercent = Calculator.Roe(PositionSide.Short, c0.Quote.Open, minPrice) * 0.9m;
 

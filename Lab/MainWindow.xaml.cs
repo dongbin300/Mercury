@@ -14,17 +14,20 @@ namespace Lab
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
 	public partial class MainWindow : Window
-    {
-        public MainWindow()
+	{
+		public MainWindow()
 		{
 			InitializeComponent();
 
 			ChartLoader.InitCharts("BTCUSDT", Binance.Net.Enums.KlineInterval.OneDay);
 			var chartPack = ChartLoader.GetChartPack("BTCUSDT", Binance.Net.Enums.KlineInterval.OneDay);
-			chartPack.UseEma(20);
+			chartPack.UsePredictiveRanges();
 
-			var ema = chartPack.Charts.Select(x => x.Ema1);
-			var close = chartPack.Charts.Select(x => x.Quote.Close);
+			var upper2 = chartPack.Charts.Select(x => x.PredictiveRangesUpper2);
+			var upper = chartPack.Charts.Select(x => x.PredictiveRangesUpper);
+			var average = chartPack.Charts.Select(x => x.PredictiveRangesAverage);
+			var lower = chartPack.Charts.Select(x => x.PredictiveRangesLower);
+			var lower2 = chartPack.Charts.Select(x => x.PredictiveRangesLower2);
 		}
 	}
 }

@@ -414,5 +414,23 @@ namespace Mercury
 
 			return result;
 		}
+
+		public static IEnumerable<PredictiveRangesResult> GetPredictiveRanges(this IEnumerable<Quote> quotes, int period = 200, double factor = 6.0)
+		{
+			var result = new List<PredictiveRangesResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			(var upper2, var upper, var average, var lower, var lower2) = ArrayCalculator.PredictiveRanges(high, low, close, period, factor);
+
+			for (int i = 0; i < upper2.Length; i++)
+			{
+                var predictiveRanges = new PredictiveRangesResult(quotes.ElementAt(i).Date, upper2[i], upper[i], average[i], lower[i], lower2[i]);
+				result.Add(predictiveRanges);
+			}
+
+			return result;
+		}
 	}
 }

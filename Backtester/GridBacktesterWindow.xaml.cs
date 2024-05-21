@@ -1,5 +1,7 @@
 ﻿using Binance.Net.Enums;
 
+using MarinerXX.Apis;
+
 using Mercury;
 using Mercury.Backtests;
 using Mercury.Charts;
@@ -9,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -169,6 +173,31 @@ namespace Backtester
 			}
 		}
 
+		private void Worker_DoWorkGridRange(object? sender, DoWorkEventArgs e)
+		{
+			try
+			{
+				List<decimal> results = [];
+				ChartLoader.Charts = [];
+				ChartLoader.InitCharts(symbol, interval, new DateTime(2019, 9, 9), endDate);
+				var chartPack = ChartLoader.GetChartPack(symbol, interval);
+
+				for (int i = 2; i <= 400; i++)
+				{
+					chartPack.UsePredictiveRanges(i, 11.0);
+
+					var estimator = new GridRangeEstimator(symbol, [.. chartPack.Charts.Skip(1057)]);
+					estimator.Run(0);
+					//BacktestResultListBox.Items.Add($"PERIOD {i} / FACTOR {j} / " + estimator.Money);
+					results.Add(estimator.Money);
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+			}
+		}
+
 		private void FileOpenButton_Click(object sender, RoutedEventArgs e)
 		{
 			Process.Start(new ProcessStartInfo()
@@ -176,6 +205,50 @@ namespace Backtester
 				FileName = MercuryPath.Desktop.Down($"{FileNameTextBox.Text}.csv"),
 				UseShellExecute = true
 			});
+		}
+
+		private void GridRangeButton_Click(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				Settings.Default.Symbol = SymbolTextBox.Text;
+				Settings.Default.StartDate = StartDateTextBox.Text;
+				Settings.Default.EndDate = EndDateTextBox.Text;
+				Settings.Default.FileName = FileNameTextBox.Text;
+				Settings.Default.IntervalIndex = IntervalComboBox.SelectedIndex;
+				Settings.Default.Save();
+
+				symbol = SymbolTextBox.Text;
+				startDate = StartDateTextBox.Text.ToDateTime();
+				endDate = EndDateTextBox.Text.ToDateTime();
+				reportFileName = FileNameTextBox.Text;
+
+				BacktestProgress.Value = 0;
+				BacktestProgress.Maximum = 100;
+
+				var intervalString = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m");
+				interval = intervalString.ToKlineInterval();
+				worker.DoWork -= Worker_DoWorkGridRange;
+				worker.DoWork += Worker_DoWorkGridRange;
+
+				worker.ProgressChanged += (sender, e) =>
+				{
+					BacktestProgress.Value = e.ProgressPercentage;
+				};
+				Common.ReportProgress = worker.ReportProgress;
+				Common.ReportProgressCount = (i, m) =>
+				{
+					DispatcherService.Invoke(() =>
+					{
+						BacktestProgressText.Text = $"{i} / {m}";
+					});
+				};
+				worker.RunWorkerAsync();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
 		}
 	}
 }

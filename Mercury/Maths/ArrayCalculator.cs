@@ -879,5 +879,38 @@
 
 			return (trend, supertrend, supertrendDirection);
 		}
+
+		public static (double[], double[], double[], double[], double[]) PredictiveRanges(double[] high, double[] low, double[] close, int period, double factor)
+		{
+			var atr = Atr(high, low, close, period).Select(x => x * factor).ToArray();
+			var avg = new double[high.Length];
+			var holdAtr = new double[high.Length];
+			var u2 = new double[high.Length];
+			var u = new double[high.Length];
+			var l = new double[high.Length];
+			var l2 = new double[high.Length];
+
+			avg[0] = close[0];
+			holdAtr[0] = 0;
+			u2[0] = avg[0];
+			u[0] = avg[0];
+			l[0] = avg[0];
+			l2[0] = avg[0];
+			for (int i = 1; i < high.Length; i++)
+			{
+				avg[i] = close[i] - avg[i - 1] > atr[i] ? avg[i - 1] + atr[i] :
+					(avg[i - 1] - close[i] > atr[i] ? avg[i - 1] - atr[i] :
+					avg[i - 1]);
+
+				holdAtr[i] = avg[i] != avg[i - 1] ? atr[i] / 2 : holdAtr[i - 1];
+
+				u2[i] = avg[i] + holdAtr[i] * 2;
+				u[i] = avg[i] + holdAtr[i];
+				l[i] = avg[i] - holdAtr[i];
+				l2[i] = avg[i] - holdAtr[i] * 2;
+			}
+
+			return (u2, u, avg, l, l2);
+		}
 	}
 }
