@@ -1559,10 +1559,10 @@ namespace MarinerX
 		{
 			try
 			{
-				var symbol = "XRPUSDT";
-				var startTime = new DateTime(2022, 7, 1);
+				var symbol = "BTCUSDT";
+				var startTime = new DateTime(2024, 1, 1);
 				var currentTime = startTime;
-				var endTime = new DateTime(2023, 12, 31);
+				var endTime = new DateTime(2024, 5, 12);
 				using var client = new HttpClient();
 
 				while (currentTime <= endTime)

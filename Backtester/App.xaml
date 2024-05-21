@@ -97,6 +97,33 @@
             </Setter>
         </Style>
 
+        <Style TargetType="{x:Type ListBoxItem}">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Grid>
+                            <Border Name="border" Margin="2" CornerRadius="4" SnapsToDevicePixels="True">
+                                <ContentPresenter />
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3D3D3D" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ListBox}">
+            <Setter Property="Margin" Value="3,2" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#F6F6F6" />
+        </Style>
+
         <Style TargetType="{x:Type Button}">
             <Setter Property="Background" Value="{StaticResource Long}" />
             <Setter Property="Foreground" Value="#000000" />

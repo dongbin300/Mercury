@@ -238,7 +238,7 @@ namespace MarinerX.Charts
 
 				if (startDate == null && endDate == null)
 				{
-					foreach(var file in files)
+					foreach (var file in files)
 					{
 						var f = file.Split('-');
 						var currentDateString = $"{f[2]}-{f[3]}-{f[4]}";
@@ -484,35 +484,35 @@ namespace MarinerX.Charts
 					var chartPack = new ChartPack(KlineInterval.OneDay);
 					var path = PathUtil.BinanceFuturesData.Down("1D", $"{symbol}.csv");
 
-					try
+					for (int i = 0; i < dayCount; i++)
 					{
-						for (int i = 0; i < dayCount; i++)
+						var date = startTime.AddDays(i);
+						var inputFileName = PathUtil.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{date:yyyy-MM-dd}.csv");
+
+						if (!File.Exists(inputFileName))
 						{
-							var date = startTime.AddDays(i);
-							var inputFileName = PathUtil.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{date:yyyy-MM-dd}.csv");
-							var data = File.ReadAllLines(inputFileName);
-
-							worker.Progress(++s);
-							worker.ProgressText($"{symbol}, {i} / {dayCount}");
-
-							foreach (var d in data)
-							{
-								var e = d.Split(',');
-								var quote = new Quote
-								{
-									Date = DateTime.Parse(e[0]),
-									Open = decimal.Parse(e[1]),
-									High = decimal.Parse(e[2]),
-									Low = decimal.Parse(e[3]),
-									Close = decimal.Parse(e[4]),
-									Volume = decimal.Parse(e[5])
-								};
-								chartPack.AddChart(new MercuryChartInfo(symbol, quote));
-							}
+							continue;
 						}
-					}
-					catch (FileNotFoundException)
-					{
+
+						var data = File.ReadAllLines(inputFileName);
+
+						worker.Progress(++s);
+						worker.ProgressText($"{symbol}, {i} / {dayCount}");
+
+						foreach (var d in data)
+						{
+							var e = d.Split(',');
+							var quote = new Quote
+							{
+								Date = DateTime.Parse(e[0]),
+								Open = decimal.Parse(e[1]),
+								High = decimal.Parse(e[2]),
+								Low = decimal.Parse(e[3]),
+								Close = decimal.Parse(e[4]),
+								Volume = decimal.Parse(e[5])
+							};
+							chartPack.AddChart(new MercuryChartInfo(symbol, quote));
+						}
 					}
 
 					chartPack.ConvertCandle();

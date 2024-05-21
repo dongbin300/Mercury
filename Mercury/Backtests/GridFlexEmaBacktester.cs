@@ -3,6 +3,8 @@
 using Mercury.Charts;
 using Mercury.Enums;
 
+using System.Diagnostics;
+
 namespace Mercury.Backtests
 {
 	/// <summary>
@@ -14,7 +16,7 @@ namespace Mercury.Backtests
 	/// <param name="gridType"></param>
 	/// <param name="gridTypeChange"></param>
 	/// <param name="reportFileName"></param>
-	public class GridFlexEmaBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> shortTermCharts, GridType gridType, string reportFileName)
+	public class GridFlexEmaBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> shortTermCharts, GridType gridType, string reportFileName, int gridCount, decimal slMargin)
 	{
 		public decimal Seed = 1_000_000;
 		public decimal Money = 1_000_000;
@@ -50,9 +52,10 @@ namespace Mercury.Backtests
 
 		public decimal LastEma; // 이전 EMA
 		public decimal LastAtr; // 이전 ATR
+		public decimal MaxRisk; // 리스크 최대값
 
-		public readonly int GRID_COUNT = 120;
-		public readonly decimal SL_MARGIN = 1.2m;
+		public readonly int GRID_COUNT = gridCount;
+		public readonly decimal SL_MARGIN = slMargin;
 
 		/// <summary>
 		/// 리스크가 -면 수익 중이라고 판단.
@@ -68,7 +71,7 @@ namespace Mercury.Backtests
 				return 0;
 			}
 
-			var risk = 100 * (Margin * Leverage - currentPrice * Math.Abs(CoinQuantity)) / (Margin + Money); // 지정가 주문이 청산가에 영향을 주면 Margin, 안주면 Margin + Money
+			var risk = 100 * (Margin * Leverage - currentPrice * Math.Abs(CoinQuantity)) / (Margin); // 지정가 주문이 청산가에 영향을 주면 Margin, 안주면 Margin + Money
 
 			if (CoinQuantity < 0)
 			{
@@ -139,10 +142,10 @@ namespace Mercury.Backtests
 			CoinQuantity += shortOrdersQuantity;
 
 			// 그리드 시작 시 생성한 Long Position과 함께 처리
-			foreach (var shortOrder in ShortOrders)
-			{
-				shortOrder.Quantity *= 2;
-			}
+			//foreach (var shortOrder in ShortOrders)
+			//{
+			//	shortOrder.Quantity *= 2;
+			//}
 		}
 
 		void InitMarketSell(int chartIndex)
@@ -155,10 +158,10 @@ namespace Mercury.Backtests
 			Margin += amount / Leverage;
 			CoinQuantity -= longOrdersQuantity;
 
-			foreach (var longOrder in LongOrders)
-			{
-				longOrder.Quantity *= 2;
-			}
+			//foreach (var longOrder in LongOrders)
+			//{
+			//	longOrder.Quantity *= 2;
+			//}
 		}
 
 		void Fill(Order order, int chartIndex)
@@ -241,9 +244,8 @@ namespace Mercury.Backtests
 			//PositionHistories.Add($"{Prices[chartIndex].Date:yyyy-MM-dd HH:mm:ss.fff},{Prices[chartIndex].Value:#.##},{order.Side},{order.Quantity:#.##},{Money:#.##},{Margin:#.##},{CoinQuantity:#.##},{GetPnl(Prices[chartIndex].Value):#.##},{nearestLongOrderPrice:#.##},{nearestShortOrderPrice:#.##}");
 		}
 
-		public void Run(Action<int> reportProgress, Action<int, int> reportProgressCount, int startIndex)
+		public string Run(Action<int> reportProgress, Action<int, int> reportProgressCount, int startIndex)
 		{
-			decimal maxRisk = 0;
 			var startTime = Prices[startIndex].Date;
 			DateTime displayDate = startTime;
 			DateTime gridResetDate = startTime;
@@ -265,34 +267,97 @@ namespace Mercury.Backtests
 				// 추후에 그리드 시작점오면 정리 후 그리드 설정 초기화 하는 것도 구현
 				if (!(gridResetDate.Month == time.Month && gridResetDate.Day == time.Day))
 				{
-					if (i > 0 && GridType == GridType.Neutral)
+					switch (GridType)
 					{
-						if ((Prices[i - 1].Value < GridStartPrice && price > GridStartPrice) || (Prices[i - 1].Value > GridStartPrice && price < GridStartPrice))
-						{
-							gridResetDate = time;
+						case GridType.Neutral:
+							if (i > 0)
+							{
+								if ((Prices[i - 1].Value < GridStartPrice && price > GridStartPrice) || (Prices[i - 1].Value > GridStartPrice && price < GridStartPrice))
+								{
+									gridResetDate = time;
 
-							CloseAllPositions(i);
-							GridType = GridType.Neutral;
-							SetGrid(i);
-							SetOrder(i);
-						}
+									WriteStatus(i);
+									CloseAllPositions(i);
+									SetGrid(i);
+									SetOrder(i);
+									WriteStatus(i);
+								}
+							}
+							break;
+
+						case GridType.Long:
+							if (i > 0)
+							{
+								if (Prices[i - 1].Value > LastEma && price < LastEma)
+								{
+									gridResetDate = time;
+
+									WriteStatus(i);
+									CloseAllPositions(i);
+									GridType = GridType.Neutral;
+									SetGrid(i);
+									SetOrder(i);
+									WriteStatus(i);
+								}
+							}
+							break;
+
+						case GridType.Short:
+							if (i > 0)
+							{
+								if (Prices[i - 1].Value < LastEma && price > LastEma)
+								{
+									gridResetDate = time;
+
+									WriteStatus(i);
+									CloseAllPositions(i);
+									GridType = GridType.Neutral;
+									SetGrid(i);
+									SetOrder(i);
+									WriteStatus(i);
+								}
+							}
+							break;
 					}
 				}
+
+				//if (GridType == GridType.Long && price < LastEma)
+				//{
+				//	WriteStatus(i);
+				//	CloseAllPositions(i);
+				//	GridType = GridType.Neutral;
+				//	SetGrid(i);
+				//	SetOrder(i);
+				//	WriteStatus(i);
+				//}
+				//else if (GridType == GridType.Short && price > LastEma)
+				//{
+				//	WriteStatus(i);
+				//	CloseAllPositions(i);
+				//	GridType = GridType.Neutral;
+				//	SetGrid(i);
+				//	SetOrder(i);
+				//	WriteStatus(i);
+				//}
 
 				// 스탑로스
 				if (price >= UpperStopLossPrice)
 				{
+					WriteStatus(i);
 					CloseAllPositions(i);
 					GridType = GridType.Long;
 					SetGrid(i);
 					SetOrder(i);
+					WriteStatus(i);
 				}
 				else if (price <= LowerStopLossPrice)
 				{
+					WriteStatus(i);
 					CloseAllPositions(i);
 					GridType = GridType.Short;
 					SetGrid(i);
 					SetOrder(i);
+					WriteStatus(i);
 				}
 
 				// 매매 Filled
@@ -316,27 +381,37 @@ namespace Mercury.Backtests
 					LastEma = (decimal)ShortTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
 					LastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Atr;
 
-					var _estimatedMoney = GetEstimatedAsset(price);
-					var risk = GetRisk(price);
-					if (risk > maxRisk)
-					{
-						maxRisk = risk;
-					}
-					File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
-					$"{time:yyyy-MM-dd HH:mm:ss},{CoinQuantity.Round(2)},{GridType},{LongFillCount},{ShortFillCount},{risk.Round(2)}%,{_estimatedMoney.Round(2)},{Margin.Round(2)},M:{Money.Round(2)},P:{price},PNL:{GetPnl(price)}" + Environment.NewLine);
+					WriteStatus(i);
 				}
 			}
 
 			var estimatedMoney = GetEstimatedAsset(Prices[^1].Value);
 			var period = (Prices[^1].Date - Prices[0].Date).Days + 1;
 			var tradePerDay = (double)(LongFillCount + ShortFillCount) / period;
+			var resultString = $"{Symbol},{period}Days,{tradePerDay.Round(1)}/d,{MaxRisk.Round(2)}%,{estimatedMoney.Round(2)},{Margin.Round(2)}";
 			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
-					$"{Symbol},{period}Days,{tradePerDay.Round(1)}/d,{maxRisk.Round(2)}%,{estimatedMoney.Round(2)},{Margin.Round(2)}" + Environment.NewLine + Environment.NewLine);
+					 resultString + Environment.NewLine + Environment.NewLine);
 
 			// Position History
 			//File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}_position.csv"),
 			//	string.Join(Environment.NewLine, PositionHistories) + Environment.NewLine + Environment.NewLine + Environment.NewLine
 			//	);
+
+			return resultString;
+		}
+
+		public void WriteStatus(int currentIndex)
+		{
+			var price = Prices[currentIndex].Value;
+			var time = Prices[currentIndex].Date;
+			var _estimatedMoney = GetEstimatedAsset(price);
+			var risk = GetRisk(price);
+			if (risk > MaxRisk)
+			{
+				MaxRisk = risk;
+			}
+			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
+			$"{time:yyyy-MM-dd HH:mm:ss},{CoinQuantity.Round(2)},{GridType},{LongFillCount},{ShortFillCount},{risk.Round(2)}%,{_estimatedMoney.Round(2)},{Margin.Round(2)},M:{Money.Round(2)},P:{price},PNL:{GetPnl(price)}" + Environment.NewLine);
 		}
 
 		public void CloseAllPositions(int chartIndex)
@@ -354,15 +429,15 @@ namespace Mercury.Backtests
 			if (GridType == GridType.Long)
 			{
 				UpperPrice = currentPrice + LastAtr;
-				LowerPrice = LastEma; // currentPrice - LastAtr or LastEma
+				LowerPrice = currentPrice - LastAtr; // currentPrice - LastAtr or LastEma
 				UpperStopLossPrice = currentPrice + LastAtr * SL_MARGIN;
-				LowerStopLossPrice = LastEma;
+				LowerStopLossPrice = currentPrice - LastAtr * SL_MARGIN;
 			}
 			else if (GridType == GridType.Short)
 			{
-				UpperPrice = LastEma;
+				UpperPrice = currentPrice + LastAtr;
 				LowerPrice = currentPrice - LastAtr;
-				UpperStopLossPrice = LastEma;
+				UpperStopLossPrice = currentPrice + LastAtr * SL_MARGIN;
 				LowerStopLossPrice = currentPrice - LastAtr * SL_MARGIN;
 			}
 			else if (GridType == GridType.Neutral)
@@ -389,7 +464,7 @@ namespace Mercury.Backtests
 
 			for (decimal i = LowerPrice; i <= UpperPrice; i += GridInterval)
 			{
-				if (Math.Abs(currentPrice - i) < 0.0001m)
+				if (Math.Abs(currentPrice - i) < 1m)
 				{
 					continue;
 				}

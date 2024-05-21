@@ -6,6 +6,7 @@ using Mercury.Charts;
 using Mercury.Enums;
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
@@ -63,11 +64,13 @@ namespace Backtester
 				var intervalString = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m");
 				if (intervalString == "price")
 				{
+					worker.DoWork -= Worker_DoWorkPrice;
 					worker.DoWork += Worker_DoWorkPrice;
 				}
 				else
 				{
 					interval = intervalString.ToKlineInterval();
+					worker.DoWork -= Worker_DoWork;
 					worker.DoWork += Worker_DoWork;
 				}
 				worker.ProgressChanged += (sender, e) =>
@@ -89,32 +92,42 @@ namespace Backtester
 				MessageBox.Show(ex.Message);
 			}
 		}
+		List<Price> aggregatedTrades = [];
 		private void Worker_DoWorkPrice(object? sender, DoWorkEventArgs e)
 		{
 			try
 			{
-				ChartLoader.Charts = [];
+				DispatcherService.Invoke(() =>
+				{
+					ChartLoader.Charts = [];
 
-				var longInterval = KlineInterval.OneWeek;
-				var shortInterval = KlineInterval.OneDay;
-				var emaPeriod = 20;
+					var longInterval = KlineInterval.OneWeek;
+					var shortInterval = KlineInterval.OneDay;
+					var emaPeriod = EmaPeriodTextBox.Text.ToInt();
+					var gridCount = 120;
+					var slMargin = SlMarginTextBox.Text.ToDecimal();
 
-				Common.ReportProgress(10);
-				ChartLoader.InitCharts(symbol, longInterval);
-				ChartLoader.InitCharts(symbol, shortInterval);
+					//Common.ReportProgress(10);
+					ChartLoader.InitCharts(symbol, longInterval);
+					ChartLoader.InitCharts(symbol, shortInterval);
 
-				Common.ReportProgress(25);
-				var longChartPack = ChartLoader.GetChartPack(symbol, longInterval);
-				longChartPack.UseAtr();
-				var shortChartPack = ChartLoader.GetChartPack(symbol, shortInterval);
-				shortChartPack.UseEma(emaPeriod);
+					//Common.ReportProgress(25);
+					var longChartPack = ChartLoader.GetChartPack(symbol, longInterval);
+					longChartPack.UseAtr();
+					var shortChartPack = ChartLoader.GetChartPack(symbol, shortInterval);
+					shortChartPack.UseEma(emaPeriod);
 
-				Common.ReportProgress(50);
-				var aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
+					//Common.ReportProgress(50);
+					if (aggregatedTrades.Count <= 0)
+					{
+						aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
+					}
 
-				Common.ReportProgress(100);
-				var backtester = new GridFlexEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, reportFileName);
-				backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
+					//Common.ReportProgress(100);
+					var backtester = new GridFlexEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, reportFileName, gridCount, slMargin);
+					var result = backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
+					BacktestResultListBox.Items.Add($"EMA: {emaPeriod}, SLMARGIN: {slMargin.Round(2)}, " + result);
+				});
 			}
 			catch (Exception ex)
 			{
