@@ -57,10 +57,12 @@
                 <TextBox x:Name="FileNameTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="Test1"/>
                 <Button x:Name="FileOpenButton" Click="FileOpenButton_Click">Open</Button>
 
-                <TextBlock Style="{StaticResource Description}">EMA Period</TextBlock>
-                <TextBox x:Name="EmaPeriodTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="20"/>
-                <TextBlock Style="{StaticResource Description}">SL Margin</TextBlock>
-                <TextBox x:Name="SlMarginTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="1.0"/>
+                <TextBlock Style="{StaticResource Description}">PR Period</TextBlock>
+                <TextBox x:Name="Param1TextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="200"/>
+                <TextBlock Style="{StaticResource Description}">PR Factor</TextBlock>
+                <TextBox x:Name="Param2TextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="6.0"/>
+                <TextBlock Style="{StaticResource Description}">Grid Count</TextBlock>
+                <TextBox x:Name="GridCountTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="120"/>
             </StackPanel>
 
             <TextBlock Grid.Row="1" x:Name="BacktestProgressText" Margin="5 2"  HorizontalAlignment="Center"/>

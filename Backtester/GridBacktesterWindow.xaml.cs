@@ -105,21 +105,17 @@ namespace Backtester
 				{
 					ChartLoader.Charts = [];
 
-					var longInterval = KlineInterval.OneWeek;
-					var shortInterval = KlineInterval.OneDay;
-					var emaPeriod = EmaPeriodTextBox.Text.ToInt();
-					var gridCount = 120;
-					var slMargin = SlMarginTextBox.Text.ToDecimal();
+					var interval = KlineInterval.OneDay;
+					var period = Param1TextBox.Text.ToInt();
+					var factor = Param2TextBox.Text.ToDecimal();
+					var gridCount = GridCountTextBox.Text.ToInt();
 
 					//Common.ReportProgress(10);
-					ChartLoader.InitCharts(symbol, longInterval);
-					ChartLoader.InitCharts(symbol, shortInterval);
+					ChartLoader.InitCharts(symbol, interval);
 
 					//Common.ReportProgress(25);
-					var longChartPack = ChartLoader.GetChartPack(symbol, longInterval);
-					longChartPack.UseAtr();
-					var shortChartPack = ChartLoader.GetChartPack(symbol, shortInterval);
-					shortChartPack.UseEma(emaPeriod);
+					var chartPack = ChartLoader.GetChartPack(symbol, interval);
+					chartPack.UsePredictiveRanges(period, (double)factor);
 
 					//Common.ReportProgress(50);
 					if (aggregatedTrades.Count <= 0)
@@ -128,9 +124,9 @@ namespace Backtester
 					}
 
 					//Common.ReportProgress(100);
-					var backtester = new GridFlexEmaBacktester(symbol, aggregatedTrades, [.. longChartPack.Charts], [.. shortChartPack.Charts], GridType.Neutral, reportFileName, gridCount, slMargin);
+					var backtester = new GridPredictiveRangesBacktester(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount);
 					var result = backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
-					BacktestResultListBox.Items.Add($"EMA: {emaPeriod}, SLMARGIN: {slMargin.Round(2)}, " + result);
+					BacktestResultListBox.Items.Add($"PR PERIOD: {period}, PR FACTOR: {factor.Round(1)}, " + result);
 				});
 			}
 			catch (Exception ex)
