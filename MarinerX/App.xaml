@@ -137,6 +137,13 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="14" />
         </Style>
+
+        <Style TargetType="{x:Type TextBlock}" x:Key="Description">
+            <Setter Property="Foreground" Value="Silver" />
+            <Setter Property="FontFamily" Value="Meiryo UI" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="1,7" />
+        </Style>
         <!--#endregion-->
 
         <!--#region TextBox -->

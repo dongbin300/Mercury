@@ -1,5 +1,4 @@
-﻿using MarinerX.Apis;
-using MarinerX.Markets;
+﻿using Mercury.Apis;
 
 using MercuryTradingModel.TradingModels;
 
@@ -7,10 +6,10 @@ using System.Windows;
 
 namespace MarinerX
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+	/// <summary>
+	/// Interaction logic for App.xaml
+	/// </summary>
+	public partial class App : Application
     {
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -21,7 +20,7 @@ namespace MarinerX
 
         void Initialize()
         {
-            LocalStorageApi.Init();
+            LocalApi.Init();
             BinanceRestApi.Init();
             BinanceSocketApi.Init();
             TradingModelPath.Init();

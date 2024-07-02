@@ -1,5 +1,6 @@
-﻿using MarinerX.Apis;
-using MarinerX.Utils;
+﻿using MarinerX.Utils;
+
+using Mercury.Apis;
 
 using System;
 using System.Runtime.InteropServices;
@@ -10,10 +11,10 @@ using System.Windows.Media;
 
 namespace MarinerX.Views
 {
-    /// <summary>
-    /// PositionMonitorView.xaml에 대한 상호 작용 논리
-    /// </summary>
-    public partial class PositionMonitorView : Window
+	/// <summary>
+	/// PositionMonitorView.xaml에 대한 상호 작용 논리
+	/// </summary>
+	public partial class PositionMonitorView : Window
     {
         private string symbol = string.Empty;
         private int interval = 15;

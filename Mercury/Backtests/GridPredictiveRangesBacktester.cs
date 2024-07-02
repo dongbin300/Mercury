@@ -197,8 +197,9 @@ namespace Mercury.Backtests
 			//PositionHistories.Add($"{Prices[chartIndex].Date:yyyy-MM-dd HH:mm:ss.fff},{Prices[chartIndex].Value:#.##},{order.Side},{order.Quantity:#.##},{Money:#.##},{Margin:#.##},{CoinQuantity:#.##},{GetPnl(Prices[chartIndex].Value):#.##},{nearestLongOrderPrice:#.##},{nearestShortOrderPrice:#.##}");
 		}
 
-		public string Run(Action<int> reportProgress, Action<int, int> reportProgressCount, int startIndex)
+		public string Run(int startIndex)
 		{
+			var isRest = false;
 			var startTime = Prices[startIndex].Date;
 			DateTime displayDate = startTime;
 
@@ -218,18 +219,21 @@ namespace Mercury.Backtests
 					displayDate = displayDate.AddDays(1);
 					WriteStatus(i);
 
+					// 그리드 재설정
+					if (isRest)
+					{
+						isRest = false;
+						SetGrid(i);
+						SetOrder(i);
+						WriteStatus(i);
+					}
+
 					// PRA 값이 바뀜
 					if (LastChart(time).PredictiveRangesAverage != CurrentChart(time).PredictiveRangesAverage)
 					{
 						WriteStatus(i);
 						CloseAllPositions(i);
-					}
-					// 그리드 재설정
-					else if (LongOrders.Count + ShortOrders.Count <= 0)
-					{
-						SetGrid(i);
-						SetOrder(i);
-						WriteStatus(i);
+						isRest = true;
 					}
 				}
 
@@ -250,7 +254,7 @@ namespace Mercury.Backtests
 			var estimatedMoney = GetEstimatedAsset(Prices[^1].Value);
 			var period = (Prices[^1].Date - Prices[0].Date).Days + 1;
 			var tradePerDay = (double)(LongFillCount + ShortFillCount) / period;
-			var resultString = $"{Symbol},{period}Days,{tradePerDay.Round(1)}/d,{MaxRisk.Round(2)}%,{estimatedMoney.Round(2)},{Margin.Round(2)}";
+			var resultString = $"{tradePerDay.Round(1)},{MaxRisk.Round(2)}%,{(int)estimatedMoney}";
 			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
 					 resultString + Environment.NewLine + Environment.NewLine);
 
@@ -297,7 +301,7 @@ namespace Mercury.Backtests
 			LowerStopLossPrice = (decimal)CurrentChart(currentTime).PredictiveRangesLower2;
 
 			GridInterval = (UpperPrice - LowerPrice) / GRID_COUNT;
-			StandardBaseOrderSize = Seed / GRID_COUNT;
+			StandardBaseOrderSize = Money / GRID_COUNT;
 			GridStartPrice = currentPrice;
 
 			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),

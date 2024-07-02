@@ -17,8 +17,9 @@ namespace MarinerX.Indicators
 
             if (pack == null)
             {
-                TrayMenu.LoadChartDataEvent(null, new EventArgs(), symbol, interval, true);
-                pack = ChartLoader.GetChartPack(symbol, interval);
+				// deprecated
+				//TrayMenu.LoadChartDataEvent(null, new EventArgs(), symbol, interval, true);
+				pack = ChartLoader.GetChartPack(symbol, interval);
             }
 
             pack.CalculateIndicators(new List<ChartElement>

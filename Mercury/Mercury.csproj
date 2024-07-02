@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Binance.Net" Version="9.1.4" />
+    <PackageReference Include="Binance.Net" Version="9.11.0" />
   </ItemGroup>
 
 </Project>

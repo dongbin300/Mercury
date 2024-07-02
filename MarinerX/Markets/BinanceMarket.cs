@@ -1,5 +1,6 @@
-﻿using MarinerX.Apis;
-using MarinerX.Utils;
+﻿using MarinerX.Utils;
+
+using Mercury.Apis;
 
 using System;
 using System.Collections.Generic;
@@ -9,14 +10,14 @@ namespace MarinerX.Markets
 {
 	public class BinanceMarket
 	{
-		public static List<SymbolBenchmark> Benchmarks = new();
+		public static List<SymbolBenchmark> Benchmarks = [];
 
 		public static void Init()
 		{
 			#region Symbol Benchmark Calculate
 			var volatilityResult = new Dictionary<string, decimal>();
 			var amountResult = new Dictionary<string, decimal>();
-			var data = LocalStorageApi.GetAllOneDayQuotes();
+			var data = LocalApi.GetAllOneDayQuotes();
 
 			foreach (var d in data)
 			{

@@ -4,6 +4,7 @@ using MarinerXX.Apis;
 
 using Mercury;
 using Mercury.Backtests;
+using Mercury.Backtests.Calculators;
 using Mercury.Charts;
 using Mercury.Enums;
 
@@ -104,29 +105,40 @@ namespace Backtester
 				DispatcherService.Invoke(() =>
 				{
 					ChartLoader.Charts = [];
-
 					var interval = KlineInterval.OneDay;
-					var period = Param1TextBox.Text.ToInt();
-					var factor = Param2TextBox.Text.ToDecimal();
-					var gridCount = GridCountTextBox.Text.ToInt();
-
-					//Common.ReportProgress(10);
 					ChartLoader.InitCharts(symbol, interval);
-
-					//Common.ReportProgress(25);
 					var chartPack = ChartLoader.GetChartPack(symbol, interval);
-					chartPack.UsePredictiveRanges(period, (double)factor);
 
-					//Common.ReportProgress(50);
 					if (aggregatedTrades.Count <= 0)
 					{
 						aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
 					}
 
-					//Common.ReportProgress(100);
-					var backtester = new GridPredictiveRangesBacktester(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount);
-					var result = backtester.Run(Common.ReportProgress, Common.ReportProgressCount, 0);
-					BacktestResultListBox.Items.Add($"PR PERIOD: {period}, PR FACTOR: {factor.Round(1)}, " + result);
+					var periodList = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+					//var periodList = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 450, 500 };
+					//var period = Param1TextBox.Text.ToInt();
+					//var factor = Param2TextBox.Text.ToDecimal();
+					//var gridCount = GridCountTextBox.Text.ToInt();
+
+					var gridCount = 60;
+					var factor = 1.5m;
+					//for (var gridCount = 10; gridCount <= 200; gridCount += 10)
+					{
+						//for (var factor = 1.5m; factor <= 4.0m; factor += 0.5m)
+						{
+							for (var pi = 0; pi < periodList.Length; pi++)
+							{
+								var period = periodList[pi];
+								chartPack.UsePredictiveRanges(period, (double)factor);
+
+								var backtester = new GridPredictiveRangesBacktester(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount);
+								var result = backtester.Run(0);
+								var resultString = $"{period},{factor.Round(1)},{gridCount}," + result;
+								File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+						 resultString + Environment.NewLine);
+							}
+						}
+					}
 				});
 			}
 			catch (Exception ex)
@@ -194,6 +206,44 @@ namespace Backtester
 			}
 		}
 
+		private void Worker_DoWorkRisk(object? sender, DoWorkEventArgs e)
+		{
+			try
+			{
+				List<decimal> results = [];
+				ChartLoader.Charts = [];
+				ChartLoader.InitCharts(symbol, interval, new DateTime(2019, 9, 9), endDate);
+				var chartPack = ChartLoader.GetChartPack(symbol, interval);
+
+				var periodList = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+				//var periodList = new int[] { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 450, 500 };
+
+				var gridCount = 60;
+				var factor = 1.5m;
+				//for (var gridCount = 10; gridCount <= 200; gridCount += 10)
+				{
+					//for (var factor = 1.5m; factor <= 4.0m; factor += 0.5m)
+					{
+						for (var pi = 0; pi < periodList.Length; pi++)
+						{
+							var period = periodList[pi];
+							chartPack.UsePredictiveRanges(period, (double)factor);
+
+							var calculator = new PredictiveRangesRiskCalculator(symbol, [.. chartPack.Charts], gridCount);
+							var result = calculator.Run(784);
+							var resultString = $"{period},{factor.Round(1)},{gridCount}," + result;
+							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+					 resultString + Environment.NewLine);
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+			}
+		}
+
 		private void FileOpenButton_Click(object sender, RoutedEventArgs e)
 		{
 			Process.Start(new ProcessStartInfo()
@@ -240,6 +290,117 @@ namespace Backtester
 					});
 				};
 				worker.RunWorkerAsync();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
+		private void CalculateRiskButton_Click(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				Settings.Default.Symbol = SymbolTextBox.Text;
+				Settings.Default.StartDate = StartDateTextBox.Text;
+				Settings.Default.EndDate = EndDateTextBox.Text;
+				Settings.Default.FileName = FileNameTextBox.Text;
+				Settings.Default.IntervalIndex = IntervalComboBox.SelectedIndex;
+				Settings.Default.Save();
+
+				symbol = SymbolTextBox.Text;
+				startDate = StartDateTextBox.Text.ToDateTime();
+				endDate = EndDateTextBox.Text.ToDateTime();
+				reportFileName = FileNameTextBox.Text;
+
+				BacktestProgress.Value = 0;
+				BacktestProgress.Maximum = 100;
+
+				var intervalString = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m");
+				interval = intervalString.ToKlineInterval();
+				worker.DoWork -= Worker_DoWorkRisk;
+				worker.DoWork += Worker_DoWorkRisk;
+
+				worker.ProgressChanged += (sender, e) =>
+				{
+					BacktestProgress.Value = e.ProgressPercentage;
+				};
+				Common.ReportProgress = worker.ReportProgress;
+				Common.ReportProgressCount = (i, m) =>
+				{
+					DispatcherService.Invoke(() =>
+					{
+						BacktestProgressText.Text = $"{i} / {m}";
+					});
+				};
+				worker.RunWorkerAsync();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
+		private void BactestRiskButton_Click(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				Common.ReportProgressCount = (i, m) =>
+				{
+					DispatcherService.Invoke(() =>
+					{
+						BacktestProgressText.Text = $"{i} / {m}";
+					});
+				};
+
+				Settings.Default.Symbol = SymbolTextBox.Text;
+				Settings.Default.StartDate = StartDateTextBox.Text;
+				Settings.Default.EndDate = EndDateTextBox.Text;
+				Settings.Default.FileName = FileNameTextBox.Text;
+				Settings.Default.IntervalIndex = IntervalComboBox.SelectedIndex;
+				Settings.Default.Save();
+
+				symbol = SymbolTextBox.Text;
+				startDate = StartDateTextBox.Text.ToDateTime();
+				endDate = EndDateTextBox.Text.ToDateTime();
+				reportFileName = FileNameTextBox.Text;
+
+				ChartLoader.Charts = [];
+				var interval = KlineInterval.OneDay;
+				ChartLoader.InitCharts(symbol, interval);
+				var chartPack = ChartLoader.GetChartPack(symbol, interval);
+				aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
+
+				//var gridCount = 60;
+				//var factor = 1.5m;
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd}" + Environment.NewLine);
+
+				for (var gridCount = 10; gridCount <= 10; gridCount += 10)
+				{
+					for (var factor = 1.5m; factor <= 1.5m; factor += 0.1m)
+					{
+						for (var period = 34; period <= 34; period++)
+						{
+							chartPack.UsePredictiveRanges(period, (double)factor);
+
+							var backtester = new GridPredictiveRangesBacktester(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount);
+							var result = backtester.Run(0);
+							var estimatedMoney = decimal.Parse(result.Split(',')[2]);
+
+							var riskCalculator = new PredictiveRangesRiskCalculator(symbol, [.. chartPack.Charts], gridCount);
+							var startIndex = chartPack.Charts.IndexOf(chartPack.Charts.First(x => x.DateTime.Year == startDate.Year && x.DateTime.Month == startDate.Month && x.DateTime.Day == startDate.Day));
+							var riskResult = riskCalculator.Run(startIndex);
+							var leveragedEstimatedMoney = (int)(riskResult * (estimatedMoney - 1_000_000));
+
+							var resultString = $"{period},{factor.Round(1)},{gridCount},{result},{riskResult.Round(2)},{leveragedEstimatedMoney}";
+							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), resultString + Environment.NewLine);
+						}
+					}
+				}
+
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), "END" + Environment.NewLine + Environment.NewLine);
+
+				Environment.Exit(0);
 			}
 			catch (Exception ex)
 			{

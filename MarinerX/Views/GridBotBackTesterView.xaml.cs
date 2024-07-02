@@ -1,10 +1,10 @@
 ﻿using MarinaX.Utils;
 
-using MarinerX.Apis;
 using MarinerX.Charts;
 using MarinerX.Utils;
 
 using Mercury;
+using Mercury.Apis;
 
 using MercuryTradingModel.Assets;
 using MercuryTradingModel.Enums;
@@ -19,7 +19,7 @@ using System.Windows;
 
 namespace MarinerX.Views
 {
-    public class GridBotBackTestTradingModel
+	public class GridBotBackTestTradingModel
     {
         public decimal Asset { get; set; }
         public DateTime StartTime { get; set; }
@@ -72,7 +72,7 @@ namespace MarinerX.Views
                 MinuteComboBox.Items.Add(i);
                 PeriodMinuteComboBox.Items.Add(i);
             }
-            foreach (var symbol in LocalStorageApi.SymbolNames)
+            foreach (var symbol in LocalApi.SymbolNames)
             {
                 TargetComboBox.Items.Add(symbol);
             }

@@ -1,5 +1,7 @@
-﻿using MarinerX.Apis;
-using MarinerX.Utils;
+﻿using MarinerX.Utils;
+
+using Mercury;
+using Mercury.Apis;
 
 using System;
 using System.Runtime.InteropServices;
@@ -10,10 +12,10 @@ using System.Windows.Media;
 
 namespace MarinerX.Views
 {
-    /// <summary>
-    /// BalanceMonitorView.xaml에 대한 상호 작용 논리
-    /// </summary>
-    public partial class BalanceMonitorView : Window
+	/// <summary>
+	/// BalanceMonitorView.xaml에 대한 상호 작용 논리
+	/// </summary>
+	public partial class BalanceMonitorView : Window
     {
         private System.Timers.Timer timer = new (1000);
 

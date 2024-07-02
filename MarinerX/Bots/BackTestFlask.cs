@@ -61,8 +61,9 @@ namespace MarinerX.Bots
             // If you did not load the target chart data yet, at first, load the chart data.
             if (charts == null)
             {
-                TrayMenu.LoadChartDataEvent(null, new EventArgs(), _symbol, _interval, true);
-                charts = ChartLoader.GetChartPack(_symbol, _interval);
+				// deprecated
+				//TrayMenu.LoadChartDataEvent(null, new EventArgs(), _symbol, _interval, true);
+				charts = ChartLoader.GetChartPack(_symbol, _interval);
             }
 
             // Named Element Init

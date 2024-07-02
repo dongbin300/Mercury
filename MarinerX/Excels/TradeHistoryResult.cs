@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Mercury;
+
+using System;
 
 namespace MarinerX.Excels
 {
-    public class TradeHistoryResult
+	public class TradeHistoryResult
     {
         public string Symbol { get; set; }
         public double Fee { get; set; }

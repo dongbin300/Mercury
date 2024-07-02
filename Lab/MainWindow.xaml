@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Lab"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-
+    <Grid Background="Black">
+        <local:NumericPlusTextBox CaretBrush="#05DAC5" Width="300" Height="35" FontSize="14"/>
     </Grid>
 </Window>

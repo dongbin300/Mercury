@@ -2,7 +2,6 @@
 
 using MarinaX.Utils;
 
-using MarinerX.Apis;
 using MarinerX.Bots;
 using MarinerX.Commas.Noises;
 using MarinerX.Commas.Parameters;
@@ -13,6 +12,7 @@ using MarinerX.Utils;
 using MarinerX.Views;
 
 using Mercury;
+using Mercury.Apis;
 
 using MercuryTradingModel.Extensions;
 using MercuryTradingModel.IO;
@@ -26,15 +26,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Security.Policy;
 using System.Windows;
 using System.Windows.Forms;
 
 using ChartLoader = MarinerX.Charts.ChartLoader;
-
-
 using MessageBox = System.Windows.MessageBox;
 
 namespace MarinerX
@@ -47,18 +43,18 @@ namespace MarinerX
 		private static ProgressView[] progressViews = new ProgressView[80];
 		private string iconFileName = "Resources/Images/chart2.ico";
 		private Image iconImage;
-		private List<BackTestTmFile> tmBackTestFiles = new();
-		private List<string> tmMockTradeFileNames = new();
-		private List<string> tmRealTradeFileNames = new();
-		private List<string> backTestResultFileNames = new();
-		private List<string> symbolNames = new();
+		private List<BackTestTmFile> tmBackTestFiles = [];
+		private List<string> tmMockTradeFileNames = [];
+		private List<string> tmRealTradeFileNames = [];
+		private List<string> backTestResultFileNames = [];
+		private List<string> symbolNames = [];
 		private PositionMonitorView positionMonitorView = new();
 		private BalanceMonitorView balanceMonitorView = new();
 		private QuoteMonitorView quoteMonitorView = new();
 
 		public TrayMenu()
 		{
-			symbolNames = LocalStorageApi.SymbolNames;
+			symbolNames = LocalApi.SymbolNames;
 
 			iconImage = Image.FromFile(iconFileName);
 
@@ -102,9 +98,9 @@ namespace MarinerX
 		private void RefreshTmFile()
 		{
 			tmBackTestFiles = Directory.GetFiles(TradingModelPath.InspectedBackTestDirectory).Select(x => new BackTestTmFile(x)).ToList();
-			tmMockTradeFileNames = Directory.GetFiles(TradingModelPath.InspectedMockTradeDirectory).ToList();
-			tmRealTradeFileNames = Directory.GetFiles(TradingModelPath.InspectedRealTradeDirectory).ToList();
-			backTestResultFileNames = Directory.GetFiles(PathUtil.Base.Down("MarinerX"), "*.csv").ToList();
+			tmMockTradeFileNames = [.. Directory.GetFiles(TradingModelPath.InspectedMockTradeDirectory)];
+			tmRealTradeFileNames = [.. Directory.GetFiles(TradingModelPath.InspectedRealTradeDirectory)];
+			backTestResultFileNames = [.. Directory.GetFiles(PathUtil.Base.Down("MarinerX"), "*.csv")];
 		}
 
 		public void RefreshMenu()
@@ -119,16 +115,9 @@ namespace MarinerX
 			menu1.DropDownItems.Add("Binance 현재가 데이터 수집", null, new EventHandler(GetBinancePriceDataEvent));
 			menu1.DropDownItems.Add("Binance 심볼 데이터 수집", null, new EventHandler(GetBinanceSymbolDataEvent));
 			menu1.DropDownItems.Add("Binance 1분봉 데이터 수집", null, new EventHandler(GetBinanceCandleDataEvent));
-			menu1.DropDownItems.Add("Binance 1일봉 데이터 추출", null, new EventHandler(Extract1DCandleEvent));
 			menu1.DropDownItems.Add("Binance 5분봉 데이터 추출", null, new EventHandler(Extract5mCandleEvent));
-			menu1.DropDownItems.Add("Binance 15분봉 데이터 추출", null, new EventHandler(Extract15mCandleEvent));
-			menu1.DropDownItems.Add("Binance 30분봉 데이터 추출", null, new EventHandler(Extract30mCandleEvent));
 			menu1.DropDownItems.Add("Binance 1시간봉 데이터 추출", null, new EventHandler(Extract1hCandleEvent));
-			menu1.DropDownItems.Add(new ToolStripSeparator());
-			menu1.DropDownItems.Add("Binance 5분봉 지표값 추출", null, new EventHandler(Extract5mIndicatorTs1Event));
-			menu1.DropDownItems.Add("Binance 15분봉 지표값 추출", null, new EventHandler(Extract15mIndicatorTs1Event));
-			menu1.DropDownItems.Add("Binance 30분봉 지표값 추출", null, new EventHandler(Extract30mIndicatorTs1Event));
-			menu1.DropDownItems.Add("Binance 1시간봉 지표값 추출", null, new EventHandler(Extract1hIndicatorTs1Event));
+			menu1.DropDownItems.Add("Binance 1일봉 데이터 추출", null, new EventHandler(Extract1DCandleEvent));
 			menu1.DropDownItems.Add(new ToolStripSeparator());
 			menu1.DropDownItems.Add("Binance 1분봉 데이터 체크", null, new EventHandler(GetBinanceCandleDataCheckEvent));
 			menu1.DropDownItems.Add("Binance 1분봉 매뉴얼 데이터 수집", null, new EventHandler(GetBinanceCandleDataManualEvent));
@@ -137,38 +126,8 @@ namespace MarinerX
 			menuStrip.Items.Add(menu1);
 
 			var menu2 = new ToolStripMenuItem("데이터 로드");
-			var menu21 = new ToolStripMenuItem("1분봉 데이터 로드");
-			var menu211 = new ToolStripMenuItem("A-D");
-			foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
-			{
-				menu211.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.OneMinute))));
-			}
-			var menu212 = new ToolStripMenuItem("E-N");
-			foreach (var symbolName in symbolNames.Where(s => s[0] >= 'E' && s[0] <= 'N'))
-			{
-				menu212.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.OneMinute))));
-			}
-			var menu213 = new ToolStripMenuItem("O-Z");
-			foreach (var symbolName in symbolNames.Where(s => s[0] >= 'O' && s[0] <= 'Z'))
-			{
-				menu213.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.OneMinute))));
-			}
-			var menu22 = new ToolStripMenuItem("5분봉 데이터 로드");
-			var menu221 = new ToolStripMenuItem("A-D");
-			foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
-			{
-				menu221.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.FiveMinutes))));
-			}
-			var menu222 = new ToolStripMenuItem("E-N");
-			foreach (var symbolName in symbolNames.Where(s => s[0] >= 'E' && s[0] <= 'N'))
-			{
-				menu222.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.FiveMinutes))));
-			}
-			var menu223 = new ToolStripMenuItem("O-Z");
-			foreach (var symbolName in symbolNames.Where(s => s[0] >= 'O' && s[0] <= 'Z'))
-			{
-				menu223.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e, symbolName, KlineInterval.FiveMinutes))));
-			}
+			menu2.DropDownItems.Add(new ToolStripMenuItem("캔들 데이터 로드", null, new EventHandler((sender, e) => LoadChartDataEvent(sender, e))));
+
 			var menu23 = new ToolStripMenuItem("거래 데이터 로드");
 			var menu231 = new ToolStripMenuItem("A-D");
 			foreach (var symbolName in symbolNames.Where(s => s[0] >= 'A' && s[0] <= 'D'))
@@ -202,20 +161,12 @@ namespace MarinerX
 				menu243.DropDownItems.Add(new ToolStripMenuItem(symbolName, null, new EventHandler((sender, e) => LoadPriceDataEvent(sender, e, symbolName))));
 			}
 
-			menu21.DropDownItems.Add(menu211);
-			menu21.DropDownItems.Add(menu212);
-			menu21.DropDownItems.Add(menu213);
-			menu22.DropDownItems.Add(menu221);
-			menu22.DropDownItems.Add(menu222);
-			menu22.DropDownItems.Add(menu223);
 			menu23.DropDownItems.Add(menu231);
 			menu23.DropDownItems.Add(menu232);
 			menu23.DropDownItems.Add(menu233);
 			menu24.DropDownItems.Add(menu241);
 			menu24.DropDownItems.Add(menu242);
 			menu24.DropDownItems.Add(menu243);
-			menu2.DropDownItems.Add(menu21);
-			menu2.DropDownItems.Add(menu22);
 			menu2.DropDownItems.Add(menu23);
 			menu2.DropDownItems.Add(menu24);
 			menuStrip.Items.Add(menu2);
@@ -334,13 +285,10 @@ namespace MarinerX
 				var symbolData = BinanceRestApi.GetFuturesSymbols();
 				symbolData.SaveCsvFile(PathUtil.BinanceFuturesData.Down($"symbol_detail_{DateTime.Now:yyyy-MM-dd}.csv"));
 
-				var bnbPrice = BinanceRestApi.GetCurrentBnbPrice();
-				File.WriteAllLines(PathUtil.BinanceFuturesData.Down("BNB.txt"), new List<string> { DateTime.Now.ToStandardFileName(), bnbPrice.ToString() });
-
 				MessageBox.Show("바이낸스 심볼 데이터 수집 완료");
 
 				ProcessUtil.Start(PathUtil.BinanceFuturesData);
-				LocalStorageApi.Init();
+				LocalApi.Init();
 			}
 			catch (Exception ex)
 			{
@@ -494,58 +442,6 @@ namespace MarinerX
 			}
 		}
 
-		public static void Extract15mCandleEvent(object? sender, EventArgs e)
-		{
-			progressView.Show();
-			var worker = new Worker()
-			{
-				ProgressBar = progressView.ProgressBar,
-				Action = Extract15mCandle
-			};
-			worker.Start();
-		}
-
-		public static void Extract15mCandle(Worker worker, object? obj)
-		{
-			try
-			{
-				ChartLoader.ExtractCandle(worker, KlineInterval.FifteenMinutes, "15m");
-				DispatcherService.Invoke(progressView.Hide);
-
-				MessageBox.Show("바이낸스 15분봉 데이터 추출 완료");
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
-
-		public static void Extract30mCandleEvent(object? sender, EventArgs e)
-		{
-			progressView.Show();
-			var worker = new Worker()
-			{
-				ProgressBar = progressView.ProgressBar,
-				Action = Extract30mCandle
-			};
-			worker.Start();
-		}
-
-		public static void Extract30mCandle(Worker worker, object? obj)
-		{
-			try
-			{
-				ChartLoader.ExtractCandle(worker, KlineInterval.ThirtyMinutes, "30m");
-				DispatcherService.Invoke(progressView.Hide);
-
-				MessageBox.Show("바이낸스 30분봉 데이터 추출 완료");
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
-
 		public static void Extract1hCandleEvent(object? sender, EventArgs e)
 		{
 			progressView.Show();
@@ -571,110 +467,6 @@ namespace MarinerX
 				MessageBox.Show(ex.Message);
 			}
 		}
-
-		public static void Extract5mIndicatorTs1Event(object? sender, EventArgs e)
-		{
-			progressView.Show();
-			var worker = new Worker()
-			{
-				ProgressBar = progressView.ProgressBar,
-				Action = Extract5mIndicatorTs1
-			};
-			worker.Start();
-		}
-
-		public static void Extract5mIndicatorTs1(Worker worker, object? obj)
-		{
-			try
-			{
-				ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.FiveMinutes, "5m");
-				DispatcherService.Invoke(progressView.Hide);
-
-				MessageBox.Show("바이낸스 5분봉 TS2 지표값 추출 완료");
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
-
-		public static void Extract15mIndicatorTs1Event(object? sender, EventArgs e)
-		{
-			progressView.Show();
-			var worker = new Worker()
-			{
-				ProgressBar = progressView.ProgressBar,
-				Action = Extract15mIndicatorTs1
-			};
-			worker.Start();
-		}
-
-		public static void Extract15mIndicatorTs1(Worker worker, object? obj)
-		{
-			try
-			{
-				ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.FifteenMinutes, "15m");
-				DispatcherService.Invoke(progressView.Hide);
-
-				MessageBox.Show("바이낸스 15분봉 TS2 지표값 추출 완료");
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
-
-		public static void Extract30mIndicatorTs1Event(object? sender, EventArgs e)
-		{
-			progressView.Show();
-			var worker = new Worker()
-			{
-				ProgressBar = progressView.ProgressBar,
-				Action = Extract30mIndicatorTs1
-			};
-			worker.Start();
-		}
-
-		public static void Extract30mIndicatorTs1(Worker worker, object? obj)
-		{
-			try
-			{
-				ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.ThirtyMinutes, "30m");
-				DispatcherService.Invoke(progressView.Hide);
-
-				MessageBox.Show("바이낸스 30분봉 TS2 지표값 추출 완료");
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
-
-		public static void Extract1hIndicatorTs1Event(object? sender, EventArgs e)
-		{
-			progressView.Show();
-			var worker = new Worker()
-			{
-				ProgressBar = progressView.ProgressBar,
-				Action = Extract1hIndicatorTs1
-			};
-			worker.Start();
-		}
-
-		public static void Extract1hIndicatorTs1(Worker worker, object? obj)
-		{
-			try
-			{
-				ChartLoader.ExtractIndicatorTs2(worker, KlineInterval.OneHour, "1h");
-				DispatcherService.Invoke(progressView.Hide);
-
-				MessageBox.Show("바이낸스 1시간봉 TS2 지표값 추출 완료");
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(ex.Message);
-			}
-		}
 		#endregion
 
 		#region 데이터 로드
@@ -683,25 +475,35 @@ namespace MarinerX
 		record TradeDataType(string symbol, bool isExternal);
 		record PriceDataType(string symbol, bool isExternal);
 
-		public static void LoadChartDataEvent(object? sender, EventArgs e, string symbol, KlineInterval interval, bool external = false)
+		public static void LoadChartDataEvent(object? sender, EventArgs e, bool external = false)
 		{
-			if (!external)
+			var symbolSelector = new SymbolSelectorView
 			{
-				progressView.Show();
-			}
-			var worker = new Worker()
-			{
-				ProgressBar = progressView.ProgressBar,
-				Action = LoadChartData,
-				Arguments = new ChartDataType(symbol, interval, external)
+				WindowStartupLocation = WindowStartupLocation.CenterScreen
 			};
-			if (external)
+			if (symbolSelector.ShowDialog() ?? false)
 			{
-				worker.Start().Wait();
-			}
-			else
-			{
-				worker.Start();
+				var symbol = symbolSelector.SelectedSymbol;
+				var interval = symbolSelector.SelectedInterval;
+
+				if (!external)
+				{
+					progressView.Show();
+				}
+				var worker = new Worker()
+				{
+					ProgressBar = progressView.ProgressBar,
+					Action = LoadChartData,
+					Arguments = new ChartDataType(symbol, interval, external)
+				};
+				if (external)
+				{
+					worker.Start().Wait();
+				}
+				else
+				{
+					worker.Start();
+				}
 			}
 		}
 
@@ -1030,7 +832,7 @@ namespace MarinerX
 		{
 			try
 			{
-				LocalStorageApi.GetSeed();
+				LocalApi.GetSeed();
 				balanceMonitorView.Show();
 			}
 			catch (Exception ex)
@@ -1197,7 +999,7 @@ namespace MarinerX
 		{
 			try
 			{
-				var data = LocalStorageApi.GetOneDayQuotes("BTCUSDT");
+				var data = LocalApi.GetOneDayQuotes("BTCUSDT");
 				var significantCount = data.Count(x => Math.Abs(StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, x.Open, x.Close)) >= 4.0m);
 				var ratio = (double)significantCount / data.Count * 100;
 
@@ -1466,7 +1268,7 @@ namespace MarinerX
 			{
 				var random = new SmartRandom();
 				var result = new List<CommasDealManager>();
-				var symbols = LocalStorageApi.SymbolNames;
+				var symbols = LocalApi.SymbolNames;
 				var interval = KlineInterval.FiveMinutes;
 				var dayCount = 90;
 				var baseOrderSize = 100;
@@ -1559,23 +1361,30 @@ namespace MarinerX
 		{
 			try
 			{
-				var symbol = "BTCUSDT";
-				var startTime = new DateTime(2024, 1, 1);
-				var currentTime = startTime;
-				var endTime = new DateTime(2024, 5, 12);
-				using var client = new HttpClient();
-
-				while (currentTime <= endTime)
+				var symbolSelector = new SymbolSelectorView
 				{
-					var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/{symbol}/{symbol}-aggTrades-{currentTime:yyyy-MM-dd}.zip";
-					var response = client.GetAsync(url).Result;
-					if (response.IsSuccessStatusCode)
+					WindowStartupLocation = WindowStartupLocation.CenterScreen
+				};
+				if (symbolSelector.ShowDialog() ?? false)
+				{
+					var symbol = symbolSelector.SelectedSymbol;
+					var startTime = symbolSelector.SelectedStartDate;
+					var currentTime = startTime;
+					var endTime = symbolSelector.SelectedEndDate;
+					using var client = new HttpClient();
+
+					while (currentTime <= endTime)
 					{
-						using Stream responseStream = response.Content.ReadAsStreamAsync().Result;
-						using FileStream fileStream = File.Create(PathUtil.BinanceFuturesData.Down("trade", symbol, $"{currentTime:yyyy-MM-dd}.zip"));
-						responseStream.CopyTo(fileStream);
+						var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/{symbol}/{symbol}-aggTrades-{currentTime:yyyy-MM-dd}.zip";
+						var response = client.GetAsync(url).Result;
+						if (response.IsSuccessStatusCode)
+						{
+							using Stream responseStream = response.Content.ReadAsStreamAsync().Result;
+							using FileStream fileStream = File.Create(PathUtil.BinanceFuturesData.Down("trade", symbol, $"{currentTime:yyyy-MM-dd}.zip"));
+							responseStream.CopyTo(fileStream);
+						}
+						currentTime = currentTime.AddDays(1);
 					}
-					currentTime = currentTime.AddDays(1);
 				}
 			}
 			catch (Exception ex)

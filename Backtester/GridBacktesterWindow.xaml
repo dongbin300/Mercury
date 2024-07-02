@@ -3,13 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                xmlns:local="clr-namespace:Backtester"
+        xmlns:c="clr-namespace:Backtester.Views.Controls"
+        xmlns:local="clr-namespace:Backtester"
         mc:Ignorable="d"
-        Title="GRID BACKTEST" Height="650" Width="1000" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+        Title="GRID BACKTEST" Height="650" Width="500" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
@@ -17,8 +18,6 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="25"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
             <StackPanel Orientation="Vertical" Grid.Row="0">
                 <StackPanel Orientation="Horizontal">
@@ -58,23 +57,39 @@
                 <Button x:Name="FileOpenButton" Click="FileOpenButton_Click">Open</Button>
 
                 <TextBlock Style="{StaticResource Description}">PR Period</TextBlock>
-                <TextBox x:Name="Param1TextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="200"/>
+                <c:NumericPlusTextBox x:Name="Param1TextBox" Width="200" Height="30" CaretBrush="{StaticResource Long}" Text="200"/>
                 <TextBlock Style="{StaticResource Description}">PR Factor</TextBlock>
-                <TextBox x:Name="Param2TextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="6.0"/>
+                <c:NumericPlusTextBox x:Name="Param2TextBox" Width="200" Height="30" CaretBrush="{StaticResource Long}" Text="6.0"/>
                 <TextBlock Style="{StaticResource Description}">Grid Count</TextBlock>
-                <TextBox x:Name="GridCountTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="120"/>
+                <c:NumericPlusTextBox x:Name="GridCountTextBox" Width="200" Height="30" CaretBrush="{StaticResource Long}" Text="120"/>
             </StackPanel>
 
             <TextBlock Grid.Row="1" x:Name="BacktestProgressText" Margin="5 2"  HorizontalAlignment="Center"/>
             <ProgressBar Grid.Row="2" x:Name="BacktestProgress" Margin="5 2" Foreground="{StaticResource Long}" Background="Transparent" BorderThickness="0"/>
-            <Button Grid.Row="3" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
-            <Button Grid.Row="4" x:Name="GridRangeButton" Content="GRID RANGE" Click="GridRangeButton_Click"/>
+            
         </Grid>
 
         <Grid Grid.Column="1">
-            <ListBox x:Name="BacktestResultListBox">
-                
-            </ListBox>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Button Grid.Row="0" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
+            <Button Grid.Row="1" x:Name="GridRangeButton" Content="GRID RANGE" Click="GridRangeButton_Click"/>
+            <Button Grid.Row="2" x:Name="CalculateRiskButton" Content="CALCULATE RISK" Click="CalculateRiskButton_Click"/>
+            <Button Grid.Row="3" x:Name="BactestRiskButton" Content="BACKTEST + RISK" Click="BactestRiskButton_Click"/>
         </Grid>
     </Grid>
     

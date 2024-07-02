@@ -1,11 +1,4 @@
-﻿using MarinerX.Utils;
-
-using Newtonsoft.Json;
-
-using System.Collections.Generic;
-using System.Linq;
-
-namespace MarinerX.Apis
+﻿namespace Mercury.Apis
 {
 	public class BinanceHttpApi
 	{

@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="MarinerX.Views.Controls.SearchTextBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="Auto" Width="Auto">
+    <StackPanel>
+        <TextBox x:Name="_SearchTextBox"
+                 Width="200"
+                 TextChanged="_SearchTextBox_TextChanged"
+                 KeyDown="_SearchTextBox_KeyDown"/>
+        <ListBox x:Name="_SuggestionsListBox"
+                 Width="200"
+                 ItemsSource="{Binding Suggestions}"
+                 Visibility="Collapsed"
+                 MouseLeftButtonDown="_SuggestionsListBox_MouseLeftButtonDown"/>
+    </StackPanel>
+</UserControl>

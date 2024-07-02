@@ -50,7 +50,8 @@ namespace MarinerX.Bots
             // If you did not load the target chart data yet, at first, load the chart data.
             if (charts == null)
             {
-                TrayMenu.LoadChartDataEvent(null, new EventArgs(), TradingModel.Targets[0], TradingModel.Interval, true);
+                // deprecated
+                //TrayMenu.LoadChartDataEvent(null, new EventArgs(), TradingModel.Targets[0], TradingModel.Interval, true);
                 charts = ChartLoader.GetChartPack(TradingModel.Targets[0], TradingModel.Interval);
             }
 
