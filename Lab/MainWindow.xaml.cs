@@ -1,14 +1,10 @@
 ﻿using Binance.Net.Enums;
 
-using Mercury;
 using Mercury.Backtests.Calculators;
 using Mercury.Charts;
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace Lab
@@ -22,7 +18,7 @@ namespace Lab
 		{
 			InitializeComponent();
 
-			binanceapi
+			IEnumerable<int> numbers = Enumerable.Range(1, 1000000000);
 
 			var b5 = CalculateMaxLeverage(PositionSide.Short, 63860, 56825, 60950, 20);
 

@@ -13,7 +13,7 @@ namespace Mercury.Apis
 	public class BinanceRestApi
 	{
 		#region Initialize
-		static BinanceRestClient binanceClient = new();
+		public static BinanceRestClient BinanceClient = new();
 
 		/// <summary>
 		/// 바이낸스 클라이언트 초기화
@@ -22,15 +22,15 @@ namespace Mercury.Apis
 		{
 			var data = File.ReadAllLines(MercuryPath.BinanceApiKey);
 
-			binanceClient = new BinanceRestClient();
-			binanceClient.SetApiCredentials(new ApiCredentials(data[0], data[1]));
+			BinanceClient = new BinanceRestClient();
+			BinanceClient.SetApiCredentials(new ApiCredentials(data[0], data[1]));
 		}
 		#endregion
 
 		#region Test
 		public static BinanceExchangeInfo Test()
 		{
-			var exchangeInfo = binanceClient.SpotApi.ExchangeData.GetExchangeInfoAsync();
+			var exchangeInfo = BinanceClient.SpotApi.ExchangeData.GetExchangeInfoAsync();
 			exchangeInfo.Wait();
 
 			return exchangeInfo.Result.Data;
@@ -44,7 +44,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static List<string> GetFuturesSymbolNames()
 		{
-			var usdFuturesSymbolData = binanceClient.UsdFuturesApi.ExchangeData.GetExchangeInfoAsync();
+			var usdFuturesSymbolData = BinanceClient.UsdFuturesApi.ExchangeData.GetExchangeInfoAsync();
 			usdFuturesSymbolData.Wait();
 
 			var symbolNames = usdFuturesSymbolData.Result.Data.Symbols
@@ -64,7 +64,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static List<BinanceFuturesSymbol> GetFuturesSymbols()
 		{
-			var usdFuturesSymbolData = binanceClient.UsdFuturesApi.ExchangeData.GetExchangeInfoAsync();
+			var usdFuturesSymbolData = BinanceClient.UsdFuturesApi.ExchangeData.GetExchangeInfoAsync();
 			usdFuturesSymbolData.Wait();
 
 			return usdFuturesSymbolData.Result.Data.Symbols
@@ -75,7 +75,7 @@ namespace Mercury.Apis
 
 		public static List<BinancePrice> GetFuturesPrices()
 		{
-			return binanceClient.UsdFuturesApi.ExchangeData.GetPricesAsync().Result.Data.Where(s => s.Symbol.EndsWith("USDT") && !s.Symbol.Equals("LINKUSDT") && !s.Symbol.StartsWith('1')).ToList();
+			return BinanceClient.UsdFuturesApi.ExchangeData.GetPricesAsync().Result.Data.Where(s => s.Symbol.EndsWith("USDT") && !s.Symbol.Equals("LINKUSDT") && !s.Symbol.StartsWith('1')).ToList();
 		}
 		#endregion
 
@@ -87,7 +87,7 @@ namespace Mercury.Apis
 		/// <param name="startTime"></param>
 		public static void GetCandleDataForOneDay(string symbol, DateTime startTime)
 		{
-			var result = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(
+			var result = BinanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(
 				symbol,
 				KlineInterval.OneMinute,
 				startTime,
@@ -134,7 +134,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static List<Quote> GetQuotes(string symbol, KlineInterval interval, DateTime? startTime, DateTime? endTime, int limit)
 		{
-			var result = binanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, startTime, endTime, limit);
+			var result = BinanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(symbol, interval, startTime, endTime, limit);
 			result.Wait();
 
 			var quotes = new List<Quote>();
@@ -162,7 +162,7 @@ namespace Mercury.Apis
 
 		public static List<AggregatedTrade> GetAggregatedTrades(string symbol, DateTime? startTime, DateTime? endTime, int? limit)
 		{
-			var result = binanceClient.UsdFuturesApi.ExchangeData.GetAggregatedTradeHistoryAsync(symbol, null, startTime, endTime, limit);
+			var result = BinanceClient.UsdFuturesApi.ExchangeData.GetAggregatedTradeHistoryAsync(symbol, null, startTime, endTime, limit);
 			result.Wait();
 
 			var aggregatedTrades = new List<AggregatedTrade>();
@@ -177,7 +177,7 @@ namespace Mercury.Apis
 
 		public static double GetCurrentBnbPrice()
 		{
-			var result = binanceClient.SpotApi.ExchangeData.GetCurrentAvgPriceAsync("BNBUSDT");
+			var result = BinanceClient.SpotApi.ExchangeData.GetCurrentAvgPriceAsync("BNBUSDT");
 			result.Wait();
 
 			return Convert.ToDouble(result.Result.Data.Price);
@@ -191,7 +191,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static BinanceFuturesAccount GetFuturesAccountInfo()
 		{
-			var accountInfo = binanceClient.UsdFuturesApi.Account.GetAccountInfoAsync();
+			var accountInfo = BinanceClient.UsdFuturesApi.Account.GetAccountInfoAsync();
 			accountInfo.Wait();
 
 			var info = accountInfo.Result.Data;
@@ -214,7 +214,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static bool ChangeInitialLeverage(string symbol, int leverage)
 		{
-			var changeInitialLeverage = binanceClient.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, leverage);
+			var changeInitialLeverage = BinanceClient.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, leverage);
 			changeInitialLeverage.Wait();
 
 			return changeInitialLeverage.Result.Success;
@@ -228,7 +228,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static bool ChangeMarginType(string symbol, FuturesMarginType type)
 		{
-			var changeMarginType = binanceClient.UsdFuturesApi.Account.ChangeMarginTypeAsync(symbol, type);
+			var changeMarginType = BinanceClient.UsdFuturesApi.Account.ChangeMarginTypeAsync(symbol, type);
 			changeMarginType.Wait();
 
 			return changeMarginType.Result.Success;
@@ -241,7 +241,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static List<BinanceFuturesPosition> GetPositionInformation(string? symbol = null)
 		{
-			var positionInformation = binanceClient.UsdFuturesApi.Account.GetPositionInformationAsync(symbol);
+			var positionInformation = BinanceClient.UsdFuturesApi.Account.GetPositionInformationAsync(symbol);
 			positionInformation.Wait();
 
 			return positionInformation.Result.Data
@@ -267,7 +267,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static List<BinanceFuturesPosition> GetPositioningInformation(string? symbol = null)
 		{
-			var positionInformation = binanceClient.UsdFuturesApi.Account.GetPositionInformationAsync(symbol);
+			var positionInformation = BinanceClient.UsdFuturesApi.Account.GetPositionInformationAsync(symbol);
 			positionInformation.Wait();
 
 			return positionInformation.Result.Data
@@ -292,7 +292,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static List<BinanceFuturesBalance> GetBalance()
 		{
-			var balance = binanceClient.UsdFuturesApi.Account.GetBalancesAsync();
+			var balance = BinanceClient.UsdFuturesApi.Account.GetBalancesAsync();
 			balance.Wait();
 
 			return balance.Result.Data.Where(x => x.Asset.Equals("USDT") || x.Asset.Equals("BNB"))
@@ -309,7 +309,7 @@ namespace Mercury.Apis
 		{
 			try
 			{
-				var result = binanceClient.UsdFuturesApi.Account.GetBalancesAsync();
+				var result = BinanceClient.UsdFuturesApi.Account.GetBalancesAsync();
 				result.Wait();
 				var balance = result.Result.Data;
 				var usdtBalance = balance.First(b => b.Asset.Equals("USDT"));
@@ -325,7 +325,7 @@ namespace Mercury.Apis
 
 		public static string StartUserStream()
 		{
-			var listenKey = binanceClient.UsdFuturesApi.Account.StartUserStreamAsync();
+			var listenKey = BinanceClient.UsdFuturesApi.Account.StartUserStreamAsync();
 			listenKey.Wait();
 
 			return listenKey.Result.Data;
@@ -333,7 +333,7 @@ namespace Mercury.Apis
 
 		public static void StopUserStream(string listenKey)
 		{
-			var result = binanceClient.UsdFuturesApi.Account.StopUserStreamAsync(listenKey);
+			var result = BinanceClient.UsdFuturesApi.Account.StopUserStreamAsync(listenKey);
 			result.Wait();
 		}
 		#endregion
@@ -344,7 +344,7 @@ namespace Mercury.Apis
 			var results = new Dictionary<string, int>();
 			try
 			{
-				var result = binanceClient.UsdFuturesApi.Account.GetBracketsAsync();
+				var result = BinanceClient.UsdFuturesApi.Account.GetBracketsAsync();
 				result.Wait();
 
 				foreach (var d in result.Result.Data)
@@ -370,7 +370,7 @@ namespace Mercury.Apis
 		/// <param name="price"></param>
 		public static void Order(string symbol, OrderSide side, FuturesOrderType type, decimal quantity, decimal? price = null)
 		{
-			var placeOrder = binanceClient.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, side, type, quantity, price);
+			var placeOrder = BinanceClient.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, side, type, quantity, price);
 			placeOrder.Wait();
 		}
 
@@ -385,7 +385,7 @@ namespace Mercury.Apis
 		public static void Buy(string symbol, double quantity, double? price = null)
 		{
 			var type = price == null ? FuturesOrderType.Market : FuturesOrderType.Limit;
-			var placeOrder = binanceClient.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Buy, type, Convert.ToDecimal(quantity), Convert.ToDecimal(price));
+			var placeOrder = BinanceClient.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Buy, type, Convert.ToDecimal(quantity), Convert.ToDecimal(price));
 		}
 
 		/// <summary>
@@ -399,7 +399,7 @@ namespace Mercury.Apis
 		public static void Sell(string symbol, double quantity, double? price = null)
 		{
 			var type = price == null ? FuturesOrderType.Market : FuturesOrderType.Limit;
-			var placeOrder = binanceClient.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, type, Convert.ToDecimal(quantity), Convert.ToDecimal(price));
+			var placeOrder = BinanceClient.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, type, Convert.ToDecimal(quantity), Convert.ToDecimal(price));
 		}
 		#endregion
 	}

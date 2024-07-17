@@ -13,7 +13,7 @@ namespace Mercury.Apis
 	public class BinanceSocketApi
 	{
 		#region Initialize
-		static BinanceSocketClient binanceClient = new();
+		public static BinanceSocketClient BinanceClient = new();
 
 		/// <summary>
 		/// 바이낸스 클라이언트 초기화
@@ -22,35 +22,35 @@ namespace Mercury.Apis
 		{
 			var data = File.ReadAllLines(MercuryPath.BinanceApiKey);
 
-			binanceClient = new BinanceSocketClient();
-			binanceClient.SetApiCredentials(new ApiCredentials(data[0], data[1]));
+			BinanceClient = new BinanceSocketClient();
+			BinanceClient.SetApiCredentials(new ApiCredentials(data[0], data[1]));
 		}
 		#endregion
 
 		#region Market API
 		public static async void GetKlineUpdatesAsync(string symbol, KlineInterval interval)
 		{
-			var result = await binanceClient.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage);
 		}
 
 		public static async void GetKlineUpdatesAsync2(string symbol, KlineInterval interval)
 		{
-			var result = await binanceClient.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage2);
+			var result = await BinanceClient.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage2);
 		}
 
 		public static async void GetContinuousKlineUpdatesAsync(string symbol, KlineInterval interval)
 		{
-			var result = await binanceClient.UsdFuturesApi.SubscribeToContinuousContractKlineUpdatesAsync(symbol, ContractType.Perpetual, interval, ContinuousKlineUpdatesOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.SubscribeToContinuousContractKlineUpdatesAsync(symbol, ContractType.Perpetual, interval, ContinuousKlineUpdatesOnMessage);
 		}
 
 		public static async void GetBnbMarkPriceUpdatesAsync()
 		{
-			var result = await binanceClient.UsdFuturesApi.SubscribeToMarkPriceUpdatesAsync("BNBUSDT", 1000, BnbMarkPriceUpdatesAsyncOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.SubscribeToMarkPriceUpdatesAsync("BNBUSDT", 1000, BnbMarkPriceUpdatesAsyncOnMessage);
 		}
 
 		public static async void GetAllMarketMiniTickersAsync()
 		{
-			var result = await binanceClient.UsdFuturesApi.SubscribeToAllMiniTickerUpdatesAsync(AllMarketMiniTickersOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.SubscribeToAllMiniTickerUpdatesAsync(AllMarketMiniTickersOnMessage);
 		}
 
 		//public static async void SubscribeToUserDataUpdatesAsync()

@@ -1,0 +1,32 @@
+﻿<Window x:Class="GridMaxLeverageCalculator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GridMaxLeverageCalculator"
+        mc:Ignorable="d"
+        Title="Grid Max Leverage Calculator" Height="380" Width="450" Background="{StaticResource Background}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="35"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <TextBlock Style="{StaticResource Description}">GRID COUNT</TextBlock>
+            <TextBox x:Name="GridCountTextBox">30</TextBox>
+            <TextBlock Style="{StaticResource Description}">LOWER PRICE</TextBlock>
+            <TextBox x:Name="LowerPriceTextBox"/>
+            <TextBlock Style="{StaticResource Description}">UPPER PRICE</TextBlock>
+            <TextBox x:Name="UpperPriceTextBox"/>
+            <TextBlock Style="{StaticResource Description}">ENTRY PRICE</TextBlock>
+            <TextBox x:Name="EntryPriceTextBox"/>
+            <TextBlock Style="{StaticResource Description}">RISK MARGIN</TextBlock>
+            <TextBox x:Name="RiskMarginTextBox">0.1</TextBox>
+        </StackPanel>
+
+        <TextBlock x:Name="ResultText" Grid.Row="1" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold" Foreground="LimeGreen"/>
+        <Button x:Name="CalculateButton" Grid.Row="2" Click="CalculateButton_Click">Calculate</Button>
+    </Grid>
+</Window>

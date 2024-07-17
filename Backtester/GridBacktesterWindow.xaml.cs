@@ -172,8 +172,8 @@ namespace Backtester
 				Common.ReportProgress(50);
 				var chartPack = ChartLoader.GetChartPack(symbol, interval);
 
-				var backtester = new GridBacktester([.. chartPack.Charts], [.. oneWeekChartPack.Charts], [.. oneDayChartPack.Charts], [.. fiveMinuteChartPack.Charts], 1.0M, GridType.Neutral);
-				backtester.Run(Common.ReportProgress, reportFileName, 1440, 0);
+				//var backtester = new GridBacktester([.. chartPack.Charts], [.. oneWeekChartPack.Charts], [.. oneDayChartPack.Charts], [.. fiveMinuteChartPack.Charts], 1.0M, GridType.Neutral);
+				//backtester.Run(Common.ReportProgress, reportFileName, 1440, 0);
 			}
 			catch (Exception ex)
 			{
@@ -375,7 +375,7 @@ namespace Backtester
 				//var factor = 1.5m;
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd}" + Environment.NewLine);
 
-				for (var gridCount = 10; gridCount <= 10; gridCount += 10)
+				for (var gridCount = 10; gridCount <= 60; gridCount += 2)
 				{
 					for (var factor = 1.5m; factor <= 1.5m; factor += 0.1m)
 					{
@@ -393,6 +393,70 @@ namespace Backtester
 							var leveragedEstimatedMoney = (int)(riskResult * (estimatedMoney - 1_000_000));
 
 							var resultString = $"{period},{factor.Round(1)},{gridCount},{result},{riskResult.Round(2)},{leveragedEstimatedMoney}";
+							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), resultString + Environment.NewLine);
+						}
+					}
+				}
+
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), "END" + Environment.NewLine + Environment.NewLine);
+
+				Environment.Exit(0);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
+		private void BactestRisk2Button_Click(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				Common.ReportProgressCount = (i, m) =>
+				{
+					DispatcherService.Invoke(() =>
+					{
+						BacktestProgressText.Text = $"{i} / {m}";
+					});
+				};
+
+				Settings.Default.Symbol = SymbolTextBox.Text;
+				Settings.Default.StartDate = StartDateTextBox.Text;
+				Settings.Default.EndDate = EndDateTextBox.Text;
+				Settings.Default.FileName = FileNameTextBox.Text;
+				Settings.Default.IntervalIndex = IntervalComboBox.SelectedIndex;
+				Settings.Default.Save();
+
+				symbol = SymbolTextBox.Text;
+				startDate = StartDateTextBox.Text.ToDateTime();
+				endDate = EndDateTextBox.Text.ToDateTime();
+				reportFileName = FileNameTextBox.Text;
+
+				ChartLoader.Charts = [];
+				var interval = KlineInterval.OneDay;
+				ChartLoader.InitCharts(symbol, interval);
+				var chartPack = ChartLoader.GetChartPack(symbol, interval);
+				aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
+
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd}" + Environment.NewLine);
+
+				for (var gridCount = 10; gridCount <= 10; gridCount += 5)
+				{
+					for (var factor = 2.0m; factor <= 2.0m; factor += 0.5m)
+					{
+						for (var period = 60; period <= 60; period += 10)
+						{
+							chartPack.UsePredictiveRanges(period, (double)factor);
+
+							var riskCalculator = new PredictiveRangesRiskCalculator2(symbol, [.. chartPack.Charts], gridCount, 0.1m);
+							//var startIndex = chartPack.Charts.IndexOf(chartPack.Charts.First(x => x.DateTime.Year == startDate.Year && x.DateTime.Month == startDate.Month && x.DateTime.Day == startDate.Day));
+							chartPack.Charts = riskCalculator.Run(300);
+
+							var backtester = new GridPredictiveRangesBacktester2(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount);
+							var result = backtester.Run(0);
+							var estimatedMoney = decimal.Parse(result.Split(',')[1]);
+
+							var resultString = $"{period},{factor.Round(1)},{gridCount},{result},{estimatedMoney}";
 							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), resultString + Environment.NewLine);
 						}
 					}

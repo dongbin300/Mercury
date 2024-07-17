@@ -69,6 +69,7 @@ namespace Mercury.Charts
         public double PredictiveRangesAverage { get; set; }
         public double PredictiveRangesLower { get; set; }
         public double PredictiveRangesLower2 { get; set; }
+        public double PredictiveRangesMaxLeverage { get; set; }
 
 		public override string ToString() => $"{Symbol} | {DateTime} | {Quote.Open} | {Quote.High} | {Quote.Low} | {Quote.Close} | {Quote.Volume}";
 	}

@@ -90,6 +90,7 @@
             <Button Grid.Row="1" x:Name="GridRangeButton" Content="GRID RANGE" Click="GridRangeButton_Click"/>
             <Button Grid.Row="2" x:Name="CalculateRiskButton" Content="CALCULATE RISK" Click="CalculateRiskButton_Click"/>
             <Button Grid.Row="3" x:Name="BactestRiskButton" Content="BACKTEST + RISK" Click="BactestRiskButton_Click"/>
+            <Button Grid.Row="4" x:Name="BactestRisk2Button" Content="BACKTEST + RISK 2" Click="BactestRisk2Button_Click"/>
         </Grid>
     </Grid>
     

@@ -22,7 +22,7 @@ namespace Mercury.Backtests
 		public string ReportFileName { get; set; } = reportFileName;
 		public decimal UpperStopLossPrice { get; set; }
 		public decimal LowerStopLossPrice { get; set; }
-		public decimal FeeRate = 0.0002M; // 0.02%
+		public decimal FeeRate = 0M; //0.0002M; // 0.02%
 		public decimal GridStartPrice { get; set; }
 
 		public string Symbol { get; set; } = symbol;
