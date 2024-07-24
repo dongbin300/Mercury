@@ -18,10 +18,6 @@ namespace Lab
 		{
 			InitializeComponent();
 
-			IEnumerable<int> numbers = Enumerable.Range(1, 1000000000);
-
-			var b5 = CalculateMaxLeverage(PositionSide.Short, 63860, 56825, 60950, 20);
-
 			ChartLoader.InitCharts("BTCUSDT", Binance.Net.Enums.KlineInterval.OneDay);
 			var chartPack = ChartLoader.GetChartPack("BTCUSDT", Binance.Net.Enums.KlineInterval.OneDay);
 			chartPack.UsePredictiveRanges();
@@ -34,40 +30,6 @@ namespace Lab
 			var average = chartPack.Charts.Select(x => x.PredictiveRangesAverage);
 			var lower = chartPack.Charts.Select(x => x.PredictiveRangesLower);
 			var lower2 = chartPack.Charts.Select(x => x.PredictiveRangesLower2);
-		}
-
-		public decimal CalculateMaxLeverage(PositionSide side, decimal upper, decimal lower, decimal entry, int gridCount)
-		{
-			decimal seed = 1_000_000;
-			decimal lowerLimit = lower * 0.9m;
-			decimal upperLimit = upper * 1.1m;
-			var tradeAmount = seed / gridCount;
-			var gridInterval = (upper - lower) / (gridCount + 1);
-			decimal loss = 0;
-
-			if (side == PositionSide.Long)
-			{
-				for (decimal price = lower; price <= entry; price += gridInterval)
-				{
-					var coinCount = tradeAmount / price;
-					loss += (lowerLimit - price) * coinCount;
-				}
-			}
-			else if (side == PositionSide.Short)
-			{
-				for (decimal price = upper; price >= entry; price -= gridInterval)
-				{
-					var coinCount = tradeAmount / price;
-					loss += (price - upperLimit) * coinCount;
-				}
-			}
-
-			if (loss == 0)
-			{
-				return seed;
-			}
-
-			return seed / -loss;
 		}
 	}
 }

@@ -1,0 +1,54 @@
+﻿<Window x:Class="BacktestViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BacktestViewer"
+        xmlns:view="clr-namespace:BacktestViewer.Views"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="1600" Background="{StaticResource Background}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="160"/>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <ListBox Grid.Column="0" x:Name="FileListBox" SelectionChanged="FileListBox_SelectionChanged"/>
+        <ListBox Grid.Column="1" x:Name="BacktestListBox" SelectionChanged="BacktestListBox_SelectionChanged"/>
+        <DataGrid Grid.Column="2" x:Name="TradeDataGrid" IsReadOnly="True" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Time" Binding="{Binding _Time}"/>
+                <DataGridTextColumn Header="P" Binding="{Binding Price}"/>
+                <DataGridTextColumn Header="Side" Binding="{Binding _Side}"/>
+                <DataGridTextColumn Header="Quantity" Binding="{Binding Custom1}"/>
+                <DataGridTextColumn Header="EST" Binding="{Binding _Estimated}"/>
+                <DataGridTextColumn Header="M" Binding="{Binding _Money}"/>
+                <DataGridTextColumn Header="Margin" Binding="{Binding _Margin}"/>
+                <DataGridTextColumn Header="Pnl" Binding="{Binding _Pnl}"/>
+                <DataGridTextColumn Header="NLO" Binding="{Binding NearestLongOrderPrice}"/>
+                <DataGridTextColumn Header="NSO" Binding="{Binding NearestShortOrderPrice}"/>
+                <DataGridTextColumn Header="LON" Binding="{Binding LongOrderNum}"/>
+                <DataGridTextColumn Header="SON" Binding="{Binding ShortOrderNum}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <DataGrid Grid.Column="3" x:Name="GridEventDataGrid" IsReadOnly="True" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Time" Binding="{Binding _Time}"/>
+                <DataGridTextColumn Header="Type" Binding="{Binding _GridType}"/>
+                <DataGridTextColumn Header="P" Binding="{Binding CurrentPrice}"/>
+                <DataGridTextColumn Header="L" Binding="{Binding Lower}"/>
+                <DataGridTextColumn Header="U" Binding="{Binding Upper}"/>
+                <DataGridTextColumn Header="I" Binding="{Binding Interval}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <!--<ListBox Grid.Column="2" x:Name="TradeListBox" Background="{StaticResource Background}" BorderThickness="0" ItemContainerStyle="{StaticResource BaseListBoxItem}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <view:TradeControl Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ListBox}}" Height="150" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>-->
+    </Grid>
+</Window>

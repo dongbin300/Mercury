@@ -20,17 +20,20 @@ namespace Mercury.Backtests
 	/// <param name="gridCount"></param>
 	public class GridPredictiveRangesBacktester2 : GridBacktester
 	{
-        public GridPredictiveRangesBacktester2(string symbol, List<Price> prices, List<ChartInfo> charts, string reportFileName, int gridCount)
-        {
+		public GridPredictiveRangesBacktester2(string symbol, List<Price> prices, List<ChartInfo> charts, string reportFileName, int gridCount, int leverage = 1)
+		{
 			Symbol = symbol;
 			Prices = prices;
 			Charts = charts;
 			ReportFileName = reportFileName;
 			GridCount = gridCount;
-        }
+			GridType = GridType.Neutral;
+			Leverage = leverage;
+		}
 
-        public (double, int) Run(int startIndex)
+		public (double, decimal) Run(int startIndex)
 		{
+			var isLiquidation = false;
 			var startTime = Prices[startIndex].Date;
 			DateTime displayDate = startTime;
 
@@ -46,9 +49,7 @@ namespace Mercury.Backtests
 				{
 					// 결과 출력
 					displayDate = displayDate.AddDays(1);
-					WriteStatus(i);
 
-					var todayChart = CurrentChart(time); // 현재봉 시가
 					var yesterdayChart = LastChart(time); // 이전봉 종가
 					var yesterday2Chart = LastChart2(time); // 2이전봉 종가
 
@@ -56,7 +57,7 @@ namespace Mercury.Backtests
 					if ((GridType == GridType.Long && yesterdayChart.Quote.Close < (decimal)yesterdayChart.PredictiveRangesAverage) ||
 						(GridType == GridType.Short && yesterdayChart.Quote.Close > (decimal)yesterdayChart.PredictiveRangesAverage))
 					{
-						WriteStatus(i);
+						WriteStatus(i, "PRA_CROSS");
 						CloseAllPositions(i);
 						ApplyLeverage(i);
 
@@ -64,22 +65,30 @@ namespace Mercury.Backtests
 
 						SetGrid(i);
 						SetOrder(i);
-						WriteStatus(i);
 					}
 
 					// PRA 값이 바뀜 : 포지션 정리 후 그리드 재설정
-					if (yesterday2Chart.PredictiveRangesAverage != todayChart.PredictiveRangesAverage)
+					if (yesterday2Chart.PredictiveRangesAverage != yesterdayChart.PredictiveRangesAverage)
 					{
-						WriteStatus(i);
+						WriteStatus(i, "CHANGE_PR");
 						CloseAllPositions(i);
 						ApplyLeverage(i);
 
-						GridType = todayChart.CandlestickType == CandlestickType.Bullish ? GridType.Long : GridType.Short;
+						GridType = yesterdayChart.Quote.Close > (decimal)yesterday2Chart.PredictiveRangesAverage ? GridType.Long : GridType.Short;
 
 						SetGrid(i);
 						SetOrder(i);
-						WriteStatus(i);
 					}
+
+					// 청산 확인
+					if (GetEstimatedAsset(price) < 0)
+					{
+						WriteStatus(i, "LIQUIDATION");
+						isLiquidation = true;
+						break;
+					}
+
+					WriteStatus(i, "");
 				}
 
 				// 매매 Filled
@@ -93,19 +102,27 @@ namespace Mercury.Backtests
 				}
 			}
 
-			var estimatedMoney = (int)GetEstimatedAsset(Prices[^1].Value);
+			var estimatedMoney = GetEstimatedAsset(Prices[^1].Value);
 			var period = (Prices[^1].Date - Prices[0].Date).Days + 1;
-			var tradePerDay = ((double)(LongFillCount + ShortFillCount) / period).Round(1);
+			var tradePerDay = isLiquidation ? -419 : ((double)(LongFillCount + ShortFillCount) / period).Round(1);
 
 			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
-					 $"{tradePerDay},{estimatedMoney}" + Environment.NewLine + Environment.NewLine);
+					 $"{tradePerDay},{estimatedMoney.Round(0)}" + Environment.NewLine + Environment.NewLine);
 
 			// Position History
-			//File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}_position.csv"),
-			//	string.Join(Environment.NewLine, PositionHistories) + Environment.NewLine + Environment.NewLine + Environment.NewLine
-			//	);
+			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}_position.csv"),
+				string.Join(Environment.NewLine, PositionHistories) + Environment.NewLine + Environment.NewLine + Environment.NewLine
+				);
 
 			return (tradePerDay, estimatedMoney);
+		}
+
+		public void ApplyLeverage(int chartIndex)
+		{
+			//xvar time = Prices[chartIndex].Date;
+			//var leverage = (decimal)LastChart2(time).PredictiveRangesMaxLeverage;
+
+			Money = InitialMargin + ((Money - InitialMargin) * Leverage);
 		}
 
 		public void SetGrid(int chartIndex)
@@ -121,10 +138,11 @@ namespace Mercury.Backtests
 			LowerStopLossPrice = (decimal)CurrentChart(currentTime).PredictiveRangesLower2;
 
 			GridInterval = (UpperPrice - LowerPrice) / GridCount;
-			StandardBaseOrderSize = InitialMargin / GridCount;
+			StandardBaseOrderSize = (InitialMargin * Leverage) / GridCount;
+			//var maxLeverage = LastChart(currentTime).PredictiveRangesMaxLeverage;
 
 			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"),
-			$"{currentTime:yyyy-MM-dd HH:mm:ss},{GridType},CurrentPrice:{currentPrice.Round(2)},Upper:{UpperPrice.Round(2)},Lower:{LowerPrice.Round(2)},UpperStopLoss:{UpperStopLossPrice.Round(2)},LowerStopLoss:{LowerStopLossPrice.Round(2)},GridInterval:{GridInterval.Round(2)},GridCount:{GridCount},StandardBaseOrderSize:{StandardBaseOrderSize.Round(2)}" + Environment.NewLine);
+			$"{currentTime:yyyy-MM-dd HH:mm:ss},{GridType},L:{Leverage},Price:{currentPrice.Round(2)},Upper:{UpperPrice.Round(2)},Lower:{LowerPrice.Round(2)},UpperSL:{UpperStopLossPrice.Round(2)},LowerSL:{LowerStopLossPrice.Round(2)},Interval:{GridInterval.Round(2)},Count:{GridCount},BOS:{StandardBaseOrderSize.Round(2)}" + Environment.NewLine);
 		}
 	}
 }

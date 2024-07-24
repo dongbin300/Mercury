@@ -16,7 +16,7 @@ namespace Mercury.Backtests.Calculators
 		/// </summary>
 		public decimal RiskMargin { get; set; } = riskMargin;
 
-		public List<ChartInfo> Run(int startIndex)
+		public List<ChartInfo> Run(int startIndex, int? leverage = null)
 		{
 			var isFirst = true;
 			var prevAverage = (decimal)Charts[startIndex].PredictiveRangesAverage;
@@ -43,8 +43,11 @@ namespace Mercury.Backtests.Calculators
 				}
 				else
 				{
-					Charts[i].PredictiveRangesMaxLeverage = Charts[i-1].PredictiveRangesMaxLeverage;
+					Charts[i].PredictiveRangesMaxLeverage = Charts[i - 1].PredictiveRangesMaxLeverage;
 				}
+				var leverageForLiquidationPrice = leverage == null ? (int)Charts[i].PredictiveRangesMaxLeverage : leverage.Value;
+				Charts[i].LiquidationPriceLong = CalculateLiquidationPrices(PositionSide.Long, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
+				Charts[i].LiquidationPriceShort = CalculateLiquidationPrices(PositionSide.Short, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
 
 				prevAverage = average;
 			}
@@ -84,6 +87,67 @@ namespace Mercury.Backtests.Calculators
 			}
 
 			return seed / -loss;
+		}
+
+		public decimal CalculateLiquidationPrices(PositionSide side, decimal upper, decimal lower, decimal entry, int gridCount, int leverage)
+		{
+			if (leverage == 0)
+			{
+				return 0m;
+			}
+
+			decimal seed = 1_000_000;
+			var tradeAmount = seed / gridCount * leverage;
+			var gridInterval = (upper - lower) / (gridCount + 1);
+			var coinQuantity = 0m;
+			var amount = 0m;
+
+			switch (side)
+			{
+				case PositionSide.Long:
+					{
+						for (decimal price = lower; price <= entry; price += gridInterval)
+						{
+							coinQuantity += tradeAmount / price;
+							amount += tradeAmount;
+							seed -= tradeAmount / leverage;
+						}
+
+						if (coinQuantity == 0)
+						{
+							return 0m;
+						}
+
+						var margin = amount / leverage;
+						var average = amount / coinQuantity;
+
+						return average * (1 - 1 / (decimal)leverage + coinQuantity / (leverage * (margin + seed)));
+					}
+
+				case PositionSide.Short:
+					{
+						for (decimal price = upper; price >= entry; price -= gridInterval)
+						{
+							coinQuantity += tradeAmount / price;
+							amount += tradeAmount;
+							seed -= tradeAmount / leverage;
+						}
+
+						if (coinQuantity == 0)
+						{
+							return 0m;
+						}
+
+						var margin = amount / leverage;
+						var average = amount / coinQuantity;
+
+						return average * (1 + 1 / (decimal)leverage - coinQuantity / (leverage * (margin + seed)));
+					}
+
+				default:
+					return 0m;
+			}
+
 		}
 	}
 }

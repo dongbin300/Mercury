@@ -71,6 +71,9 @@ namespace Mercury.Charts
         public double PredictiveRangesLower2 { get; set; }
         public double PredictiveRangesMaxLeverage { get; set; }
 
+        public decimal LiquidationPriceLong { get; set; } = 0m;
+        public decimal LiquidationPriceShort { get; set; } = 0m;
+
 		public override string ToString() => $"{Symbol} | {DateTime} | {Quote.Open} | {Quote.High} | {Quote.Low} | {Quote.Close} | {Quote.Volume}";
 	}
 }

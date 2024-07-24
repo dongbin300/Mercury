@@ -49,7 +49,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeluxeChartViewer", "Deluxe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChartViewerPrism", "ChartViewerPrism\ChartViewerPrism.csproj", "{04BFD410-0875-4E92-AEC7-B253D7000D64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GridMaxLeverageCalculator", "GridMaxLeverageCalculator\GridMaxLeverageCalculator.csproj", "{EC5684B6-2884-48F3-8204-54BE4FB26BFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GridMaxLeverageCalculator", "GridMaxLeverageCalculator\GridMaxLeverageCalculator.csproj", "{EC5684B6-2884-48F3-8204-54BE4FB26BFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BacktestViewer", "BacktestViewer\BacktestViewer.csproj", "{6C601943-77C7-4044-A0FA-DD22EA22CC7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -325,6 +327,18 @@ Global
 		{EC5684B6-2884-48F3-8204-54BE4FB26BFC}.Release|x64.Build.0 = Release|Any CPU
 		{EC5684B6-2884-48F3-8204-54BE4FB26BFC}.Release|x86.ActiveCfg = Release|Any CPU
 		{EC5684B6-2884-48F3-8204-54BE4FB26BFC}.Release|x86.Build.0 = Release|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Debug|x64.Build.0 = Debug|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Debug|x86.Build.0 = Debug|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Release|x64.ActiveCfg = Release|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Release|x64.Build.0 = Release|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Release|x86.ActiveCfg = Release|Any CPU
+		{6C601943-77C7-4044-A0FA-DD22EA22CC7D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

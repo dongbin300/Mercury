@@ -438,26 +438,40 @@ namespace Backtester
 				var chartPack = ChartLoader.GetChartPack(symbol, interval);
 				aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
 
-				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd}" + Environment.NewLine);
-
-				for (var gridCount = 10; gridCount <= 10; gridCount += 5)
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd},{DateTime.Now:yyyy-MM-dd HH:mm:ss}" + Environment.NewLine);
+				
+				//var periodSeq = new int[] { 30, 32, 34, 36, 38, 40, 64, 66, 68, 70, 72, 74, 76 };
+				for (var gridCount = 10; gridCount <= 10; gridCount += 1)
 				{
-					for (var factor = 2.0m; factor <= 2.0m; factor += 0.5m)
+					for (var factor = 1.056m; factor <= 1.056m; factor += 0.001m)
 					{
-						for (var period = 60; period <= 60; period += 10)
+						//for (var _period = 0; _period < periodSeq.Length; _period += 1)
+						for (var period = 123; period <= 123; period += 1)
 						{
-							chartPack.UsePredictiveRanges(period, (double)factor);
+							for(var leverage = 1; leverage <= 20; leverage += 1)
+							{
+								//var period = periodSeq[_period];
+								chartPack.UsePredictiveRanges(period, (double)factor);
 
-							var riskCalculator = new PredictiveRangesRiskCalculator2(symbol, [.. chartPack.Charts], gridCount, 0.1m);
-							//var startIndex = chartPack.Charts.IndexOf(chartPack.Charts.First(x => x.DateTime.Year == startDate.Year && x.DateTime.Month == startDate.Month && x.DateTime.Day == startDate.Day));
-							chartPack.Charts = riskCalculator.Run(300);
+								var riskCalculator = new PredictiveRangesRiskCalculator2(symbol, [.. chartPack.Charts], gridCount, 0.25m);
+								//var startIndex = chartPack.Charts.IndexOf(chartPack.Charts.First(x => x.DateTime.Year == startDate.Year && x.DateTime.Month == startDate.Month && x.DateTime.Day == startDate.Day));
+								chartPack.Charts = riskCalculator.Run(300, leverage);
 
-							var backtester = new GridPredictiveRangesBacktester2(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount);
-							var result = backtester.Run(0);
-							var estimatedMoney = decimal.Parse(result.Split(',')[1]);
+								var backtester = new GridPredictiveRangesBacktester2(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount, leverage);
 
-							var resultString = $"{period},{factor.Round(1)},{gridCount},{result},{estimatedMoney}";
-							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), resultString + Environment.NewLine);
+								try
+								{
+									(var tradePerDay, var estimatedMoney) = backtester.Run(0);
+
+									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), 
+										$"{period},{factor.Round(3)},{gridCount},{leverage},{tradePerDay},{estimatedMoney.Round(0)}" + Environment.NewLine);
+								}
+								catch
+								{
+									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), 
+										$"{period},{factor.Round(3)},{gridCount},{leverage},-,-" + Environment.NewLine);
+								}
+							}
 						}
 					}
 				}
@@ -468,7 +482,7 @@ namespace Backtester
 			}
 			catch (Exception ex)
 			{
-				MessageBox.Show(ex.Message);
+				MessageBox.Show(ex.ToString());
 			}
 		}
 	}
