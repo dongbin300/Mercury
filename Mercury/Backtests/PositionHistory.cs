@@ -22,6 +22,7 @@ namespace Mercury.Backtests
         public decimal ExitAmount { get; set; }
         public decimal Income => Side == PositionSide.Long ? ExitAmount - EntryAmount : EntryAmount - ExitAmount;
         public int EntryCount { get; set; }
+        public decimal Fee { get; set; }
 
         public PositionHistory(DateTime time, DateTime entryTime, string symbol, PositionSide side, PositionResult result)
         {

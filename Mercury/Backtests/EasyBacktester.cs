@@ -4,19 +4,27 @@ using Mercury.Charts;
 using Mercury.Enums;
 using Mercury.Maths;
 
+using System.Runtime.Intrinsics;
+
 namespace Mercury.Backtests
 {
-	public class EasyBacktester(string strategyId, List<string> symbols, KlineInterval interval)
+	public class EasyBacktester(string strategyId, List<string> symbols, KlineInterval interval, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals, decimal money, int leverage)
 	{
 		public int Win { get; set; } = 0;
 		public int Lose { get; set; } = 0;
 		public decimal WinRate => Win + Lose == 0 ? 0 : (decimal)Win / (Win + Lose) * 100;
-		public decimal Money = 10000;
-		public decimal BaseOrderSize = 10000; //1000;
-		public decimal FeeSize = 0; // 1.0m;
+		public decimal Money = money;
+		public int Leverage = leverage;
+		public decimal BaseOrderSize = money * leverage / maxActiveDeals;
 		public decimal EstimatedMoney => Money
 			+ Positions.Where(x => x.Side.Equals(PositionSide.Long)).Sum(x => x.EntryPrice * x.Quantity)
-			- Positions.Where(x => x.Side.Equals(PositionSide.Short)).Sum(x => x.EntryPrice * x.Quantity);
+			- Positions.Where(x => x.Side.Equals(PositionSide.Short)).Sum(x => x.EntryPrice * x.Quantity)
+			- Borrowed;
+
+		public readonly decimal FeeRate = 0.00018m; // 0.05%
+		public decimal MarginSize = money / maxActiveDeals;
+		public Dictionary<DateTime, decimal> BorrowSize = [];// money * (leverage - 1) / maxActiveDeals;
+		public decimal Borrowed = 0m;
 
 		public string StrategyId { get; set; } = strategyId;
 		public List<string> Symbols { get; set; } = symbols;
@@ -24,18 +32,17 @@ namespace Mercury.Backtests
 		public Dictionary<string, List<ChartInfo>> Charts { get; set; } = [];
 		public List<Position> Positions { get; set; } = [];
 		public List<PositionHistory> PositionHistories { get; set; } = [];
-		public MaxActiveDealsType MaxActiveDealsType { get; set; }
-		public int MaxActiveDeals { get; set; }
+		public bool IsGeneratePositionHistory = false;
+		public MaxActiveDealsType MaxActiveDealsType { get; set; } = maxActiveDealsType;
+		public int MaxActiveDeals { get; set; } = maxActiveDeals;
 		public int LongPositionCount => Positions.Count(x => x.Side.Equals(PositionSide.Long));
 		public int ShortPositionCount => Positions.Count(x => x.Side.Equals(PositionSide.Short));
+		public int LongFillCount = 0;
+		public int LongExitCount = 0;
+		public int ShortFillCount = 0;
+		public int ShortExitCount = 0;
 
-		public void SetMaxActiveDeals(MaxActiveDealsType maxActiveDealsType, int maxActiveDeals)
-		{
-			MaxActiveDealsType = maxActiveDealsType;
-			MaxActiveDeals = maxActiveDeals;
-		}
-
-		public void InitIndicators()
+		public void InitIndicators(params decimal[] p)
 		{
 			foreach (var symbol in Symbols)
 			{
@@ -49,6 +56,10 @@ namespace Mercury.Backtests
 						break;
 
 					case "macd4.1.14.2":
+						//chartPack.UseMacd((int)p[0], (int)p[1], (int)p[2], (int)p[3], (int)p[4], (int)p[5]);
+						//chartPack.UseAdx();
+						//chartPack.UseSupertrend((int)p[6], (double)p[7]);
+
 						chartPack.UseMacd(12, 26, 9, 9, 20, 7);
 						chartPack.UseAdx();
 						chartPack.UseSupertrend(10, 1.5);
@@ -77,6 +88,11 @@ namespace Mercury.Backtests
 						chartPack.UseSma(20, 60);
 						break;
 
+					case "custom":
+						//chartPack.UseRsi();
+						//chartPack.UseSupertrend(10, 2.0);
+						break;
+
 					default:
 						break;
 				}
@@ -94,12 +110,47 @@ namespace Mercury.Backtests
 			}
 		}
 
+		private decimal GetBorrowSize(DateTime time)
+		{
+			return BorrowSize[new DateTime(time.Year, time.Month, time.Day)];
+		}
+
 		public void Run(BacktestType backtestType, Action<int> reportProgress, string reportFileName, int reportInterval, int startIndex)
 		{
+			//var seedPercent = 0.51m;
+			//var prevEstimatedMoney = 0m;
 			var currentTime = DateTime.Now;
 			var maxChartCount = Charts.Max(c => c.Value.Count);
 			for (int i = startIndex; i < maxChartCount; i++)
 			{
+				// Reset Order Size
+				var time = Charts.ElementAt(0).Value[i].DateTime;
+				if (time.Hour == 0 && time.Minute == 0)
+				{
+					//if(EstimatedMoney > prevEstimatedMoney)
+					//{
+					//	seedPercent -= 0.01m;
+					//}
+					//else
+					//{
+					//	seedPercent += 0.01m;
+					//}
+					BaseOrderSize = EstimatedMoney * 0.9m * Leverage / MaxActiveDeals;
+					//prevEstimatedMoney = EstimatedMoney;
+					MarginSize = BaseOrderSize / Leverage;
+					BorrowSize.Add(time, MarginSize * (Leverage - 1));
+				}
+				//var t = new DateTime(2022, 1, 1);
+				//for (int j = 0; j < 1000; j++)
+				//{
+				//	var time = t.AddDays(j);
+				//	if (BorrowSize.ContainsKey(time))
+				//	{
+				//		continue;
+				//	}
+				//	BorrowSize.Add(time, MarginSize * (Leverage - 1));
+				//}
+
 				if (backtestType == BacktestType.All)
 				{
 					reportProgress((int)(50 + (double)i / maxChartCount * 50));
@@ -119,6 +170,11 @@ namespace Mercury.Backtests
 					var c1 = charts[i - 1];
 					var c2 = charts[i - 2];
 					var c3 = charts[i - 3];
+					var c4 = charts[i - 4];
+					var c5 = charts[i - 5];
+					var c6 = charts[i - 6];
+					var c7 = charts[i - 7];
+					var c8 = charts[i - 8];
 					currentTime = c0.DateTime;
 					var c1LongBodyLength = c1.BodyLength;
 					var minPrice = GetMinPrice(charts, 14, i);
@@ -207,6 +263,22 @@ namespace Mercury.Backtests
 									}
 									break;
 
+								case "custom":
+									if (
+										c1.CandlestickType == CandlestickType.Bearish
+										&& c2.CandlestickType == CandlestickType.Bearish
+										&& c3.CandlestickType == CandlestickType.Bearish
+										&& c4.CandlestickType == CandlestickType.Bullish
+										)
+									{
+										if (c0.Quote.Low <= c1.Quote.Close)
+										{
+											LongFillCount++;
+											EntryPosition(PositionSide.Long, c0, c1.Quote.Close);
+										}
+									}
+									break;
+
 								default:
 									break;
 							}
@@ -266,15 +338,23 @@ namespace Mercury.Backtests
 								break;
 
 							case "upcandle2":
-								ExitPosition(longPosition, c1, c1.Quote.Close);
-								break;
-
 							case "downcandle3":
-								ExitPosition(longPosition, c1, c1.Quote.Close);
-								break;
-
 							case "candlesma":
 								ExitPosition(longPosition, c1, c1.Quote.Close);
+								break;
+
+							case "custom":
+								if (
+									c1.CandlestickType == CandlestickType.Bullish
+									&& c2.CandlestickType == CandlestickType.Bullish
+									)
+								{
+									if (c0.Quote.High >= c1.Quote.Close)
+									{
+										LongExitCount++;
+										ExitPosition(longPosition, c1, c1.Quote.Close);
+									}
+								}
 								break;
 
 							default:
@@ -323,7 +403,7 @@ namespace Mercury.Backtests
 									var slPer = Calculator.Roe(PositionSide.Short, c0.Quote.Open, slPrice);
 									var tpPer = Calculator.Roe(PositionSide.Short, c0.Quote.Open, tpPrice);
 
-									if(IsPowerDeadCross(charts, 14, i, c1.Macd) && IsPowerDeadCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)
+									if (IsPowerDeadCross(charts, 14, i, c1.Macd) && IsPowerDeadCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)
 									{
 										EntryPosition(PositionSide.Short, c0, c0.Quote.Open, slPrice, tpPrice);
 									}
@@ -366,6 +446,22 @@ namespace Mercury.Backtests
 										if (c1.CandlestickType == CandlestickType.Bullish && c2.CandlestickType == CandlestickType.Bullish && c3.CandlestickType == CandlestickType.Bullish)
 										{
 											EntryPosition(PositionSide.Short, c0, c0.Quote.Open);
+										}
+									}
+									break;
+
+								case "custom":
+									if (
+										c1.CandlestickType == CandlestickType.Bullish
+										&& c2.CandlestickType == CandlestickType.Bullish
+										&& c3.CandlestickType == CandlestickType.Bullish
+										&& c4.CandlestickType == CandlestickType.Bearish
+										)
+									{
+										if (c0.Quote.High >= c1.Quote.Close)
+										{
+											ShortFillCount++;
+											EntryPosition(PositionSide.Short, c0, c1.Quote.Close);
 										}
 									}
 									break;
@@ -430,15 +526,23 @@ namespace Mercury.Backtests
 								break;
 
 							case "upcandle3":
-								ExitPosition(shortPosition, c1, c1.Quote.Close);
-								break;
-
 							case "downcandle2":
-								ExitPosition(shortPosition, c1, c1.Quote.Close);
-								break;
-
 							case "candlesma":
 								ExitPosition(shortPosition, c1, c1.Quote.Close);
+								break;
+
+							case "custom":
+								if (
+									c1.CandlestickType == CandlestickType.Bearish
+									&& c2.CandlestickType == CandlestickType.Bearish
+									)
+								{
+									if (c0.Quote.Low <= c1.Quote.Close)
+									{
+										ShortExitCount++;
+										ExitPosition(shortPosition, c1, c1.Quote.Close);
+									}
+								}
 								break;
 
 							default:
@@ -449,7 +553,14 @@ namespace Mercury.Backtests
 
 				if (backtestType == BacktestType.All && i % reportInterval == 0)
 				{
+					if (EstimatedMoney < 0) // LIQUIDATION
+					{
+						File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"), $"LIQ" + Environment.NewLine + Environment.NewLine);
+						return;
+					}
+
 					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}.csv"), $"{currentTime:yyyy-MM-dd HH:mm:ss},{Win},{Lose},{WinRate.Round(2)},{LongPositionCount},{ShortPositionCount},{EstimatedMoney.Round(2)}" + Environment.NewLine);
+					//,{LongFillCount},{LongExitCount},{ShortFillCount},{ShortExitCount}
 				}
 			}
 
@@ -457,12 +568,12 @@ namespace Mercury.Backtests
 				backtestType == BacktestType.All ? Environment.NewLine + Environment.NewLine :
 				$"{Symbols[0]},{Win},{Lose},{WinRate.Round(2)},{EstimatedMoney.Round(2)}" + Environment.NewLine);
 
-			if (backtestType == BacktestType.All)
+			if (IsGeneratePositionHistory && backtestType == BacktestType.All)
 			{
 				foreach (var h in PositionHistories)
 				{
 					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_positionhistory.csv"),
-						$"{h.EntryTime:yyyy-MM-dd HH:mm:ss},{h.Symbol},{h.Side},{h.Time:yyyy-MM-dd HH:mm:ss},{h.Result},{Math.Round(h.Income, 4)}" + Environment.NewLine
+						$"{h.EntryTime:yyyy-MM-dd HH:mm:ss},{h.Symbol},{h.Side},{h.Time:yyyy-MM-dd HH:mm:ss},{h.Result},{Math.Round(h.Income, 4)},{Math.Round(h.Fee, 4)}" + Environment.NewLine
 						);
 				}
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_positionhistory.csv"), Environment.NewLine + Environment.NewLine);
@@ -616,7 +727,12 @@ namespace Mercury.Backtests
 		void EntryPosition(PositionSide side, ChartInfo currentChart, decimal entryPrice, decimal? stopLossPrice = null, decimal? takeProfitPrice = null)
 		{
 			var quantity = BaseOrderSize / entryPrice;
-			Money += side == PositionSide.Long ? -entryPrice * quantity : entryPrice * quantity;
+			var amount = entryPrice * quantity;
+
+			Money += GetBorrowSize(currentChart.DateTime);
+			Borrowed += GetBorrowSize(currentChart.DateTime);
+			Money += side == PositionSide.Long ? -amount : amount;
+
 			var newPosition = new Position(currentChart.DateTime, currentChart.Symbol, side, entryPrice)
 			{
 				Quantity = quantity,
@@ -645,16 +761,22 @@ namespace Mercury.Backtests
 		{
 			var price = position.StopLossPrice;
 			var quantity = position.Quantity;
-			Money += position.Side == PositionSide.Long ? price * quantity : -price * quantity;
+			var amount = price * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			Money -= GetBorrowSize(position.Time);
+			Borrowed -= GetBorrowSize(position.Time);
+
 			position.ExitAmount = price * quantity;
 			Positions.Remove(position);
 			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, PositionResult.Lose)
 			{
 				EntryAmount = position.EntryAmount,
-				ExitAmount = position.ExitAmount
+				ExitAmount = position.ExitAmount,
+				Fee = (position.EntryAmount + position.ExitAmount) * FeeRate
 			});
 			Lose++;
-			Money -= FeeSize;
+			Money -= (position.EntryAmount + position.ExitAmount) * FeeRate;
 		}
 
 		/// <summary>
@@ -665,6 +787,7 @@ namespace Mercury.Backtests
 		{
 			var price = position.TakeProfitPrice;
 			var quantity = position.Quantity / 2;
+
 			Money += position.Side == PositionSide.Long ? price * quantity : -price * quantity;
 			position.Quantity -= quantity;
 			position.ExitAmount = price * quantity;
@@ -680,15 +803,21 @@ namespace Mercury.Backtests
 		{
 			var price = currentChart.Quote.Close;
 			var quantity = position.Quantity;
-			Money += position.Side == PositionSide.Long ? price * quantity : -price * quantity;
+			var amount = price * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			Money -= GetBorrowSize(position.Time);
+			Borrowed -= GetBorrowSize(position.Time);
+
 			Positions.Remove(position);
 			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, PositionResult.Win)
 			{
 				EntryAmount = position.EntryAmount,
-				ExitAmount = position.ExitAmount + price * quantity
+				ExitAmount = position.ExitAmount + amount,
+				Fee = (position.EntryAmount + position.ExitAmount) * FeeRate
 			});
 			Win++;
-			Money -= FeeSize;
+			Money -= (position.EntryAmount + position.ExitAmount) * FeeRate;
 		}
 
 		/// <summary>
@@ -700,16 +829,22 @@ namespace Mercury.Backtests
 		{
 			var price = position.TakeProfitPrice;
 			var quantity = position.Quantity;
-			Money += position.Side == PositionSide.Long ? price * quantity : -price * quantity;
-			position.ExitAmount = price * quantity;
+			var amount = price * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			Money -= GetBorrowSize(position.Time);
+			Borrowed -= GetBorrowSize(position.Time);
+
+			position.ExitAmount = amount;
 			Positions.Remove(position);
 			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, PositionResult.Win)
 			{
 				EntryAmount = position.EntryAmount,
-				ExitAmount = position.ExitAmount
+				ExitAmount = position.ExitAmount,
+				Fee = (position.EntryAmount + position.ExitAmount) * FeeRate
 			});
 			Win++;
-			Money -= FeeSize;
+			Money -= (position.EntryAmount + position.ExitAmount) * FeeRate;
 		}
 
 		/// <summary>
@@ -721,21 +856,27 @@ namespace Mercury.Backtests
 		void ExitPosition(Position position, ChartInfo currentChart, decimal exitPrice)
 		{
 			var quantity = position.Quantity;
-			Money += position.Side == PositionSide.Long ? exitPrice * quantity : -exitPrice * quantity;
-			position.ExitAmount = exitPrice * quantity;
+			var amount = exitPrice * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			Money -= GetBorrowSize(position.Time);
+			Borrowed -= GetBorrowSize(position.Time);
+
+			position.ExitAmount = amount;
 			var result = position.Income > 0 ? PositionResult.Win : PositionResult.Lose;
 			Positions.Remove(position);
 			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, result)
 			{
 				EntryAmount = position.EntryAmount,
-				ExitAmount = position.ExitAmount
+				ExitAmount = position.ExitAmount,
+				Fee = (position.EntryAmount + position.ExitAmount) * FeeRate
 			});
 			switch (result)
 			{
 				case PositionResult.Win: Win++; break;
 				case PositionResult.Lose: Lose++; break;
 			}
-			Money -= FeeSize;
+			Money -= (position.EntryAmount + position.ExitAmount) * FeeRate;
 		}
 
 		decimal GetMinPrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Low);

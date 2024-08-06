@@ -11,14 +11,14 @@ using System.Windows.Media;
 
 namespace TradeBot.Models
 {
-    public class PairQuote
-    {
+    public class PairQuote(string symbol, IEnumerable<Quote> quotes)
+	{
         private int DecimalCount = 4;
 
-        public string Symbol { get; set; }
-        public List<ChartInfo> Charts { get; set; }
+		public string Symbol { get; set; } = symbol;
+		public List<ChartInfo> Charts { get; set; } = quotes.Select(quote => new ChartInfo(quote)).ToList();
 
-        public string EntryRate => GetEntryRateString();
+		public string EntryRate => GetEntryRateString();
         public SolidColorBrush EntryRateColor => GetEntryRateColor();
 
         //public decimal CurrentPrice => Charts[^1].Quote.Close;
@@ -29,60 +29,51 @@ namespace TradeBot.Models
         //public double CurrentAdx => Math.Round(Charts[^1].Adx, DecimalCount);
         //public double CurrentSupertrend => Math.Round(Charts[^1].Supertrend, DecimalCount);
         public SolidColorBrush SymbolColor => GetSymbolColor();
-        //public SolidColorBrush CurrentMacdColor => GetCurrentMacdColor();
-        //public SolidColorBrush CurrentSignalColor => Common.WhiteColor;
-        //public SolidColorBrush CurrentAdxColor => CurrentAdx >= 30 ? Common.LongColor : Common.OffColor;
-        //public SolidColorBrush CurrentSupertrendColor => CurrentSupertrend >= 0 ? Common.LongColor : Common.ShortColor;
 
-        public PairQuote(string symbol, IEnumerable<Quote> quotes)
-        {
-            Symbol = symbol;
-            Charts = quotes.Select(quote => new ChartInfo(quote)).ToList();
-        }
-
-        public void UpdateQuote(Quote quote)
+		public void UpdateQuote(Quote quote)
         {
             try
             {
-                var lastQuote = Charts[^1];
-                if (lastQuote.Quote.Date.Equals(quote.Date) || quote.Date.Minute % Common.BaseIntervalNumber != 0)
-                {
-                    lastQuote.Quote.High = quote.High;
-                    lastQuote.Quote.Low = quote.Low;
-                    lastQuote.Quote.Close = quote.Close;
-                    lastQuote.Quote.Volume = quote.Volume;
-                }
-                else
-                {
-                    Charts.Add(new ChartInfo(quote));
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(PairQuote), MethodBase.GetCurrentMethod()?.Name, ex);
-            }
-        }
+				var lastQuote = Charts[^1];
+				//if (lastQuote.Quote.Date.Equals(quote.Date) || quote.Date.Minute % Common.BaseIntervalNumber != 0)
+				if (lastQuote.Quote.Date.Hour.Equals(quote.Date.Hour))
+				{
+					lastQuote.Quote.High = quote.High;
+					lastQuote.Quote.Low = quote.Low;
+					lastQuote.Quote.Close = quote.Close;
+					lastQuote.Quote.Volume = quote.Volume;
+				}
+				else
+				{
+					Charts.Add(new ChartInfo(quote));
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(PairQuote), MethodBase.GetCurrentMethod()?.Name, ex);
+			}
+		}
 
         public void UpdateIndicators()
         {
             try
             {
-                var quotes = Charts.Select(x => x.Quote);
-                var macd = quotes.GetMacd(12, 26, 9);
-                var m = macd.Select(x => x.Macd);
-                var s = macd.Select(x => x.Signal);
-                var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
-                var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
-                var stoch = quotes.GetStoch(12).Select(x => x.Stoch);
+                //var quotes = Charts.Select(x => x.Quote);
+                //var macd = quotes.GetMacd(12, 26, 9);
+                //var m = macd.Select(x => x.Macd);
+                //var s = macd.Select(x => x.Signal);
+                //var st = quotes.GetSupertrend(10, 1.5).Select(x => x.Supertrend);
+                //var adx = quotes.GetAdx(14, 14).Select(x => x.Adx);
+                //var stoch = quotes.GetStoch(12).Select(x => x.Stoch);
 
-                for (int i = 0; i < Charts.Count; i++)
-                {
-                    Charts[i].Macd = m.ElementAt(i);
-                    Charts[i].Signal = s.ElementAt(i);
-                    Charts[i].Supertrend = st.ElementAt(i);
-                    Charts[i].Adx = adx.ElementAt(i);
-                    Charts[i].Stoch = stoch.ElementAt(i);
-                }
+                //for (int i = 0; i < Charts.Count; i++)
+                //{
+                //    Charts[i].Macd = m.ElementAt(i);
+                //    Charts[i].Signal = s.ElementAt(i);
+                //    Charts[i].Supertrend = st.ElementAt(i);
+                //    Charts[i].Adx = adx.ElementAt(i);
+                //    Charts[i].Stoch = stoch.ElementAt(i);
+                //}
             }
             catch (Exception ex)
             {

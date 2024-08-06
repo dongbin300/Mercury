@@ -441,34 +441,37 @@ namespace Backtester
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd},{DateTime.Now:yyyy-MM-dd HH:mm:ss}" + Environment.NewLine);
 				
 				//var periodSeq = new int[] { 30, 32, 34, 36, 38, 40, 64, 66, 68, 70, 72, 74, 76 };
-				for (var gridCount = 10; gridCount <= 10; gridCount += 1)
+				for (var gridCount = 10; gridCount <= 50; gridCount += 10)
 				{
-					for (var factor = 1.056m; factor <= 1.056m; factor += 0.001m)
+					for (var factor = 2.0m; factor <= 5.0m; factor += 0.5m)
 					{
 						//for (var _period = 0; _period < periodSeq.Length; _period += 1)
-						for (var period = 123; period <= 123; period += 1)
+						for (var period = 20; period <= 200; period += 20)
 						{
-							for(var leverage = 1; leverage <= 20; leverage += 1)
+							for(var leverage = 1; leverage <= 1; leverage += 1)
 							{
 								//var period = periodSeq[_period];
 								chartPack.UsePredictiveRanges(period, (double)factor);
 
-								var riskCalculator = new PredictiveRangesRiskCalculator2(symbol, [.. chartPack.Charts], gridCount, 0.25m);
+								var riskCalculator = new PredictiveRangesRiskCalculator2(symbol, [.. chartPack.Charts], gridCount, 0.1m);
 								//var startIndex = chartPack.Charts.IndexOf(chartPack.Charts.First(x => x.DateTime.Year == startDate.Year && x.DateTime.Month == startDate.Month && x.DateTime.Day == startDate.Day));
 								chartPack.Charts = riskCalculator.Run(300, leverage);
 
-								var backtester = new GridPredictiveRangesBacktester2(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount, leverage);
+								var backtester = new GridPredictiveRangesBacktester2(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount, 0.1m, leverage)
+								{
+									IsGeneratePositionHistory = false
+								};
 
 								try
 								{
 									(var tradePerDay, var estimatedMoney) = backtester.Run(0);
 
-									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), 
-										$"{period},{factor.Round(3)},{gridCount},{leverage},{tradePerDay},{estimatedMoney.Round(0)}" + Environment.NewLine);
+									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+									$"{period},{factor.Round(3)},{gridCount},{leverage},{tradePerDay},{(tradePerDay == -419 ? "-" : estimatedMoney.Round(0))}" + Environment.NewLine);
 								}
 								catch
 								{
-									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), 
+									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
 										$"{period},{factor.Round(3)},{gridCount},{leverage},-,-" + Environment.NewLine);
 								}
 							}

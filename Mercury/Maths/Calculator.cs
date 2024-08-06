@@ -73,5 +73,66 @@ namespace Mercury.Maths
         {
             return (entryPrice * entryQuantity + exitPrice * exitQuantity) * feeRate;
         }
-    }
+
+        /// <summary>
+        /// Calculate Optimal Ranges Leverage
+        /// </summary>
+        /// <param name="upper"></param>
+        /// <param name="lower"></param>
+        /// <param name="entry"></param>
+        /// <param name="gridCount"></param>
+        /// <param name="riskMargin"></param>
+        /// <returns></returns>
+        public static decimal RangesLeverage(decimal upper, decimal lower, decimal entry, int gridCount, decimal riskMargin)
+        {
+            return Math.Min(
+                RangesMaxLeverage(PositionSide.Long, upper, lower, entry, gridCount, riskMargin),
+                RangesMaxLeverage(PositionSide.Short, upper, lower, entry, gridCount, riskMargin)
+                );
+        }
+
+        /// <summary>
+        /// Calculate Ranges Max Leverage
+        /// </summary>
+        /// <param name="side"></param>
+        /// <param name="upper"></param>
+        /// <param name="lower"></param>
+        /// <param name="entry"></param>
+        /// <param name="gridCount"></param>
+        /// <param name="riskMargin"></param>
+        /// <returns></returns>
+		public static decimal RangesMaxLeverage(PositionSide side, decimal upper, decimal lower, decimal entry, int gridCount, decimal riskMargin)
+		{
+			decimal seed = 1_000_000;
+			decimal lowerLimit = lower * (1 - riskMargin);
+			decimal upperLimit = upper * (1 + riskMargin);
+			var tradeAmount = seed / gridCount;
+			var gridInterval = (upper - lower) / (gridCount - 1);
+			decimal loss = 0;
+
+			if (side == PositionSide.Long)
+			{
+				for (decimal price = lower; price <= entry; price += gridInterval)
+				{
+					var coinCount = tradeAmount / price;
+					loss += (lowerLimit - price) * coinCount;
+				}
+			}
+			else if (side == PositionSide.Short)
+			{
+				for (decimal price = upper; price >= entry; price -= gridInterval)
+				{
+					var coinCount = tradeAmount / price;
+					loss += (price - upperLimit) * coinCount;
+				}
+			}
+
+			if (loss == 0)
+			{
+				return seed;
+			}
+
+			return seed / Math.Abs(loss);
+		}
+	}
 }

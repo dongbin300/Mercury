@@ -4,53 +4,53 @@ using System.Collections.Generic;
 
 namespace TradeBot.Bots
 {
-    public class Bot : IBot
+    public class Bot(string name, string description) : IBot
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        protected List<string> MonitorSymbols { get; set; } = new()
-        {
-            "RLCUSDT",
-            "UNFIUSDT",
-            "LPTUSDT",
-            "QTUMUSDT",
-            "OMGUSDT",
-            "CHZUSDT",
-            "STORJUSDT",
-            "KNCUSDT",
-            "BALUSDT",
-            "COMPUSDT",
-            "GALUSDT",
-            "YFIUSDT",
-            "MTLUSDT",
-            "IMXUSDT",
-            "ENSUSDT",
-            "DASHUSDT",
-            "MANAUSDT",
-            "WAVESUSDT",
-            "MATICUSDT",
-            "BLZUSDT",
-            "ZENUSDT",
-            "SFPUSDT",
-            "SANDUSDT",
-            "BCHUSDT",
-            "LTCUSDT",
-            "TRXUSDT",
-            "ALPHAUSDT",
-            "ETCUSDT",
-            "ENJUSDT",
-            "ARUSDT",
-            "COTIUSDT",
-            "AVAXUSDT",
-            "SXPUSDT",
-            "AXSUSDT",
-            "BANDUSDT",
-            "NEOUSDT",
-            "OCEANUSDT",
+		public string Name { get; set; } = name;
+		public string Description { get; set; } = description;
+		protected List<string> MonitorSymbols { get; set; } =
+		[
+			"JASMYUSDT",
+            "DOGEUSDT",
             "ZECUSDT",
+            "UNIUSDT",
+            "XMRUSDT",
+            "MASKUSDT",
+            "SUSHIUSDT",
+            "ATOMUSDT",
+            "GRTUSDT",
+            "ENSUSDT",
+            "CHZUSDT",
+            "BNBUSDT",
             "NKNUSDT",
-            "GRTUSDT"
-        };
+            "OMGUSDT",
+            "NEOUSDT",
+            "WAVESUSDT",
+            "XRPUSDT",
+            "DASHUSDT",
+            "OCEANUSDT",
+            "ROSEUSDT",
+            "BALUSDT",
+            "SANDUSDT",
+            "BANDUSDT",
+            "COTIUSDT",
+            "EGLDUSDT",
+            "IOSTUSDT",
+            "LTCUSDT",
+            "ADAUSDT",
+            "KAVAUSDT",
+            "RLCUSDT",
+            "MATICUSDT",
+            "AAVEUSDT",
+            "BELUSDT",
+            "FTMUSDT",
+            "ALPHAUSDT",
+            "XLMUSDT",
+            "KNCUSDT",
+            "ETCUSDT",
+            "OPUSDT",
+            "HBARUSDT"
+		];
 
         public Bot() : this("", "")
         {
@@ -61,11 +61,5 @@ namespace TradeBot.Bots
         {
 
         }
-
-        public Bot(string name, string description)
-        {
-            Name = name;
-            Description = description;
-        }
-    }
+	}
 }

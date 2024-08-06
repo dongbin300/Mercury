@@ -4,6 +4,7 @@ using Mercury;
 using Mercury.Backtests;
 using Mercury.Charts;
 using Mercury.Charts.Technicals;
+using Mercury.Maths;
 
 using Microsoft.Win32;
 
@@ -17,6 +18,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ChartViewer
 {
@@ -42,9 +44,14 @@ namespace ChartViewer
 			return new Point(lpPoint.X, lpPoint.Y);
 		}
 
+		private List<decimal> LongPoints = [];
+		private List<decimal> ShortPoints = [];
+
 		private readonly SKFont CandleInfoFont = new(SKTypeface.FromFamilyName("Meiryo UI"), 11);
 		private readonly SKPaint CandleInfoPaint = new() { Color = SKColors.White };
 		private readonly SKPaint HorizontalLinePointerPaint = new() { Color = SKColors.Silver };
+		private readonly SKPaint LongHorizontalLinePointerPaint = new() { Color = new SKColor(59, 207, 134) };
+		private readonly SKPaint ShortHorizontalLinePointerPaint = new() { Color = new SKColor(237, 49, 97) };
 		private static readonly SKColor LongColor = new(59, 207, 134);
 		private static readonly SKColor LongVolumeColor = new(59, 207, 134, 64);
 		private static readonly SKColor ShortColor = new(237, 49, 97);
@@ -53,11 +60,11 @@ namespace ChartViewer
 		private readonly SKPaint LongVolumePaint = new() { Color = LongVolumeColor };
 		private readonly SKPaint ShortPaint = new() { Color = ShortColor };
 		private readonly SKPaint ShortVolumePaint = new() { Color = ShortVolumeColor };
-		private readonly SKPaint CandlePointerPaint = new() { Color = new SKColor(255, 255, 255, 32) };
+		private readonly SKPaint CandlePointerPaint = new() { Color = new SKColor(255, 255, 255, 16) };
 		private readonly SKPaint CandleBuyPointerPaint = new() { Color = new SKColor(59, 207, 134, 64) };
 		private readonly SKPaint CandleSellPointerPaint = new() { Color = new SKColor(237, 49, 97, 64) };
 		private readonly int CandleTopBottomMargin = 10;
-		List<ChartInfo> Charts = new();
+		List<ChartInfo> Charts = [];
 		private int ChartCount => Charts.Count;
 		public float CurrentMouseX;
 		public float CurrentMouseY;
@@ -559,12 +566,30 @@ namespace ChartViewer
 			// Draw Info Text
 			try
 			{
+				CandleInfoFont.Size = Math.Max(10, (float)ActualHeight / 75);
 				var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
 				var changeText = pointingChart.Quote.Close >= pointingChart.Quote.Open ? $"+{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}" : $"{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}";
-				canvas.DrawText($"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close} V {pointingChart.Quote.Volume}", 3, 10, CandleInfoFont, CandleInfoPaint);
+				canvas.DrawText($"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close} ({changeText}) V {pointingChart.Quote.Volume}", 2, CandleInfoFont.Size + 2, CandleInfoFont, CandleInfoPaint);
 			}
 			catch
 			{
+			}
+
+			// Draw Long/Short Points
+			foreach (var point in LongPoints)
+			{
+				var changeText = ShortPoints.Count > 0 ? $"({Calculator.Roe(PositionSide.Short, ShortPoints[0], point) / 100:P2})" : "";
+				var y = (float)GetYCoordinateFromPrice(point, yMin, yMax, CandleTopBottomMargin, LiveActualHeight);
+				canvas.DrawLine(0, y, (float)CandleChart.ActualWidth, y, LongHorizontalLinePointerPaint);
+				canvas.DrawText($"{point} {changeText}", 2, y - 4, CandleInfoFont, LongHorizontalLinePointerPaint);
+			}
+
+			foreach (var point in ShortPoints)
+			{
+				var changeText = LongPoints.Count > 0 ? $"({Calculator.Roe(PositionSide.Long, LongPoints[0], point) / 100:P2})" : "";
+				var y = (float)GetYCoordinateFromPrice(point, yMin, yMax, CandleTopBottomMargin, LiveActualHeight);
+				canvas.DrawLine(0, y, (float)CandleChart.ActualWidth, y, ShortHorizontalLinePointerPaint);
+				canvas.DrawText($"{point} {changeText}", 2, y - 4, CandleInfoFont, ShortHorizontalLinePointerPaint);
 			}
 		}
 
@@ -662,6 +687,36 @@ namespace ChartViewer
 		private void RefreshOptionButton_Click(object sender, RoutedEventArgs e)
 		{
 			LoadChart();
+		}
+
+		/// <summary>
+		/// 가격에 해당하는 Y좌표
+		/// </summary>
+		/// <param name="price"></param>
+		/// <param name="yMin"></param>
+		/// <param name="yMax"></param>
+		/// <param name="CandleTopBottomMargin"></param>
+		/// <param name="LiveActualHeight"></param>
+		/// <returns></returns>
+		public decimal GetYCoordinateFromPrice(decimal price, double yMin, double yMax, decimal CandleTopBottomMargin, float LiveActualHeight)
+		{
+			return CandleTopBottomMargin + (((decimal)yMax - price) / (decimal)(yMax - yMin) * (decimal)LiveActualHeight);
+		}
+
+		private void CandleChart_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
+
+			LongPoints.Clear();
+			LongPoints.Add(pointingChart.Quote.Close);
+		}
+
+		private void CandleChart_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
+
+			ShortPoints.Clear();
+			ShortPoints.Add(pointingChart.Quote.Close);
 		}
 	}
 }

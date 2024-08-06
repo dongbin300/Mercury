@@ -64,7 +64,7 @@
             </Grid>
 
             <Grid Name="CandleChartGrid" Grid.Row="1">
-                <skia:SKElement x:Name="CandleChart" PaintSurface="CandleChart_PaintSurface"/>
+                <skia:SKElement x:Name="CandleChart" PaintSurface="CandleChart_PaintSurface" MouseLeftButtonDown="CandleChart_MouseLeftButtonDown" MouseRightButtonDown="CandleChart_MouseRightButtonDown"/>
             </Grid>
         </Grid>
 

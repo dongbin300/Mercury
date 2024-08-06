@@ -322,5 +322,14 @@ namespace Mercury.Charts
 				Charts[i].PredictiveRangesLower2 = pr.Lower2;
 			}
 		}
+
+		public void UseStoch(int period = 14)
+		{
+			var stoch = Charts.Select(x => x.Quote).GetStoch(period).Select(x => x.Stoch);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Stoch = stoch.ElementAt(i);
+			}
+		}
 	}
 }

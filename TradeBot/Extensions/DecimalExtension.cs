@@ -2,7 +2,7 @@
 
 namespace TradeBot.Extensions
 {
-    public static class DecimalExtension
+	public static class DecimalExtension
     {
         public static decimal ToValidPrice(this decimal price, string symbol)
         {
@@ -15,5 +15,17 @@ namespace TradeBot.Extensions
             var tick = Common.SymbolDetails.Find(x => x.Symbol.Equals(symbol))?.QuantityTick ?? 0;
             return Math.Round(quantity, tick);
         }
-    }
+
+		public static decimal ToUpTickPrice(this decimal price, string symbol, int count = 1)
+		{
+			var tickSize = Common.SymbolDetails.Find(x => x.Symbol.Equals(symbol))?.TickSize ?? 0;
+			return price + tickSize * count;
+		}
+
+		public static decimal ToDownTickPrice(this decimal price, string symbol, int count = 1)
+        {
+			var tickSize = Common.SymbolDetails.Find(x => x.Symbol.Equals(symbol))?.TickSize ?? 0;
+            return price - tickSize * count;
+		}
+	}
 }

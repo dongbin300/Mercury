@@ -4,20 +4,13 @@ using System;
 
 namespace TradeBot.Models
 {
-    public class PositionCoolTime
-    {
-        public string Symbol { get; set; }
-        public PositionSide Side { get; set; }
-        public DateTime LatestEntryTime { get; set; }
+    public class PositionCoolTime(string symbol, PositionSide side, DateTime latestEntryTime)
+	{
+		public string Symbol { get; set; } = symbol;
+		public PositionSide Side { get; set; } = side;
+		public DateTime LatestEntryTime { get; set; } = latestEntryTime;
 
-        public PositionCoolTime(string symbol, PositionSide side, DateTime latestEntryTime)
-        {
-            Symbol = symbol;
-            Side = side;
-            LatestEntryTime = latestEntryTime;
-        }
-
-        public bool IsCoolTime()
+		public bool IsCoolTime()
         {
             return (DateTime.Now - LatestEntryTime).TotalSeconds < 120;
         }

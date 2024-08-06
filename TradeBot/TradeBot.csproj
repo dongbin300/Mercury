@@ -8,6 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\symbol_detail.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\symbol_detail.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Management" Version="7.0.2" />
   </ItemGroup>
 

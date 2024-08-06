@@ -1,5 +1,6 @@
 ﻿using Mercury.Charts;
 using Mercury.Enums;
+using Mercury.Maths;
 
 namespace Mercury.Backtests
 {
@@ -20,7 +21,9 @@ namespace Mercury.Backtests
 	/// <param name="gridCount"></param>
 	public class GridPredictiveRangesBacktester2 : GridBacktester
 	{
-		public GridPredictiveRangesBacktester2(string symbol, List<Price> prices, List<ChartInfo> charts, string reportFileName, int gridCount, int leverage = 1)
+		public decimal PredictiveRangesRiskMargin { get; set; }
+
+		public GridPredictiveRangesBacktester2(string symbol, List<Price> prices, List<ChartInfo> charts, string reportFileName, int gridCount, decimal riskMargin = 0m, int leverage = 1)
 		{
 			Symbol = symbol;
 			Prices = prices;
@@ -28,6 +31,7 @@ namespace Mercury.Backtests
 			ReportFileName = reportFileName;
 			GridCount = gridCount;
 			GridType = GridType.Neutral;
+			PredictiveRangesRiskMargin = riskMargin;
 			Leverage = leverage;
 		}
 
@@ -42,12 +46,11 @@ namespace Mercury.Backtests
 
 			for (int i = startIndex; i < Prices.Count; i++)
 			{
-				var time = Prices[i].Date;
-				var price = Prices[i].Value;
-
-				if (time >= displayDate)
+				if (Prices[i].Date >= displayDate) // 결과 출력
 				{
-					// 결과 출력
+					var time = Prices[i].Date;
+					var price = Prices[i].Value;
+
 					displayDate = displayDate.AddDays(1);
 
 					var yesterdayChart = LastChart(time); // 이전봉 종가
@@ -59,7 +62,6 @@ namespace Mercury.Backtests
 					{
 						WriteStatus(i, "PRA_CROSS");
 						CloseAllPositions(i);
-						ApplyLeverage(i);
 
 						GridType = GridType.Neutral;
 
@@ -72,7 +74,6 @@ namespace Mercury.Backtests
 					{
 						WriteStatus(i, "CHANGE_PR");
 						CloseAllPositions(i);
-						ApplyLeverage(i);
 
 						GridType = yesterdayChart.Quote.Close > (decimal)yesterday2Chart.PredictiveRangesAverage ? GridType.Long : GridType.Short;
 
@@ -92,11 +93,11 @@ namespace Mercury.Backtests
 				}
 
 				// 매매 Filled
-				if (NearestLongOrder != null && NearestLongOrder.Price >= price)
+				if (NearestLongOrder != null && NearestLongOrder.Price >= Prices[i].Value)
 				{
 					Fill(NearestLongOrder, i);
 				}
-				if (NearestShortOrder != null && NearestShortOrder.Price <= price)
+				if (NearestShortOrder != null && NearestShortOrder.Price <= Prices[i].Value)
 				{
 					Fill(NearestShortOrder, i);
 				}
@@ -110,32 +111,42 @@ namespace Mercury.Backtests
 					 $"{tradePerDay},{estimatedMoney.Round(0)}" + Environment.NewLine + Environment.NewLine);
 
 			// Position History
-			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}_position.csv"),
+			if (IsGeneratePositionHistory)
+			{
+				File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}_position.csv"),
 				string.Join(Environment.NewLine, PositionHistories) + Environment.NewLine + Environment.NewLine + Environment.NewLine
 				);
+			}
 
 			return (tradePerDay, estimatedMoney);
 		}
 
+		/// <summary>
+		/// deprecated
+		/// </summary>
+		/// <param name="chartIndex"></param>
 		public void ApplyLeverage(int chartIndex)
 		{
-			//xvar time = Prices[chartIndex].Date;
-			//var leverage = (decimal)LastChart2(time).PredictiveRangesMaxLeverage;
-
-			Money = InitialMargin + ((Money - InitialMargin) * Leverage);
+			var time = Prices[chartIndex].Date;
+			var price = Prices[chartIndex].Value;
+			var chart = LastChart2(time);
+			var leverage = (int)Calculator.RangesLeverage((decimal)chart.PredictiveRangesUpper2, (decimal)chart.PredictiveRangesLower2, price, GridCount, PredictiveRangesRiskMargin);
+			Leverage = leverage;
+			//Money = InitialMargin + ((Money - InitialMargin) * Leverage);
 		}
 
 		public void SetGrid(int chartIndex)
 		{
-			InitialMargin = Money;
+			ApplyLeverage(chartIndex);
+			InitialMargin = Money * 0.9m;
 
 			var currentPrice = Prices[chartIndex].Value;
 			var currentTime = Prices[chartIndex].Date;
 
-			UpperPrice = (decimal)CurrentChart(currentTime).PredictiveRangesUpper2;
-			LowerPrice = (decimal)CurrentChart(currentTime).PredictiveRangesLower2;
-			UpperStopLossPrice = (decimal)CurrentChart(currentTime).PredictiveRangesUpper2;
-			LowerStopLossPrice = (decimal)CurrentChart(currentTime).PredictiveRangesLower2;
+			UpperPrice = (decimal)LastChart2(currentTime).PredictiveRangesUpper2;
+			LowerPrice = (decimal)LastChart2(currentTime).PredictiveRangesLower2;
+			UpperStopLossPrice = (decimal)LastChart2(currentTime).PredictiveRangesUpper2;
+			LowerStopLossPrice = (decimal)LastChart2(currentTime).PredictiveRangesLower2;
 
 			GridInterval = (UpperPrice - LowerPrice) / GridCount;
 			StandardBaseOrderSize = (InitialMargin * Leverage) / GridCount;

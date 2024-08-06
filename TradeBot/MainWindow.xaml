@@ -17,13 +17,13 @@
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="15*"/>
                 <ColumnDefinition Width="9*"/>
-                <ColumnDefinition Width="240"/>
+                <!--<ColumnDefinition Width="240"/>-->
             </Grid.ColumnDefinitions>
 
             <GroupBox Grid.Column="0" Header="Bot Settings">
                 <StackPanel Orientation="Vertical">
-                    <!--<TextBlock Style="{StaticResource Description}">Mock Bot</TextBlock>
-                    <CheckBox x:Name="MockBotCheckBox" HorizontalAlignment="Right" Checked="MockBotCheckBox_Checked" Unchecked="MockBotCheckBox_Unchecked"/>-->
+                    <TextBlock Style="{StaticResource Description}">Mock Bot</TextBlock>
+                    <CheckBox x:Name="MockBotCheckBox" HorizontalAlignment="Right" Checked="MockBotCheckBox_Checked" Unchecked="MockBotCheckBox_Unchecked"/>
                     <TextBlock Style="{StaticResource Description}">Long Bot</TextBlock>
                     <CheckBox x:Name="LongBotCheckBox" HorizontalAlignment="Right" Checked="LongBotCheckBox_Checked" Unchecked="LongBotCheckBox_Unchecked"/>
                     <TextBlock Style="{StaticResource Description}">Short Bot</TextBlock>
@@ -35,16 +35,16 @@
                     <TextBlock Style="{StaticResource Description}">Lower Alarm</TextBlock>
                     <TextBox x:Name="LowerAlarmTextBox" HorizontalContentAlignment="Right" Text="70"/>
                     <TextBlock Style="{StaticResource Description}">Base Order Size</TextBlock>
-                    <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="40" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
+                    <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="500000" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage</TextBlock>
-                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="10" TextChanged="LeverageTextBox_TextChanged"/>
+                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="5" TextChanged="LeverageTextBox_TextChanged"/>
                     <TextBlock Style="{StaticResource Description}">Leverage Type</TextBlock>
                     <ComboBox x:Name="LeverageTypeComboBox" SelectedIndex="0">
                         <ComboBoxItem>Cross</ComboBoxItem>
                         <ComboBoxItem>Isolated</ComboBoxItem>
                     </ComboBox>
                     <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
-                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="10" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
+                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="9" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
                     <!--<TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
                     <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.85"/>
                     <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>
@@ -80,7 +80,12 @@
             <GroupBox Grid.Column="2" Header="Positions">
                 <DataGrid x:Name="PositionDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0">
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="" Width="1" >
+                        <DataGridTextColumn Header="Time" Width="120" Binding="{Binding Time}"/>
+                        <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}"/>
+                        <DataGridTextColumn Header="Side" Width="90" Binding="{Binding Side}"/>
+                        <DataGridTextColumn Header="EntryPrice" Width="90" Binding="{Binding EntryPrice}"/>
+                        <DataGridTextColumn Header="Quantity" Width="100" Binding="{Binding Quantity}"/>
+                        <!--<DataGridTemplateColumn Header="" Width="1" >
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Rectangle Fill="{Binding PositionSideColor}"/>
@@ -95,12 +100,12 @@
                                     <Setter Property="Foreground" Value="{Binding PnlColor}" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
+                        </DataGridTextColumn>-->
                     </DataGrid.Columns>
                 </DataGrid>
             </GroupBox>
 
-            <GroupBox Grid.Column="3" Header="Indicators" x:Name="IndicatorsGroupBox">
+            <GroupBox Grid.Column="3" Header="Indicators" x:Name="IndicatorsGroupBox" Visibility="Collapsed">
                 <DataGrid x:Name="IndicatorDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0" MouseDoubleClick="IndicatorDataGrid_MouseDoubleClick">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}">

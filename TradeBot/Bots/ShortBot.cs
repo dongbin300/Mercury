@@ -11,266 +11,304 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Mercury.Enums;
 
 namespace TradeBot.Bots
 {
-    public class ShortBot : Bot
-    {
-        #region Entry
-        public bool IsRunning { get; set; }
-        public decimal BaseOrderSize { get; set; }
-        public decimal TargetRoe { get; set; }
-        public int Leverage { get; set; }
-        public int MaxActiveDeals { get; set; }
+	public class ShortBot : Bot
+	{
+		#region Entry
+		public bool IsRunning { get; set; }
+		public decimal BaseOrderSize { get; set; }
+		public decimal TargetRoe { get; set; }
+		public int Leverage { get; set; }
+		public int MaxActiveDeals { get; set; }
 
-        private PositionSide side => PositionSide.Short;
-        private List<string> DealingSymbols = new();
+		private PositionSide side => PositionSide.Short;
+		private List<string> dealingSymbols = [];
 
-        public ShortBot() : this("", "")
-        {
+		public ShortBot() : this("", "")
+		{
 
-        }
+		}
 
-        public ShortBot(string name) : this(name, "")
-        {
+		public ShortBot(string name) : this(name, "")
+		{
 
-        }
+		}
 
-        public ShortBot(string name, string description)
-        {
-            Name = name;
-            Description = description;
-        }
-        #endregion
+		public ShortBot(string name, string description)
+		{
+			Name = name;
+			Description = description;
+		}
+		#endregion
 
-        public async Task Evaluate()
-        {
-            try
-            {
-                foreach (var pairQuote in Common.PairQuotes)
-                {
-                    var symbol = pairQuote.Symbol;
-                    var c0 = pairQuote.Charts[^1]; // 현재 정보
-                    var c1 = pairQuote.Charts[^2]; // 1봉전 정보
+		public async Task Evaluate()
+		{
+			try
+			{
+				foreach (var pairQuote in Common.PairQuotes)
+				{
+					var symbol = pairQuote.Symbol;
+					var c0 = pairQuote.Charts[^1]; // 현재 정보
+					var c1 = pairQuote.Charts[^2]; // 1봉전 정보
+					var c2 = pairQuote.Charts[^3]; // 2봉전 정보
+					var c3 = pairQuote.Charts[^4]; // 3봉전 정보
+					var c4 = pairQuote.Charts[^5]; // 4봉전 정보
 
-                    if (c0.Quote.Date.Minute != DateTime.Now.Minute) // 차트 시간과 현재 시간의 동기화 실패
-                    {
-                        continue;
-                    }
+					if (c0.Quote.Date.Hour != DateTime.Now.Hour) // 차트 시간과 현재 시간의 동기화 실패
+					{
+						continue;
+					}
 
-                    var minPrice = pairQuote.Charts.SkipLast(1).TakeLast(24).Min(x => x.Quote.Low);
-                    var maxPrice = pairQuote.Charts.SkipLast(1).TakeLast(24).Max(x => x.Quote.High);
-                    var slPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 1.1m;
-                    var tpPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 0.9m;
+					//var minPrice = pairQuote.Charts.SkipLast(1).TakeLast(24).Min(x => x.Quote.Low);
+					//var maxPrice = pairQuote.Charts.SkipLast(1).TakeLast(24).Max(x => x.Quote.High);
+					//var slPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 1.1m;
+					//var tpPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 0.9m;
 
-                    if (!Common.IsShortPositioning(symbol)) // 포지션이 없으면
-                    {
-                        if (Common.ShortPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
-                        {
-                            continue;
-                        }
+					if (!Common.IsShortPositioning(symbol)) // 포지션이 없으면
+					{
+						if (Common.LongPositions.Count + Common.ShortPositions.Count >= MaxActiveDeals) // 동시 거래 수 MAX
+						{
+							continue;
+						}
 
-                        if (Common.IsCoolTime(symbol, side)) // 정리한지 시간이 별로 안 지났으면 스킵
-                        {
-                            continue;
-                        }
+						if (Common.IsCoolTime(symbol, side)) // 정리한지 시간이 별로 안 지났으면 스킵
+						{
+							continue;
+						}
 
-                        if (DealingSymbols.Contains(symbol)) // 이미 주문하고 있는 중이면
-                        {
-                            continue;
-                        }
+						if (dealingSymbols.Contains(symbol)) // 이미 주문하고 있는 중이면
+						{
+							continue;
+						}
 
-                        DealingSymbols.Add(symbol);
-                        try
-                        {
-                            // 진입 조건에 부합하면
-                            if (pairQuote.IsPowerDeadCross(14) &&
-                                c1.Macd > 0 &&
-                                c1.Stoch > 80 &&
-                                tpPer > 1.0m)
-                            {
-                                //Common.AddHistory("Short Bot", $"c1:{c1CandleLength.Round(2)}, min:{minPrice.Round(6)}, max:{maxPrice.Round(6)}, sl%:{slPer.Round(4)}, tp%:{tpPer.Round(4)}");
-                                var price = c0.Quote.Close;
-                                var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
-                                var halfQuantity = (quantity / 2).ToValidQuantity(symbol);
-                                if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
-                                {
-                                    var stopLossPrice = Calculator.TargetPrice(side, c0.Quote.Open, slPer);
-                                    var takeProfitPrice = Calculator.TargetPrice(side, c0.Quote.Open, tpPer);
-                                    await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
-                                    await SetTakeProfit(symbol, takeProfitPrice, halfQuantity).ConfigureAwait(false);
+						dealingSymbols.Add(symbol);
+						try
+						{
+							// 진입 조건에 부합하면
+							//if (pairQuote.IsPowerDeadCross(14) &&
+							//    c1.Macd > 0 &&
+							//    c1.Stoch > 80 &&
+							//    tpPer > 1.0m)
+							//{
+							//    //Common.AddHistory("Short Bot", $"c1:{c1CandleLength.Round(2)}, min:{minPrice.Round(6)}, max:{maxPrice.Round(6)}, sl%:{slPer.Round(4)}, tp%:{tpPer.Round(4)}");
+							//    var price = c0.Quote.Close;
+							//    var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
+							//    var halfQuantity = (quantity / 2).ToValidQuantity(symbol);
+							//    if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
+							//    {
+							//        var stopLossPrice = Calculator.TargetPrice(side, c0.Quote.Open, slPer);
+							//        var takeProfitPrice = Calculator.TargetPrice(side, c0.Quote.Open, tpPer);
+							//        await SetStopLoss(symbol, stopLossPrice, quantity).ConfigureAwait(false);
+							//        await SetTakeProfit(symbol, takeProfitPrice, halfQuantity).ConfigureAwait(false);
 
-                                    Common.AddPositionCoolTime(symbol, side);
-                                    if (Common.IsSound)
-                                    {
-                                        Sound.Play("Resources/entry.wav", 0.5);
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-                        }
-                        DealingSymbols.Remove(symbol);
-                    }
-                    else // 포지션이 있으면
-                    {
-                        var stopLossOrder = Common.GetOrder(symbol, side, FuturesOrderType.Stop);
-                        if (stopLossOrder == null)
-                        {
-                            continue;
-                        }
+							//        Common.AddPositionCoolTime(symbol, side);
+							//        if (Common.IsSound)
+							//        {
+							//            Sound.Play("Resources/entry.wav", 0.5);
+							//        }
+							//    }
+							//}
 
-                        if ((DateTime.UtcNow - stopLossOrder.CreateTime).TotalSeconds < 30)
-                        {
-                            continue;
-                        }
+							if (c1.CandlestickType == CandlestickType.Bullish
+								&& c2.CandlestickType == CandlestickType.Bullish
+								&& c3.CandlestickType == CandlestickType.Bullish
+								&& c4.CandlestickType == CandlestickType.Bearish)
+							{
+								var price = c0.Quote.Close;
+								var quantity = (BaseOrderSize / price).ToValidQuantity(symbol);
+								if (await OpenSell(symbol, price, quantity).ConfigureAwait(false))
+								{
+									Common.AddPositionCoolTime(symbol, side);
+									if (Common.IsSound)
+									{
+										Sound.Play("Resources/entry.wav", 0.5);
+									}
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+						}
+						dealingSymbols.Remove(symbol);
+					}
+					else // 포지션이 있으면
+					{
+						//var stopLossOrder = Common.GetOrder(symbol, side, FuturesOrderType.Stop);
+						//if (stopLossOrder == null)
+						//{
+						//    continue;
+						//}
 
-                        var takeProfitOrder = Common.GetOrder(symbol, side, FuturesOrderType.TakeProfit);
-                        if (takeProfitOrder == null && c1.Supertrend > 0)
-                        {
-                            var position = Common.GetPosition(symbol, side);
-                            if (position == null)
-                            {
-                                continue;
-                            }
-                            var price = c0.Quote.Close;
-                            var quantity = Math.Abs(position.Quantity);
-                            await CloseBuy(symbol, price, quantity).ConfigureAwait(false);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-            }
-        }
+						//if ((DateTime.UtcNow - stopLossOrder.CreateTime).TotalSeconds < 30)
+						//{
+						//    continue;
+						//}
 
-        public async Task MonitorOpenOrderTimeout()
-        {
-            try
-            {
-                var openOrderResult = BinanceClients.Api.UsdFuturesApi.Trading.GetOpenOrdersAsync();
-                openOrderResult.Wait();
-                foreach (var order in openOrderResult.Result.Data)
-                {
-                    if ((DateTime.UtcNow - order.CreateTime) >= TimeSpan.FromMinutes(5)) // 5분이 넘도록 체결이 안되면 주문 취소
-                    {
-                        var result = await BinanceClients.Api.UsdFuturesApi.Trading.CancelOrderAsync(order.Symbol, order.Id).ConfigureAwait(false);
-                        if (result.Success)
-                        {
-                            Common.AddHistory("Short Bot", $"Cancel Order {order.Symbol}, {order.Id}");
-                        }
-                        else
-                        {
-                            Common.AddHistory("Short Bot", $"Cancel Order {order.Symbol}, Error: {result.Error?.Message}");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-            }
-        }
+						//var takeProfitOrder = Common.GetOrder(symbol, side, FuturesOrderType.TakeProfit);
+						//if (takeProfitOrder == null && c1.Supertrend > 0)
+						//{
+						//    var position = Common.GetPosition(symbol, side);
+						//    if (position == null)
+						//    {
+						//        continue;
+						//    }
+						//    var price = c0.Quote.Close;
+						//    var quantity = Math.Abs(position.Quantity);
+						//    await CloseBuy(symbol, price, quantity).ConfigureAwait(false);
+						//}
 
-        public async Task<bool> OpenSell(string symbol, decimal price, decimal quantity)
-        {
-            try
-            {
-                await BinanceClients.Api.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, Leverage); // 레버리지 설정
-                var limitPrice = Calculator.TargetPrice(side, price, 0.25m).ToValidPrice(symbol); // -0 ~ -0.25%
+						if (
+							c1.CandlestickType == CandlestickType.Bearish
+							&& c2.CandlestickType == CandlestickType.Bearish
+							)
+						{
+							var position = Common.GetPosition(symbol, side);
+							if (position == null)
+							{
+								continue;
+							}
 
-                var result = await BinanceClients.OpenSell(symbol, limitPrice, quantity).ConfigureAwait(false);
-                if (result.Success)
-                {
-                    Common.AddHistory("Short Bot", $"Open Sell {symbol}, {price}, {quantity}");
-                    return true;
-                }
-                else
-                {
-                    Common.AddHistory("Short Bot", $"Open Sell {symbol}, Error: {result.Error?.Message}");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-                return false;
-            }
-        }
+							var price = c0.Quote.Close;
+							var quantity = Math.Abs(position.Quantity);
+							await CloseBuy(symbol, price, quantity).ConfigureAwait(false);
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+			}
+		}
 
-        public async Task CloseBuy(string symbol, decimal price, decimal quantity)
-        {
-            try
-            {
-                var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
+		public async Task MonitorOpenOrderTimeout()
+		{
+			try
+			{
+				var openOrderResult = BinanceClients.Api.UsdFuturesApi.Trading.GetOpenOrdersAsync();
+				openOrderResult.Wait();
+				foreach (var order in openOrderResult.Result.Data)
+				{
+					if ((DateTime.UtcNow - order.CreateTime) >= TimeSpan.FromMinutes(5)) // 5분이 넘도록 체결이 안되면 주문 취소
+					{
+						var result = await BinanceClients.Api.UsdFuturesApi.Trading.CancelOrderAsync(order.Symbol, order.Id).ConfigureAwait(false);
+						if (result.Success)
+						{
+							Common.AddHistory("Short Bot", $"Cancel Order {order.Symbol}, {order.Id}");
+						}
+						else
+						{
+							Common.AddHistory("Short Bot", $"Cancel Order {order.Symbol}, Error: {result.Error?.Message}");
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+			}
+		}
 
-                var result = await BinanceClients.CloseBuy(symbol, limitPrice, quantity).ConfigureAwait(false);
-                if (result.Success)
-                {
-                    Common.AddHistory("Short Bot", $"Close Buy {symbol}, {price}, {quantity}");
-                }
-                else
-                {
-                    Common.AddHistory("Short Bot", $"Close Buy {symbol}, Error: {result.Error?.Message}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-            }
-        }
+		public async Task<bool> OpenSell(string symbol, decimal price, decimal quantity)
+		{
+			try
+			{
+				await BinanceClients.Api.UsdFuturesApi.Account.ChangeInitialLeverageAsync(symbol, Leverage); // 레버리지 설정
+				var limitPrice = price;
+				for (int i = 1; i <= 20; i++) // 지정가 주문이 성공할 떄까지 주문금액을 계속 높힘(최대 20틱)
+				{
+					limitPrice = limitPrice.ToUpTickPrice(symbol).ToValidPrice(symbol);
 
-        public async Task SetTakeProfit(string symbol, decimal price, decimal quantity)
-        {
-            try
-            {
-                var takePrice = price.ToValidPrice(symbol);
-                var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
+					var result = await BinanceClients.OpenSell(symbol, limitPrice, quantity).ConfigureAwait(false);
+					if (result.Success)
+					{
+						Common.AddHistory("Short Bot", $"Open Sell {symbol}, {limitPrice}, {quantity} ({i})");
+						return true;
+					}
+				}
+				Common.AddHistory("Short Bot", $"Open Sell {symbol}, Failed");
+				return false;
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+				return false;
+			}
+		}
 
-                var result = await BinanceClients.SetShortTakeProfit(symbol, limitPrice, quantity, takePrice).ConfigureAwait(false);
-                if (result.Success)
-                {
-                    Common.AddHistory("Short Bot", $"Set Take Profit {symbol}, {price}, {quantity}");
-                }
-                else
-                {
-                    Common.AddHistory("Short Bot", $"Set Take Profit {symbol}, Error: {result.Error?.Message}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-            }
-        }
+		public async Task CloseBuy(string symbol, decimal price, decimal quantity)
+		{
+			try
+			{
+				var limitPrice = price.ToDownTickPrice(symbol).ToValidPrice(symbol);
 
-        public async Task SetStopLoss(string symbol, decimal price, decimal quantity)
-        {
-            try
-            {
-                var stopPrice = price.ToValidPrice(symbol);
-                var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
+				var result = await BinanceClients.CloseBuy(symbol, limitPrice, quantity).ConfigureAwait(false);
+				if (result.Success)
+				{
+					Common.AddHistory("Short Bot", $"Close Buy {symbol}, {limitPrice}, {quantity}");
+				}
+				else
+				{
+					Common.AddHistory("Short Bot", $"Close Buy {symbol}, Error: {result.Error?.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+			}
+		}
 
-                var result = await BinanceClients.SetShortStopLoss(symbol, limitPrice, quantity, stopPrice).ConfigureAwait(false);
-                if (result.Success)
-                {
-                    Common.AddHistory("Short Bot", $"Set Stop Loss {symbol}, {price}, {quantity}");
-                }
-                else
-                {
-                    Common.AddHistory("Short Bot", $"Set Stop Loss {symbol}, Error: {result.Error?.Message}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
-            }
-        }
+		public async Task SetTakeProfit(string symbol, decimal price, decimal quantity)
+		{
+			try
+			{
+				var takePrice = price.ToValidPrice(symbol);
+				var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
 
-        /*
+				var result = await BinanceClients.SetShortTakeProfit(symbol, limitPrice, quantity, takePrice).ConfigureAwait(false);
+				if (result.Success)
+				{
+					Common.AddHistory("Short Bot", $"Set Take Profit {symbol}, {price}, {quantity}");
+				}
+				else
+				{
+					Common.AddHistory("Short Bot", $"Set Take Profit {symbol}, Error: {result.Error?.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+			}
+		}
+
+		public async Task SetStopLoss(string symbol, decimal price, decimal quantity)
+		{
+			try
+			{
+				var stopPrice = price.ToValidPrice(symbol);
+				var limitPrice = Calculator.TargetPrice(side, price, -1m).ToValidPrice(symbol); // +0 ~ +1%
+
+				var result = await BinanceClients.SetShortStopLoss(symbol, limitPrice, quantity, stopPrice).ConfigureAwait(false);
+				if (result.Success)
+				{
+					Common.AddHistory("Short Bot", $"Set Stop Loss {symbol}, {price}, {quantity}");
+				}
+				else
+				{
+					Common.AddHistory("Short Bot", $"Set Stop Loss {symbol}, Error: {result.Error?.Message}");
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(ShortBot), MethodBase.GetCurrentMethod()?.Name, ex);
+			}
+		}
+
+		/*
         #region Mock
         public async Task MockEvaluate()
         {
@@ -362,5 +400,5 @@ namespace TradeBot.Bots
         }
         #endregion
         */
-    }
+	}
 }

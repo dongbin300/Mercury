@@ -1,5 +1,8 @@
 ﻿using Binance.Net.Enums;
 
+using System.Drawing;
+using System.Text;
+
 namespace Mercury.Backtests
 {
     public class Position(DateTime time, string symbol, PositionSide side, decimal entryPrice)

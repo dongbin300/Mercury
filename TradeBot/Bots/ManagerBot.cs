@@ -16,9 +16,9 @@ namespace TradeBot.Bots
 {
     public class ManagerBot : Bot
     {
-        private double preTotal = 0;
-        private double preAvbl = 0;
-        private double preBnb = 0;
+        private decimal preTotal = 0;
+        private decimal preAvbl = 0;
+        private decimal preBnb = 0;
 
         public ManagerBot() : this("", "")
         {
@@ -40,7 +40,7 @@ namespace TradeBot.Bots
         /// Get Total Balance(USDT) and Available Balance(USDT) and BNB Balance(BNB)
         /// </summary>
         /// <returns></returns>
-        public async Task<(double, double, double)> GetBinanceBalance()
+        public async Task<(decimal, decimal, decimal)> GetBinanceBalance()
         {
             try
             {
@@ -48,9 +48,9 @@ namespace TradeBot.Bots
                 var balance = result.Data;
                 var usdtBalance = balance.First(b => b.Asset.Equals("USDT"));
                 var usdt = usdtBalance.WalletBalance + usdtBalance.CrossUnrealizedPnl;
-                var availableUsdt = (double)Math.Round(usdtBalance.AvailableBalance, 3);
-                var total = (double)Math.Round(usdt, 3);
-                var bnb = (double)Math.Round(balance.First(b => b.Asset.Equals("BNB")).WalletBalance, 4);
+                var availableUsdt = Math.Round(usdtBalance.AvailableBalance, 3);
+                var total = Math.Round(usdt, 3);
+                var bnb = Math.Round(balance.First(b => b.Asset.Equals("BNB")).WalletBalance, 4);
 
                 preTotal = total;
                 preAvbl = availableUsdt;
@@ -75,7 +75,7 @@ namespace TradeBot.Bots
                 }
 
                 var positions = result.Data.Where(r => r.Quantity != 0);
-                Common.Positions = positions.Select(p => new BinancePosition(
+                Common.Positions = [.. positions.Select(p => new BinancePosition(
                     p.Symbol,
                     p.PositionSide.ToString(),
                     p.UnrealizedPnl,
@@ -83,9 +83,27 @@ namespace TradeBot.Bots
                     p.MarkPrice,
                     p.Quantity,
                     p.Leverage
-                    )).OrderByDescending(x => x.Pnl).ToList();
+                    )).OrderByDescending(x => x.Pnl)];
             }
             catch (Exception ex)
+            {
+                Logger.Log(nameof(ManagerBot), MethodBase.GetCurrentMethod()?.Name, ex);
+            }
+        }
+
+        public async Task GetBinanceOpenOrders()
+        {
+            try
+            {
+                var result = await BinanceClients.Api.UsdFuturesApi.Trading.GetOpenOrdersAsync().ConfigureAwait(false);
+                if (result.Data == null)
+                {
+                    return;
+                }
+
+				Common.OpenOrders = result.Data.Select(x => new BinanceOrder(x.Id, x.Symbol, x.PositionSide, x.Type, x.Quantity, x.CreateTime)).ToList();
+			}
+			catch (Exception ex)
             {
                 Logger.Log(nameof(ManagerBot), MethodBase.GetCurrentMethod()?.Name, ex);
             }
@@ -100,7 +118,7 @@ namespace TradeBot.Bots
                 return data.Select(d => new BinanceRealizedPnlHistory(
                     d.Timestamp,
                     d.Symbol ?? string.Empty,
-                    (double)d.Income
+                    d.Income
                     ));
             }
             catch
@@ -160,7 +178,6 @@ namespace TradeBot.Bots
                     }).ConfigureAwait(false);
                 }
 
-
                 Common.AddHistory("Manager Bot", "Start Binance Futures Ticker Complete");
             }
             catch (Exception ex)
@@ -183,11 +200,23 @@ namespace TradeBot.Bots
             }
         }
 
-        /// <summary>
-        /// 딜이 완료된 포지션에서 주문취소가 안된 주문 찾아서 취소
-        /// </summary>
-        /// <returns></returns>
-        public async Task MonitorOpenOrderClosedDeal()
+  //      public async Task CancelAllOpenOrders()
+  //      {
+  //          try
+  //          {
+				
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		Logger.Log(nameof(ManagerBot), MethodBase.GetCurrentMethod()?.Name, ex);
+		//	}
+		//}
+
+		/// <summary>
+		/// 딜이 완료된 포지션에서 주문취소가 안된 주문 찾아서 취소
+		/// </summary>
+		/// <returns></returns>
+		public async Task MonitorOpenOrderClosedDeal()
         {
             try
             {
@@ -198,9 +227,9 @@ namespace TradeBot.Bots
                     return;
                 }
 
-                Common.Orders = result.Data.Select(x => new BinanceOrder(x.Id, x.Symbol, x.PositionSide, x.Type, x.Quantity, x.CreateTime)).ToList();
+                Common.OpenOrders = result.Data.Select(x => new BinanceOrder(x.Id, x.Symbol, x.PositionSide, x.Type, x.Quantity, x.CreateTime)).ToList();
 
-                foreach (var order in Common.Orders)
+                foreach (var order in Common.OpenOrders)
                 {
                     // 해당 주문의 생성시간이 10초가 안 지났으면 스킵
                     if ((DateTime.UtcNow - order.CreateTime).TotalSeconds < 10)

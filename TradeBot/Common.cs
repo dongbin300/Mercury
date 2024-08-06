@@ -28,10 +28,10 @@ namespace TradeBot
         public static readonly SolidColorBrush ShortColor = new(Color.FromRgb(246, 70, 93));
         public static readonly SolidColorBrush MixColor = new(Color.FromRgb(125, 136, 111));
 
-        public static readonly KlineInterval BaseInterval = KlineInterval.FiveMinutes;
+        public static readonly KlineInterval BaseInterval = KlineInterval.OneHour;
         public static readonly int BaseIntervalNumber = 1;
 
-        public static List<SymbolDetail> SymbolDetails = new();
+        public static List<SymbolDetail> SymbolDetails = [];
 
         public static bool IsSound = false;
 
@@ -48,7 +48,6 @@ namespace TradeBot
                     SymbolDetails.Add(new SymbolDetail
                     {
                         Symbol = d[0],
-                        ListingDate = DateTime.Parse(d[2]),
                         MaxPrice = decimal.Parse(d[3]),
                         MinPrice = decimal.Parse(d[4]),
                         TickSize = decimal.Parse(d[5]),
@@ -66,16 +65,12 @@ namespace TradeBot
             }
         }
 
-        public static List<PairQuote> PairQuotes = new();
-        public static List<BinancePosition> Positions = new();
+        public static List<PairQuote> PairQuotes = [];
+        public static List<BinancePosition> Positions = [];
         public static List<BinancePosition> LongPositions => Positions.Where(p => p.PositionSide.Equals("Long")).ToList();
         public static List<BinancePosition> ShortPositions => Positions.Where(p => p.PositionSide.Equals("Short")).ToList();
-        public static List<BinanceOrder> Orders = new();
+        public static List<BinanceOrder> OpenOrders = [];
         public static Action<string, string> AddHistory = default!;
-
-        public static List<BinancePosition> MockPositions = new();
-        public static List<BinancePosition> LongMockPositions => MockPositions.Where(p => p.PositionSide.Equals("Long")).ToList();
-        public static List<BinancePosition> ShortMockPositions => MockPositions.Where(p => p.PositionSide.Equals("Short")).ToList();
 
         public static bool IsPositioning(string symbol, PositionSide side)
         {
@@ -99,17 +94,7 @@ namespace TradeBot
 
         public static BinanceOrder? GetOrder(string symbol, PositionSide side, FuturesOrderType type)
         {
-            return Orders.Find(o => o.Symbol.Equals(symbol) && o.Side.Equals(side) && o.Type.Equals(type));
-        }
-
-        public static bool IsMockPositioning(string symbol, PositionSide side)
-        {
-            return MockPositions.Any(p => p.Symbol.Equals(symbol) && p.PositionSide.Equals(side.ToString()));
-        }
-
-        public static BinancePosition? GetMockPosition(string symbol, PositionSide side)
-        {
-            return MockPositions.Find(p => p.Symbol.Equals(symbol) && p.PositionSide.Equals(side.ToString()));
+            return OpenOrders.Find(o => o.Symbol.Equals(symbol) && o.Side.Equals(side) && o.Type.Equals(type));
         }
 
         public static readonly int PositionCoolTimeSeconds = 60;

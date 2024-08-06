@@ -46,8 +46,8 @@ namespace Mercury.Backtests.Calculators
 					Charts[i].PredictiveRangesMaxLeverage = Charts[i - 1].PredictiveRangesMaxLeverage;
 				}
 				var leverageForLiquidationPrice = leverage == null ? (int)Charts[i].PredictiveRangesMaxLeverage : leverage.Value;
-				Charts[i].LiquidationPriceLong = CalculateLiquidationPrices(PositionSide.Long, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
-				Charts[i].LiquidationPriceShort = CalculateLiquidationPrices(PositionSide.Short, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
+				//Charts[i].LiquidationPriceLong = CalculateLiquidationPrices(PositionSide.Long, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
+				//Charts[i].LiquidationPriceShort = CalculateLiquidationPrices(PositionSide.Short, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
 
 				prevAverage = average;
 			}
@@ -61,7 +61,7 @@ namespace Mercury.Backtests.Calculators
 			decimal lowerLimit = lower * (1 - riskMargin);
 			decimal upperLimit = upper * (1 + riskMargin);
 			var tradeAmount = seed / gridCount;
-			var gridInterval = (upper - lower) / (gridCount + 1);
+			var gridInterval = (upper - lower) / (gridCount - 1);
 			decimal loss = 0;
 
 			if (side == PositionSide.Long)
@@ -86,7 +86,7 @@ namespace Mercury.Backtests.Calculators
 				return seed;
 			}
 
-			return seed / -loss;
+			return seed / Math.Abs(loss);
 		}
 
 		public decimal CalculateLiquidationPrices(PositionSide side, decimal upper, decimal lower, decimal entry, int gridCount, int leverage)
@@ -98,7 +98,7 @@ namespace Mercury.Backtests.Calculators
 
 			decimal seed = 1_000_000;
 			var tradeAmount = seed / gridCount * leverage;
-			var gridInterval = (upper - lower) / (gridCount + 1);
+			var gridInterval = (upper - lower) / (gridCount - 1);
 			var coinQuantity = 0m;
 			var amount = 0m;
 
