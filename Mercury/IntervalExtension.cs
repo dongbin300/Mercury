@@ -43,5 +43,25 @@ namespace Mercury
             KlineInterval.OneMonth => "1M",
             _ => "1m"
         };
-    }
+
+		public static TimeSpan ToTimeSpan(this KlineInterval interval) => interval switch
+		{
+			KlineInterval.OneMinute => TimeSpan.FromMinutes(1),
+			KlineInterval.ThreeMinutes => TimeSpan.FromMinutes(3),
+			KlineInterval.FiveMinutes => TimeSpan.FromMinutes(5),
+			KlineInterval.FifteenMinutes => TimeSpan.FromMinutes(15),
+			KlineInterval.ThirtyMinutes => TimeSpan.FromMinutes(30),
+			KlineInterval.OneHour => TimeSpan.FromHours(1),
+			KlineInterval.TwoHour => TimeSpan.FromHours(2),
+			KlineInterval.FourHour => TimeSpan.FromHours(4),
+			KlineInterval.SixHour => TimeSpan.FromHours(6),
+			KlineInterval.EightHour => TimeSpan.FromHours(8),
+			KlineInterval.TwelveHour => TimeSpan.FromHours(12),
+			KlineInterval.OneDay => TimeSpan.FromDays(1),
+			KlineInterval.ThreeDay => TimeSpan.FromDays(3),
+			KlineInterval.OneWeek => TimeSpan.FromDays(7),
+			KlineInterval.OneMonth => TimeSpan.FromDays(30),
+			_ => TimeSpan.FromMinutes(1)
+		};
+	}
 }

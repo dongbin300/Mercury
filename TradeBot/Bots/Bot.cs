@@ -4,62 +4,132 @@ using System.Collections.Generic;
 
 namespace TradeBot.Bots
 {
-    public class Bot(string name, string description) : IBot
-    {
+	public class Bot(string name, string description) : IBot
+	{
 		public string Name { get; set; } = name;
 		public string Description { get; set; } = description;
 		protected List<string> MonitorSymbols { get; set; } =
 		[
 			"JASMYUSDT",
-            "DOGEUSDT",
-            "ZECUSDT",
-            "UNIUSDT",
-            "XMRUSDT",
-            "MASKUSDT",
-            "SUSHIUSDT",
-            "ATOMUSDT",
-            "GRTUSDT",
-            "ENSUSDT",
-            "CHZUSDT",
-            "BNBUSDT",
-            "NKNUSDT",
-            "OMGUSDT",
-            "NEOUSDT",
-            "WAVESUSDT",
-            "XRPUSDT",
-            "DASHUSDT",
-            "OCEANUSDT",
-            "ROSEUSDT",
-            "BALUSDT",
-            "SANDUSDT",
-            "BANDUSDT",
-            "COTIUSDT",
-            "EGLDUSDT",
-            "IOSTUSDT",
-            "LTCUSDT",
-            "ADAUSDT",
-            "KAVAUSDT",
-            "RLCUSDT",
-            "MATICUSDT",
-            "AAVEUSDT",
-            "BELUSDT",
-            "FTMUSDT",
-            "ALPHAUSDT",
-            "XLMUSDT",
-            "KNCUSDT",
-            "ETCUSDT",
-            "OPUSDT",
-            "HBARUSDT"
+			"MASKUSDT",
+			"ZECUSDT",
+			"DOGEUSDT",
+			"ENSUSDT",
+			"APEUSDT",
+			"SUSHIUSDT",
+			"XMRUSDT",
+			"UNIUSDT",
+			"NKNUSDT",
+			"LRCUSDT",
+			"ATOMUSDT",
+			"DASHUSDT",
+			"ROSEUSDT",
+			"BANDUSDT",
+			"KAVAUSDT",
+			"COTIUSDT",
+			"BNBUSDT",
+			"XRPUSDT",
+			"ADAUSDT",
+			"OMGUSDT",
+			"ALPHAUSDT",
+			"GRTUSDT",
+			"NEOUSDT",
+			"LTCUSDT"
 		];
 
-        public Bot() : this("", "")
-        {
+		protected List<string> AllSymbols { get; set; } =
+		[
+			"AAVEUSDT",
+			"ADAUSDT",
+			"ALPHAUSDT",
+			"ANKRUSDT",
+			"APEUSDT",
+			"API3USDT",
+			"ARPAUSDT",
+			"ARUSDT",
+			"ATOMUSDT",
+			"AVAXUSDT",
+			"AXSUSDT",
+			"BAKEUSDT",
+			"BANDUSDT",
+			"BCHUSDT",
+			"BELUSDT",
+			"BLZUSDT",
+			"BNBUSDT",
+			"BTCUSDT",
+			"CHZUSDT",
+			"COMPUSDT",
+			"COTIUSDT",
+			"DASHUSDT",
+			"DOGEUSDT",
+			"DOTUSDT",
+			"DUSKUSDT",
+			"EGLDUSDT",
+			"ENJUSDT",
+			"ENSUSDT",
+			"ETCUSDT",
+			"ETHUSDT",
+			"FILUSDT",
+			"FTMUSDT",
+			"GMTUSDT",
+			"GRTUSDT",
+			"HBARUSDT",
+			"IMXUSDT",
+			"IOSTUSDT",
+			"IOTXUSDT",
+			"JASMYUSDT",
+			"KAVAUSDT",
+			"KNCUSDT",
+			"KSMUSDT",
+			"LPTUSDT",
+			"LRCUSDT",
+			"LTCUSDT",
+			"MANAUSDT",
+			"MASKUSDT",
+			"MATICUSDT",
+			"MKRUSDT",
+			"MTLUSDT",
+			"NEARUSDT",
+			"NEOUSDT",
+			"NKNUSDT",
+			"OMGUSDT",
+			"PEOPLEUSDT",
+			"QTUMUSDT",
+			"RENUSDT",
+			"RLCUSDT",
+			"ROSEUSDT",
+			"RSRUSDT",
+			"RUNEUSDT",
+			"SANDUSDT",
+			"SFPUSDT",
+			"SKLUSDT",
+			"SOLUSDT",
+			"STORJUSDT",
+			"SUSHIUSDT",
+			"THETAUSDT",
+			"TRBUSDT",
+			"TRXUSDT",
+			"UNFIUSDT",
+			"UNIUSDT",
+			"VETUSDT",
+			"WOOUSDT",
+			"XLMUSDT",
+			"XMRUSDT",
+			"XRPUSDT",
+			"YFIUSDT",
+			"ZECUSDT",
+			"ZENUSDT",
+			"ZRXUSDT"
+		];
 
-        }
+		public Bot() : this("", "")
+		{
 
-        public Bot(string name) : this(name, "")
-        {
+		}
 
-        }
+		public Bot(string name) : this(name, "")
+		{
+
+		}
 	}
 }

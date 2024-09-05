@@ -1,6 +1,7 @@
 ﻿using Binance.Net.Clients;
 using Binance.Net.Enums;
 using Binance.Net.Interfaces;
+using Binance.Net.Objects.Models;
 using Binance.Net.Objects.Models.Futures.Socket;
 
 using CryptoExchange.Net.Authentication;
@@ -22,7 +23,8 @@ namespace Mercury.Apis
 		{
 			var data = File.ReadAllLines(MercuryPath.BinanceApiKey);
 
-			BinanceClient = new BinanceSocketClient();
+			// BinanceSocketClient 초기화
+			var socketClient = new BinanceSocketClient();
 			BinanceClient.SetApiCredentials(new ApiCredentials(data[0], data[1]));
 		}
 		#endregion
@@ -53,21 +55,21 @@ namespace Mercury.Apis
 			var result = await BinanceClient.UsdFuturesApi.SubscribeToAllMiniTickerUpdatesAsync(AllMarketMiniTickersOnMessage);
 		}
 
-		//public static async void SubscribeToUserDataUpdatesAsync()
-		//{
-		//    var listenKey = BinanceClientApi.StartUserStream();
-		//    var result = await binanceClient.UsdFuturesApi.SubscribeToUserDataUpdatesAsync(listenKey, null, null, AccountUpdateOnMessage, null, actionkey);
-		//}
+		public static async void SubscribeToUserDataUpdatesAsync()
+		{
+			var listenKey = BinanceRestApi.StartUserStream();
+			var result = await BinanceClient.UsdFuturesApi.SubscribeToUserDataUpdatesAsync(listenKey, null, null, AccountUpdateOnMessage, null, ListenKeyExpiredOnMessage);
+		}
 
-		//private static void actionkey(DataEvent<BinanceStreamEvent> obj)
-		//{
-		//    throw new NotImplementedException();
-		//}
+		public static void ListenKeyExpiredOnMessage(DataEvent<BinanceStreamEvent> obj)
+		{
+			
+		}
 
-		//private static void AccountUpdateOnMessage(DataEvent<BinanceFuturesStreamAccountUpdate> obj)
-		//{
+		public static void AccountUpdateOnMessage(DataEvent<BinanceFuturesStreamAccountUpdate> obj)
+		{
 
-		//}
+		}
 
 		/// <summary>
 		/// 모든 심볼의 24시간 변화 데이터

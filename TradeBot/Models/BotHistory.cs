@@ -23,7 +23,7 @@ namespace TradeBot.Models
             }
             else
             {
-                return Common.WhiteColor;
+                return Common.ForegroundColor;
             }
         }
     }

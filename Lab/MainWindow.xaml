@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lab"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="100" Width="200">
     <Grid Background="Black">
-        <local:NumericPlusTextBox CaretBrush="#05DAC5" Width="300" Height="35" FontSize="14"/>
+        <!--<Button x:Name="Test" Content="Click" Click="Test_Click"/>-->
+        <!--<local:NumericPlusTextBox CaretBrush="#05DAC5" Width="300" Height="35" FontSize="14"/>-->
     </Grid>
 </Window>

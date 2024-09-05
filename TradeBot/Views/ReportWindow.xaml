@@ -1,0 +1,40 @@
+﻿<Window x:Class="TradeBot.Views.ReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TradeBot.Views"
+        mc:Ignorable="d"
+        Title="Report" Height="600" Width="800" Background="{DynamicResource BackgroundBrush}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Style="{StaticResource Description}" VerticalAlignment="Center" HorizontalAlignment="Center">Keyword</TextBlock>
+            <TextBox Grid.Column="1" x:Name="KeywordTextBox" KeyDown="KeywordTextBox_KeyDown"/>
+            <Button Grid.Column="2" x:Name="SearchButton" Style="{StaticResource HorizontalButton}" Click="SearchButton_Click">Search</Button>
+            <Button Grid.Column="3" x:Name="CollectButton" Style="{StaticResource HorizontalButton}" Click="CollectButton_Click">Collect</Button>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Button x:Name="IncomeButton" Style="{StaticResource HorizontalButton}" Click="IncomeButton_Click">Income</Button>
+            <Button x:Name="TradeButton" Style="{StaticResource HorizontalButton}" Click="TradeButton_Click">Trade</Button>
+            <Button x:Name="BotReportButton" Style="{StaticResource HorizontalButton}" Click="BotReportButton_Click">Bot Report</Button>
+            <Button x:Name="DailyButton" Style="{StaticResource HorizontalButton}" Click="DailyButton_Click">Daily</Button>
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" x:Name="ReportDataGrid" IsReadOnly="True" AutoGeneratingColumn="ReportDataGrid_AutoGeneratingColumn">
+            
+        </DataGrid>
+    </Grid>
+</Window>

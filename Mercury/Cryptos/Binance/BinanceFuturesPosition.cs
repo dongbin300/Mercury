@@ -2,29 +2,16 @@
 
 namespace Mercury.Cryptos.Binance
 {
-	public class BinanceFuturesPosition
+	public class BinanceFuturesPosition(string symbol, FuturesMarginType marginType, int leverage, PositionSide positionSide, decimal quantity, decimal entryPrice, decimal markPrice, decimal unrealizedPnl, decimal liquidationPrice)
 	{
-		public string Symbol { get; set; }
-		public FuturesMarginType MarginType { get; set; }
-		public int Leverage { get; set; }
-		public PositionSide PositionSide { get; set; }
-		public decimal Quantity { get; set; }
-		public decimal EntryPrice { get; set; }
-		public decimal MarkPrice { get; set; }
-		public decimal UnrealizedPnl { get; set; }
-		public decimal LiquidationPrice { get; set; }
-
-		public BinanceFuturesPosition(string symbol, FuturesMarginType marginType, int leverage, PositionSide positionSide, decimal quantity, decimal entryPrice, decimal markPrice, decimal unrealizedPnl, decimal liquidationPrice)
-		{
-			Symbol = symbol;
-			MarginType = marginType;
-			Leverage = leverage;
-			PositionSide = positionSide;
-			Quantity = quantity;
-			EntryPrice = entryPrice;
-			MarkPrice = markPrice;
-			UnrealizedPnl = unrealizedPnl;
-			LiquidationPrice = liquidationPrice;
-		}
+		public string Symbol { get; set; } = symbol;
+		public FuturesMarginType MarginType { get; set; } = marginType;
+		public int Leverage { get; set; } = leverage;
+		public PositionSide PositionSide { get; set; } = positionSide;
+		public decimal Quantity { get; set; } = quantity;
+		public decimal EntryPrice { get; set; } = entryPrice;
+		public decimal MarkPrice { get; set; } = markPrice;
+		public decimal UnrealizedPnl { get; set; } = unrealizedPnl;
+		public decimal LiquidationPrice { get; set; } = liquidationPrice;
 	}
 }

@@ -190,5 +190,17 @@ namespace Backtester {
                 this["Leverage"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int SubIntervalIndex {
+            get {
+                return ((int)(this["SubIntervalIndex"]));
+            }
+            set {
+                this["SubIntervalIndex"] = value;
+            }
+        }
     }
 }

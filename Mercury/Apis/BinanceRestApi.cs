@@ -6,6 +6,7 @@ using CryptoExchange.Net.Authentication;
 
 using Mercury.Cryptos.Binance;
 
+using System.Collections.Generic;
 using System.Text;
 
 namespace Mercury.Apis
@@ -191,7 +192,7 @@ namespace Mercury.Apis
 		/// <returns></returns>
 		public static BinanceFuturesAccount GetFuturesAccountInfo()
 		{
-			var accountInfo = BinanceClient.UsdFuturesApi.Account.GetAccountInfoAsync();
+			var accountInfo = BinanceClient.UsdFuturesApi.Account.GetAccountInfoV3Async();
 			accountInfo.Wait();
 
 			var info = accountInfo.Result.Data;
@@ -400,6 +401,33 @@ namespace Mercury.Apis
 		{
 			var type = price == null ? FuturesOrderType.Market : FuturesOrderType.Limit;
 			var placeOrder = BinanceClient.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, type, Convert.ToDecimal(quantity), Convert.ToDecimal(price));
+		}
+
+		public static IEnumerable<BinanceFuturesTrade> GetFuturesTradeHistory(string[] symbols, DateTime startTime)
+		{
+			var result = new List<BinanceFuturesTrade>();
+
+			foreach (var symbol in symbols)
+			{
+				var userTrades = BinanceClient.UsdFuturesApi.Trading.GetUserTradesAsync(symbol, startTime).Result;
+				var trades = userTrades.Data.Select(x => new BinanceFuturesTrade(
+					x.Timestamp,
+					x.Symbol,
+					x.PositionSide,
+					x.Side,
+					x.Price,
+					x.Quantity,
+					x.QuoteQuantity,
+					x.Fee,
+					x.FeeAsset,
+					x.RealizedPnl,
+					x.Maker
+					)
+				);
+				result.AddRange(trades);
+			}
+
+			return result;
 		}
 		#endregion
 	}

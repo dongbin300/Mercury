@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Binance.Net.Enums;
+
+using System;
 using System.Text;
 using System.Windows.Media;
 
 namespace TradeBot.Models
 {
-	public class BinancePosition(string symbol, string positionSide, decimal pnl, decimal entryPrice, decimal markPrice, decimal quantity, int leverage)
+	public class BinancePosition(string symbol, string positionSide, decimal pnl, decimal quantity, decimal margin)
 	{
 		public string Symbol { get; set; } = symbol;
 		public string PositionSide { get; set; } = positionSide;
@@ -12,12 +14,11 @@ namespace TradeBot.Models
 		public decimal Pnl { get; set; } = pnl;
 		public string PnlString => GetPnlString();
         public SolidColorBrush PnlColor => Pnl >= 0 ? Common.LongColor : Common.ShortColor;
-		public decimal EntryPrice { get; set; } = entryPrice;
-		public decimal MarkPrice { get; set; } = markPrice;
+		//public decimal EntryPrice { get; set; } = entryPrice;
+		//public decimal MarkPrice { get; set; } = markPrice;
 		public decimal Quantity { get; set; } = quantity;
-		public int Leverage { get; set; } = leverage;
-		public decimal Margin => Math.Round(Math.Abs(MarkPrice * Quantity / Leverage), 3);
-        public decimal Roe => Math.Round(Pnl / Math.Abs(MarkPrice * Quantity / Leverage) * 100, 2);
+        public decimal Margin { get; set; } = Math.Round(margin, 3);
+        public decimal Roe => Math.Round(Pnl / Margin * 100, 2);
 
 		public string GetPnlString()
         {
@@ -32,7 +33,7 @@ namespace TradeBot.Models
             {
                 builder.Append('+');
             }
-            builder.Append(Math.Round(Pnl / Math.Abs(MarkPrice * Quantity / Leverage) * 100, 2));
+            builder.Append(Roe);
             builder.Append("%)");
 
             return builder.ToString();

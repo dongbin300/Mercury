@@ -27,5 +27,19 @@ namespace TradeBot.Extensions
 			var tickSize = Common.SymbolDetails.Find(x => x.Symbol.Equals(symbol))?.TickSize ?? 0;
             return price - tickSize * count;
 		}
+
+        public static decimal ToUpTickPricePercent(this decimal price, string symbol, decimal percent)
+        {
+            var calPrice = price * (1 + percent / 100);
+			calPrice = calPrice.ToValidPrice(symbol);
+			return price == calPrice ? price.ToUpTickPrice(symbol) : calPrice;
+		}
+
+		public static decimal ToDownTickPricePercent(this decimal price, string symbol, decimal percent)
+		{
+            var calPrice = price * (1 - percent / 100);
+			calPrice = calPrice.ToValidPrice(symbol);
+			return price == calPrice ? price.ToDownTickPrice(symbol) : calPrice;
+		}
 	}
 }

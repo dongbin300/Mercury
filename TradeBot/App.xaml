@@ -5,8 +5,19 @@
     <Application.Resources>
         <BooleanToVisibilityConverter x:Key="btv"/>
 
-        <Color x:Key="LongColor" R="14" G="203" B="209" />
-        <Color x:Key="ShortColor" R="246" G="70" B="93" />
+        <Color x:Key="ThemeColor">White</Color>
+        <SolidColorBrush x:Key="ThemeBrush" Color="{StaticResource ThemeColor}" />
+        <Color x:Key="ForegroundColor">#F1F1F1</Color>
+        <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}" />
+        <Color x:Key="BackgroundColor">#131722</Color>
+        <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}" />
+        <Color x:Key="LongColor">#0ECB81</Color>
+        <SolidColorBrush x:Key="LongBrush" Color="{StaticResource LongColor}" />
+        <Color x:Key="ShortColor">#F6465D</Color>
+        <SolidColorBrush x:Key="ShortBrush" Color="{StaticResource ShortColor}" />
+
+        <!--<Color x:Key="LongColor" R="14" G="203" B="209" />
+        <Color x:Key="ShortColor" R="246" G="70" B="93" />-->
 
         <SolidColorBrush x:Key="ChartBackground" Color="#131722"/>
         <SolidColorBrush x:Key="Background" Color="#24292E"/>
@@ -18,7 +29,7 @@
         <SolidColorBrush x:Key="Binance" Color="#F0B90B"/>
 
         <Style TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="#F1F1F1" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="FontFamily" Value="Meiryo UI" />
             <Setter Property="FontSize" Value="13" />
@@ -39,16 +50,16 @@
         </Style>
 
         <Style TargetType="{x:Type TextBox}">
-            <Setter Property="Foreground" Value="#F1F1F1" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="FontFamily" Value="Meiryo UI" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="BorderBrush" Value="#666" />
             <Setter Property="BorderThickness" Value="0 0 0 1" />
-            <Setter Property="CaretBrush" Value="{StaticResource Cool}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource ThemeBrush}" />
             <Style.Triggers>
                 <Trigger Property="TextBox.IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="{StaticResource Cool}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush}" />
                 </Trigger>
                 <Trigger Property="TextBox.IsMouseOver" Value="False">
                     <Setter Property="BorderBrush" Value="#666" />
@@ -58,16 +69,16 @@
 
         <Style TargetType="{x:Type PasswordBox}">
             <Setter Property="PasswordChar" Value="*"/>
-            <Setter Property="Foreground" Value="#F1F1F1" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="FontFamily" Value="Meiryo UI" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="BorderBrush" Value="#666" />
             <Setter Property="BorderThickness" Value="0 0 0 1" />
-            <Setter Property="CaretBrush" Value="{StaticResource Cool}" />
+            <Setter Property="CaretBrush" Value="{DynamicResource ThemeBrush}" />
             <Style.Triggers>
                 <Trigger Property="TextBox.IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="{StaticResource Cool}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource ThemeBrush}" />
                 </Trigger>
                 <Trigger Property="TextBox.IsMouseOver" Value="False">
                     <Setter Property="BorderBrush" Value="#666" />
@@ -99,27 +110,63 @@
         </Style>
 
         <Style TargetType="{x:Type Button}">
-            <Setter Property="Background" Value="{StaticResource Long}" />
-            <Setter Property="Foreground" Value="#000000" />
+            <Setter Property="FontFamily" Value="Meiryo UI" />
             <Setter Property="FontWeight" Value="UltraBold" />
-            <Setter Property="Margin" Value="5" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush}" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="3" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <Border Name="Border" CornerRadius="2"
-                            Background="{TemplateBinding Background}">
+                        <Border Name="Border"
+                                CornerRadius="3"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{DynamicResource ThemeBrush}"
+                                BorderThickness="1">
                             <TextBlock Name="TextBlock" 
-                                          Text="{TemplateBinding Content}" 
-                                          Margin="{TemplateBinding Padding}" 
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                       Text="{TemplateBinding Content}" 
+                                       Margin="{TemplateBinding Padding}" 
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Border" Property="Background" Value="Transparent" />
-                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource Long}" />
-                                <Setter TargetName="Border" Property="BorderThickness" Value="1" />
-                                <Setter TargetName="TextBlock" Property="Foreground" Value="{StaticResource Long}" />
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ThemeBrush}" />
+                                <Setter TargetName="TextBlock" Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type Button}" x:Key="HorizontalButton">
+            <Setter Property="FontFamily" Value="Meiryo UI" />
+            <Setter Property="FontWeight" Value="UltraBold" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource ThemeBrush}" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Name="Border"
+                         Background="{TemplateBinding Background}"
+                         BorderBrush="{DynamicResource ThemeBrush}"
+                         BorderThickness="0 0 1 0">
+                            <TextBlock Name="TextBlock" 
+                                Text="{TemplateBinding Content}" 
+                                Margin="{TemplateBinding Padding}" 
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ThemeBrush}" />
+                                <Setter TargetName="TextBlock" Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -136,7 +183,7 @@
                 </Grid.ColumnDefinitions>
                 <Border x:Name="Border" Grid.ColumnSpan="2" Background="Transparent" BorderBrush="#666" BorderThickness="0" />
                 <Border x:Name="ContentBorder" Grid.Column="0" Margin="1" Background="Transparent" BorderBrush="#999" BorderThickness="0" />
-                <Path x:Name="Arrow" Grid.Column="1" Fill="#F4F4f4" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
+                <Path x:Name="Arrow" Grid.Column="1" Fill="{DynamicResource ForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 4 4 L 8 0 Z"/>
             </Grid>
             <ControlTemplate.Triggers>
                 <Trigger Property="ToggleButton.IsMouseOver" Value="true">
@@ -162,7 +209,7 @@
 
         <Style TargetType="{x:Type ComboBox}">
             <Setter Property="Height" Value="30"/>
-            <Setter Property="Foreground" Value="#F4F4F4"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -208,7 +255,7 @@
         </Style>
 
         <Style TargetType="{x:Type ComboBox}" x:Key="IconComboBox">
-            <Setter Property="Foreground" Value="#F4F4F4"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -280,8 +327,8 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="_ellipse" Property="HorizontalAlignment" Value="Right" />
-                                <Setter TargetName="_ellipse" Property="Fill" Value="{StaticResource Cool}" />
-                                <Setter TargetName="_border" Property="Background" Value="{StaticResource Cool}" />
+                                <Setter TargetName="_ellipse" Property="Fill" Value="{DynamicResource ThemeBrush}" />
+                                <Setter TargetName="_border" Property="Background" Value="{DynamicResource ThemeBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -402,12 +449,12 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" BorderThickness="1" BorderBrush="{StaticResource Cool}" Background="{StaticResource Cool}">
-                                <Label Foreground="White" Height="28" FontWeight="Bold">
+                            <Border Grid.Row="0" BorderThickness="1" BorderBrush="{DynamicResource ThemeBrush}" Background="{DynamicResource ThemeBrush}">
+                                <Label Foreground="{DynamicResource ForegroundBrush}" Height="28" FontWeight="Bold">
                                     <ContentPresenter ContentSource="Header" RecognizesAccessKey="True"/>
                                 </Label>
                             </Border>
-                            <Border Grid.Row="1" BorderThickness="3,0,3,3" BorderBrush="{StaticResource Cool}">
+                            <Border Grid.Row="1" BorderThickness="2,0,2,2" BorderBrush="{DynamicResource ThemeBrush}">
                                 <ContentPresenter Margin="4" />
                             </Border>
                         </Grid>
@@ -423,18 +470,18 @@
             <Setter Property="FontSize" Value="12" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="Foreground" Value="#EEE" />
-            <Setter Property="Background" Value="{StaticResource ChartBackground}" />
+            <Setter Property="Margin" Value="10 0" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="Background" Value="Transparent" />
         </Style>
 
         <Style TargetType="{x:Type DataGridRow}">
             <Setter Property="FontFamily" Value="Meiryo UI" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Background" Value="{StaticResource ChartBackground}" />
+            <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
             <Style.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
-                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{StaticResource LongColor}" />
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{DynamicResource LongColor}" />
             </Style.Resources>
         </Style>
 
@@ -443,8 +490,8 @@
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Height" Value="35" />
             <Setter Property="Padding" Value="4,0" />
-            <Setter Property="Foreground" Value="#EEE" />
-            <Setter Property="Background" Value="{StaticResource ChartBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
         </Style>
 
@@ -452,7 +499,7 @@
             <Setter Property="Margin" Value="0" />
             <Setter Property="FontFamily" Value="Meiryo UI" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="Background" Value="{StaticResource ChartBackground}" />
+            <Setter Property="Background" Value="{DynamicResource BackgroundBrush}" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="RowHeaderWidth" Value="0" />
             <Setter Property="GridLinesVisibility" Value="Horizontal" />

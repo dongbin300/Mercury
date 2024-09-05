@@ -5,14 +5,16 @@ using Mercury.Maths;
 
 namespace Mercury.Charts
 {
-	public class ChartInfo(string symbol, Quote quote)
-	{
-		public string Symbol { get; set; } = symbol;
-		public DateTime DateTime => Quote.Date;
-		public Quote Quote { get; set; } = quote;
+    public class ChartInfo(string symbol, Quote quote)
+    {
+        public string Symbol { get; set; } = symbol;
+        public DateTime DateTime => Quote.Date;
+        public Quote Quote { get; set; } = quote;
         public decimal Change => Calculator.Roe(PositionSide.Long, Quote.Open, Quote.Close);
         public decimal BodyLength => Math.Abs(Change);
-        public CandlestickType CandlestickType => Quote.Open < Quote.Close ? CandlestickType.Bullish : Quote.Open > Quote.Close ? CandlestickType.Bearish : CandlestickType.Doji;
+        public decimal UpTailLength => Calculator.Roe(PositionSide.Long, Math.Max(Quote.Open, Quote.Close), Quote.High);
+        public decimal DownTailLength => Calculator.Roe(PositionSide.Long, Quote.Low, Math.Min(Quote.Open, Quote.Close));
+		public CandlestickType CandlestickType => Quote.Open < Quote.Close ? CandlestickType.Bullish : Quote.Open > Quote.Close ? CandlestickType.Bearish : CandlestickType.Doji;
 
 		public double Sma1 { get; set; }
         public double Sma2 { get; set; }

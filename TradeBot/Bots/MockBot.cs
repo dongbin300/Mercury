@@ -50,7 +50,7 @@ namespace TradeBot.Bots
 		}
 		#endregion
 
-		public async Task Evaluate()
+		public void EvaluateLong()
 		{
 			try
 			{
@@ -63,7 +63,7 @@ namespace TradeBot.Bots
 					var c3 = pairQuote.Charts[^4]; // 3봉전 정보
 					var c4 = pairQuote.Charts[^5]; // 4봉전 정보
 
-					if (c0.Quote.Date.Hour != DateTime.Now.Hour) // 차트 시간과 현재 시간의 동기화 실패
+					if (c0.Quote.Date.Hour != DateTime.UtcNow.Hour) // 차트 시간과 현재 시간의 동기화 실패
 					{
 						continue;
 					}
@@ -116,7 +116,31 @@ namespace TradeBot.Bots
 							CloseSell(symbol, price, quantity);
 						}
 					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Log(nameof(MockBot), MethodBase.GetCurrentMethod()?.Name, ex);
+			}
+		}
 
+		public void EvaluateShort()
+		{
+			try
+			{
+				foreach (var pairQuote in Common.PairQuotes)
+				{
+					var symbol = pairQuote.Symbol;
+					var c0 = pairQuote.Charts[^1]; // 현재 정보
+					var c1 = pairQuote.Charts[^2]; // 1봉전 정보
+					var c2 = pairQuote.Charts[^3]; // 2봉전 정보
+					var c3 = pairQuote.Charts[^4]; // 3봉전 정보
+					var c4 = pairQuote.Charts[^5]; // 4봉전 정보
+
+					if (c0.Quote.Date.Hour != DateTime.UtcNow.Hour) // 차트 시간과 현재 시간의 동기화 실패
+					{
+						continue;
+					}
 
 					if (!IsShortPositioning(symbol)) // 포지션이 없으면
 					{

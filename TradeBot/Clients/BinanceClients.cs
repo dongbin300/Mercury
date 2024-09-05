@@ -22,7 +22,7 @@ namespace TradeBot.Clients
 
         }
 
-        public static void Init()
+        public static string Init()
         {
             try
             {
@@ -33,11 +33,17 @@ namespace TradeBot.Clients
 
                 Socket = new BinanceSocketClient();
                 Socket.SetApiCredentials(new CryptoExchange.Net.Authentication.ApiCredentials(data[0], data[1]));
-                // socketClient.UsdFuturesStreams.SubscribeToUserDataUpdatesAsync() 이거 죽어도 데이터 안옴(추후)
-            }
+				// socketClient.UsdFuturesStreams.SubscribeToUserDataUpdatesAsync() 이거 죽어도 데이터 안옴(추후)
+
+				var exchangeInfo = Api.SpotApi.ExchangeData.GetExchangeInfoAsync();
+				exchangeInfo.Wait();
+
+				return exchangeInfo.Result.Data.ServerTime.ToString("SERVER_SYNC: yyyy-MM-dd HH:mm:ss");
+			}
             catch (Exception ex)
             {
                 Logger.Log(nameof(BinanceClients), MethodBase.GetCurrentMethod()?.Name, ex);
+                return "API COMM ERROR";
             }
         }
 
