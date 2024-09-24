@@ -13,6 +13,10 @@ using Mercury.Backtests.Calculators;
 using Mercury.Charts;
 using Mercury.Cryptos.Binance;
 
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,11 +24,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace Lab
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
+	/// TODO
+	/// Order History View 추가
+	/// CubeAlgorithmCreator
+	/// SC Mini
 	/// </summary>
 	public partial class MainWindow : Window
 	{
@@ -71,12 +80,36 @@ namespace Lab
 			"HBARUSDT"
 			];
 
+		List<string> histories = [];
+
+		public enum Subject
+		{
+			None,
+			Master,
+			Long,
+			Short
+		}
+
+		public enum Act
+		{
+			None,
+			OpenOrder,
+			CloseOrder,
+			CancelOrder,
+			BotOn,
+			BotOff,
+			Collect
+		}
+
 		public MainWindow()
 		{
 			InitializeComponent();
 
+			var startTime = new DateTime(2024, 9, 16);
+			var endTime = new DateTime(2024, 9, 22);
+
 			BinanceRestApi.Init();
-			var result1 = BinanceRestApi.BinanceClient.UsdFuturesApi.Account.GetIncomeHistoryAsync(null, null, new DateTime(2024, 8, 20), new DateTime(2024, 8, 27), 1000).Result;
+			var result1 = BinanceRestApi.BinanceClient.UsdFuturesApi.Trading.GetOrdersAsync("ZECUSDT", null, startTime, endTime, 1000).Result;
 			//var result2 = BinanceRestApi.GetFuturesTradeHistory(new string[] { "JASMYUSDT" }, new DateTime(2024, 8, 30)).ToList();
 
 			/* trade history */

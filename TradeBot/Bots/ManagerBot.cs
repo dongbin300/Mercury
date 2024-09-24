@@ -99,6 +99,12 @@ namespace TradeBot.Bots
 			{
 				var result = await BinanceClients.Api.UsdFuturesApi.Account.GetAccountInfoV3Async().ConfigureAwait(false);
 				var accountInfo = result.Data;
+
+				if (accountInfo == null)
+				{
+					return (-39909m, -39909m);
+				}
+
 				Common.Positions = [.. accountInfo.Positions.Where(x => x.PositionAmount != 0).Select(x => new BinancePosition(
 					x.Symbol,
 					x.PositionSide.ToString(),

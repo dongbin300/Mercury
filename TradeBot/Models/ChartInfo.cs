@@ -19,5 +19,10 @@ namespace TradeBot.Models
         public CandlestickType CandlestickType => Quote.Open < Quote.Close ? CandlestickType.Bullish : Quote.Open > Quote.Close ? CandlestickType.Bearish : CandlestickType.Doji;
 		public decimal Change => Calculator.Roe(PositionSide.Long, Quote.Open, Quote.Close);
 		public decimal BodyLength => Math.Abs(Change);
+
+		public string ToDebugString()
+		{
+			return $"{CandlestickType},{Quote.Open},{Quote.High},{Quote.Low},{Quote.Close},{Change}";
+		}
 	}
 }

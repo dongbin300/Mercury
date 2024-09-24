@@ -163,7 +163,7 @@ namespace Backtester
 						}
 					}
 
-					var backtester = new EasyBacktester(strategyId, [.. symbols], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage)
+					var backtester = new EasyBacktester(strategyId, [.. symbols], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage, -8.0m, 24, 0.05m)
 					{
 						IsGeneratePositionHistory = true
 					};
@@ -308,38 +308,35 @@ namespace Backtester
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
 					$"{symbols[0]} +{symbols.Length - 1},{interval},{strategyId},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd},{DateTime.Now:yyyy-MM-dd HH:mm:ss}" + Environment.NewLine);
 
-				/* Symbol Eval */
-				var symbolResults = new Dictionary<string, decimal>();
-				for (int i = 0; i < symbols.Length; i++)
+				for (var lossPer = -8.0m; lossPer >= -8.0m; lossPer -= 0.1m)
 				{
-					var backtester = new EasyBacktester(strategyId, [symbols[i]], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage)
+					for (var banHour = 24; banHour <= 24; banHour += 3)
 					{
-						IsGeneratePositionHistory = false
-					};
-					backtester.InitIndicators();
-					(var symbol, var est) = backtester.Run(BacktestType.BySymbol, Common.ReportProgress, reportFileName, 1, 24 * 12);
-					symbolResults.Add(symbol, est);
-				}
-				var bestSymbols = symbolResults.OrderByDescending(x => x.Value).Take(25).Select(x => x.Key).ToArray();
-				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-					$"Best 25 Symbols: {string.Join(';', bestSymbols)}" + Environment.NewLine);
-
-				/* Macro Eval */
-				for (var maxActiveDeals = 3; maxActiveDeals <= 12; maxActiveDeals++)
-				{
-					for (var leverage = 1; leverage <= 10; leverage++)
-					{
-						//for (var macd2 = 10; macd2 <= 10; macd2++)
+						for (var bodyLengthMin = 0m; bodyLengthMin <= 0.08m; bodyLengthMin += 0.005m)
 						{
-							//for (var st = 5; st <= 5; st += 5)
+							/* Symbol Eval */
+							var symbolResults = new Dictionary<string, decimal>();
+							for (int i = 0; i < symbols.Length; i++)
 							{
-								//for (var stf = 3.0m; stf <= 3.0m; stf += 0.5m)
+								var backtester = new EasyBacktester(strategyId, [symbols[i]], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage, lossPer, banHour, bodyLengthMin)
+								{
+									IsGeneratePositionHistory = false
+								};
+								backtester.InitIndicators();
+								(var symbol, var est) = backtester.Run(BacktestType.BySymbol, Common.ReportProgress, reportFileName, 1, 24 * 12);
+								symbolResults.Add(symbol, est);
+							}
+							var bestSymbols = symbolResults.OrderByDescending(x => x.Value).Take(25).Select(x => x.Key).ToArray();
+							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+								$"({lossPer.Round(1)}/{banHour}/{bodyLengthMin.Round(3)}) Best 25 Symbols: {string.Join(';', bestSymbols)}" + Environment.NewLine);
+
+							/* Macro Eval */
+							for (var maxActiveDeals = 4; maxActiveDeals <= 10; maxActiveDeals++)
+							{
+								for (var leverage = 3; leverage <= 8; leverage++)
 								{
 									maxActiveDealsType = MaxActiveDealsType.Total;
-									////var macd1Values = MacdTable.GetValues(macd1);
-									////var macd2Values = MacdTable.GetValues(macd2);
-
-									var backtester = new EasyBacktester(strategyId, [.. bestSymbols], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage)
+									var backtester = new EasyBacktester(strategyId, [.. bestSymbols], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage, lossPer, banHour, bodyLengthMin)
 									{
 										IsGeneratePositionHistory = false
 									};
@@ -347,11 +344,11 @@ namespace Backtester
 									backtester.Run(backtestType, Common.ReportProgress, reportFileName, 24 * 12, 24 * 12);
 
 									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-										$"{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)}" + Environment.NewLine);
+										$"{maxActiveDealsType},{lossPer.Round(1)},{banHour},{bodyLengthMin.Round(3)},{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)}" + Environment.NewLine);
 
 
 									maxActiveDealsType = MaxActiveDealsType.Each;
-									var backtester1 = new EasyBacktester(strategyId, [.. bestSymbols], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage)
+									var backtester1 = new EasyBacktester(strategyId, [.. bestSymbols], interval, subInterval, maxActiveDealsType, maxActiveDeals, money, leverage, lossPer, banHour, bodyLengthMin)
 									{
 										IsGeneratePositionHistory = false
 									};
@@ -359,13 +356,12 @@ namespace Backtester
 									backtester1.Run(backtestType, Common.ReportProgress, reportFileName, 24 * 12, 24 * 12);
 
 									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-										$"{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)}" + Environment.NewLine);
+										$"{maxActiveDealsType},{lossPer.Round(1)},{banHour},{bodyLengthMin.Round(3)},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)}" + Environment.NewLine);
 								}
 							}
 						}
 					}
 				}
-
 
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
 									"END" + Environment.NewLine + Environment.NewLine + Environment.NewLine);

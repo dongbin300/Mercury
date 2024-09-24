@@ -2,7 +2,6 @@
 using Mercury.Enums;
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -33,14 +32,14 @@ namespace TradeBot
 		DispatcherTimer timer = new();
 		DispatcherTimer mockTimer = new();
 		DispatcherTimer timer2s = new();
-		DispatcherTimer timer1m = new();
+		DispatcherTimer timer5m = new();
 		ManagerBot manager = new("매니저 봇", "심볼 모니터링, 포지션 모니터링, 자산 모니터링 등등 전반적인 시스템을 관리하는 봇입니다.");
 		LongBot longBot = new("롱 봇", "롱 포지션 매매를 하는 봇입니다.");
 		ShortBot shortBot = new("숏 봇", "숏 포지션 매매를 하는 봇입니다.");
 		MockBot mockBot = new("모의 봇", "모의 매매를 하는 봇입니다.");
 		ReportBot reportBot = new("보고서 봇", "보고서 작성을 해주는 봇입니다.");
 
-		IEnumerable<BinanceRealizedPnlHistory> todayRealizedPnlHistory = default!;
+		//IEnumerable<BinanceRealizedPnlHistory> todayRealizedPnlHistory = default!;
 
 		decimal balance = -1;
 		decimal todayPnl = 0;
@@ -78,7 +77,7 @@ namespace TradeBot
 			Common.CheckAdmin();
 			if (Common.IsAdmin)
 			{
-				AdminText.Text = "Admin";
+				AdminText.Text = "ⓒ Gaten";
 			}
 
 			BaseOrderSizeTextBox.Text = Settings.Default.BaseOrderSize;
@@ -118,13 +117,14 @@ namespace TradeBot
 
 			reportBot.Init();
 			Common.LoadSymbolDetail();
+			Common.LoadBlacklist();
 
 			Common.AddHistory = (subject, text) =>
 			{
 				DispatcherService.Invoke(() =>
 				{
 					var history = new BotHistory(DateTime.Now, subject, text);
-					HistoryDataGrid.Items.Add(history);
+					HistoryDataGrid.Items.Insert(0, history);
 					Logger.LogHistory(history);
 				});
 			};
@@ -144,13 +144,19 @@ namespace TradeBot
 			timer2s.Tick += Timer2s_Tick;
 			timer2s.Start();
 
+			timer5m.Interval = TimeSpan.FromMinutes(5);
+			timer5m.Tick += Timer5m_Tick;
+			timer5m.Start();
+
 			#endregion
 		}
 
-		private void Timer1m_Tick(object? sender, EventArgs e)
+		private void Timer5m_Tick(object? sender, EventArgs e)
 		{
 			try
 			{
+				Common.SaveBlacklist();
+
 				// 소리 재생 안하면 스킵
 				//if (!Common.IsSound)
 				//{
@@ -208,12 +214,12 @@ namespace TradeBot
 					Logger.LogReport(usdt, bnb, todayPnl, longBot.BaseOrderSize, longBot.Leverage, longBot.MaxActiveDeals);
 				}
 
-				/* 매시 15분 5초에 모든 미체결주문 취소 */
+				/* 매시 15분 2초에 모든 미체결주문 취소 */
 				if (minute == 15 && second == 0)
 				{
 					foreach (var openOrder in Common.OpenOrders)
 					{
-						await BinanceClients.Api.UsdFuturesApi.Trading.CancelAllOrdersAfterTimeoutAsync(openOrder.Symbol, TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+						await BinanceClients.Api.UsdFuturesApi.Trading.CancelAllOrdersAfterTimeoutAsync(openOrder.Symbol, TimeSpan.FromSeconds(2)).ConfigureAwait(false);
 						Common.AddHistory("Master", $"Cancel Order {openOrder.Symbol}, {openOrder.Side}, {openOrder.FilledString}");
 					}
 				}
@@ -260,6 +266,7 @@ namespace TradeBot
 				{
 					PositionDataGrid.ItemsSource = Common.Positions;
 					OrderDataGrid.ItemsSource = Common.OpenOrders;
+					BlacklistDataGrid.ItemsSource = Common.BannedBlacklistPositions;
 					//IndicatorDataGrid.ItemsSource = null;
 					//IndicatorDataGrid.ItemsSource = Common.PairQuotes.OrderBy(x => x.Symbol);
 
@@ -783,8 +790,15 @@ namespace TradeBot
 			Common.IsSound = false;
 		}
 
+		/// <summary>
+		/// 프로그램 종료
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
+			Common.SaveBlacklist();
+
 			if (longBot.IsRunning || shortBot.IsRunning)
 			{
 				if (MessageBox.Show("로봇이 작동 중입니다.\n정말 종료하시겠습니까?", "확인", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -808,6 +822,15 @@ namespace TradeBot
 		{
 			switch (e.Key)
 			{
+				case Key.F9:
+					var debugWindow = new DebugWindow()
+					{
+						LongBot = longBot,
+						ShortBot = shortBot
+					};
+					debugWindow.Show();
+					break;
+
 				case Key.F11:
 					FullScreen();
 					break;

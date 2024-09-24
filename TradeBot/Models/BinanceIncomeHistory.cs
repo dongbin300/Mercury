@@ -1,6 +1,10 @@
 ﻿using Binance.Net.Enums;
 
 using System;
+using System.ComponentModel;
+using System.Windows.Media;
+
+using TradeBot.Extensions;
 
 namespace TradeBot.Models
 {
@@ -13,6 +17,9 @@ namespace TradeBot.Models
 		public decimal Income { get; set; }
 		public string? Asset { get; set; }
 		public string? Info { get; set; }
+
+		[Browsable(false)]
+		public SolidColorBrush IncomeColor => Income > 0 ? Common.LongColor : Income < 0 ? Common.ShortColor : Common.ForegroundColor;
 
 		public BinanceIncomeHistory(DateTime time, string transactionId, string? symbol, IncomeType? incomeType, decimal income, string? asset, string? info)
 		{

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Media;
 
 using TradeBot.Extensions;
@@ -22,6 +23,7 @@ namespace TradeBot
 
 		public static readonly string BinanceApiKeyPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Down("Gaten", "binance_api.txt");
 		public static readonly string TradeBotPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Down("Gaten", "tradebot.txt");
+		public static readonly string BlacklistPath = "Logs/blacklist.csv";
 
 		public static readonly SolidColorBrush OffColor = new(Color.FromRgb(80, 80, 80));
 		public static readonly SolidColorBrush WhiteColor = new(Color.FromRgb(222, 222, 222));
@@ -32,8 +34,6 @@ namespace TradeBot
 
 		public static readonly KlineInterval BaseInterval = KlineInterval.OneHour;
 		public static readonly int BaseIntervalNumber = 1;
-
-		public static List<SymbolDetail> SymbolDetails = [];
 
 		public static bool IsSound = false;
 		public static bool IsAdmin = false;
@@ -67,6 +67,8 @@ namespace TradeBot
 			}
 		}
 
+		#region Symbol Detail
+		public static List<SymbolDetail> SymbolDetails = [];
 		public static void LoadSymbolDetail()
 		{
 			try
@@ -96,12 +98,16 @@ namespace TradeBot
 				Logger.Log(nameof(Common), MethodBase.GetCurrentMethod()?.Name, ex);
 			}
 		}
+		#endregion
 
+		#region Chart
 		public static List<PairQuote> PairQuotes = [];
+		#endregion
+
+		#region Position
 		public static List<BinancePosition> Positions = [];
 		public static List<BinancePosition> LongPositions => Positions.Where(p => p.PositionSide.Equals("Long")).ToList();
 		public static List<BinancePosition> ShortPositions => Positions.Where(p => p.PositionSide.Equals("Short")).ToList();
-		public static List<BinanceOrder> OpenOrders = [];
 		public static Action<string, string> AddHistory = default!;
 
 		public static bool IsPositioning(string symbol, PositionSide side)
@@ -122,47 +128,6 @@ namespace TradeBot
 		public static BinancePosition? GetPosition(string symbol, PositionSide side)
 		{
 			return Positions.Find(p => p.Symbol.Equals(symbol) && p.PositionSide.Equals(side.ToString()));
-		}
-
-		public static BinanceOrder? GetOrder(string symbol, PositionSide side, FuturesOrderType type)
-		{
-			return OpenOrders.Find(o => o.Symbol.Equals(symbol) && o.Side.Equals(side) && o.Type.Equals(type));
-		}
-
-		public static readonly int PositionCoolTimeSeconds = 60;
-		public static List<PositionCoolTime> PositionCoolTimes = [];
-		public static PositionCoolTime? GetPositionCoolTime(string symbol, PositionSide side)
-		{
-			return PositionCoolTimes.Find(p => p.Symbol.Equals(symbol) && p.Side.Equals(side));
-		}
-
-		public static void AddPositionCoolTime(string symbol, PositionSide side)
-		{
-			var positionCoolTime = GetPositionCoolTime(symbol, side);
-			if (positionCoolTime == null)
-			{
-				PositionCoolTimes.Add(new PositionCoolTime(symbol, side, DateTime.Now));
-			}
-			else
-			{
-				positionCoolTime.LatestEntryTime = DateTime.Now;
-			}
-		}
-
-		public static bool IsCoolTime(string symbol, PositionSide side)
-		{
-			var positionCoolTime = GetPositionCoolTime(symbol, side);
-			return positionCoolTime == null ? false : positionCoolTime.IsCoolTime();
-		}
-
-		public static List<PositionCoolTime> GetCoolTimeLongPositions()
-		{
-			return PositionCoolTimes.Where(x => x.Side == PositionSide.Long && x.IsCoolTime()).ToList();
-		}
-
-		public static List<PositionCoolTime> GetCoolTimeShortPositions()
-		{
-			return PositionCoolTimes.Where(x => x.Side == PositionSide.Short && x.IsCoolTime()).ToList();
 		}
 
 		/// <summary>
@@ -188,5 +153,115 @@ namespace TradeBot
 			positions = positions.Union(GetCoolTimeShortPositions().Select(x => new Position(x.Symbol, x.Side.ToString())));
 			return positions.Count();
 		}
+		#endregion
+
+		#region Order
+		public static List<BinanceOrder> OpenOrders = [];
+		public static BinanceOrder? GetOrder(string symbol, PositionSide side, FuturesOrderType type)
+		{
+			return OpenOrders.Find(o => o.Symbol.Equals(symbol) && o.Side.Equals(side) && o.Type.Equals(type));
+		}
+		#endregion
+
+		#region Cooltime
+		public static readonly int PositionCoolTimeSeconds = 60;
+		public static List<PositionCoolTime> PositionCoolTimes = [];
+		public static PositionCoolTime? GetPositionCoolTime(string symbol, PositionSide side)
+		{
+			return PositionCoolTimes.Find(p => p.Symbol.Equals(symbol) && p.Side.Equals(side));
+		}
+
+		public static void AddPositionCoolTime(string symbol, PositionSide side)
+		{
+			var positionCoolTime = GetPositionCoolTime(symbol, side);
+			if (positionCoolTime == null)
+			{
+				PositionCoolTimes.Add(new PositionCoolTime(symbol, side, DateTime.Now));
+			}
+			else
+			{
+				positionCoolTime.LatestEntryTime = DateTime.Now;
+			}
+		}
+
+		public static bool IsCoolTime(string symbol, PositionSide side)
+		{
+			var positionCoolTime = GetPositionCoolTime(symbol, side);
+			return positionCoolTime != null && positionCoolTime.IsCoolTime();
+		}
+
+		public static List<PositionCoolTime> GetCoolTimeLongPositions()
+		{
+			return PositionCoolTimes.Where(x => x.Side == PositionSide.Long && x.IsCoolTime()).ToList();
+		}
+
+		public static List<PositionCoolTime> GetCoolTimeShortPositions()
+		{
+			return PositionCoolTimes.Where(x => x.Side == PositionSide.Short && x.IsCoolTime()).ToList();
+		}
+		#endregion
+
+		#region Blacklist
+		public static List<BlacklistPosition> BlacklistPositions { get; set; } = [];
+		public static List<BlacklistPosition> BannedBlacklistPositions => BlacklistPositions.Where(x => x.IsBanned(DateTime.UtcNow)).ToList();
+		public static void SaveBlacklist()
+		{
+			var builder = new StringBuilder();
+
+			foreach (var blacklist in BlacklistPositions)
+			{
+				builder.AppendLine(blacklist.ToString());
+			}
+
+			File.WriteAllText(BlacklistPath, builder.ToString());
+		}
+
+		public static void LoadBlacklist()
+		{
+			if (!File.Exists(BlacklistPath))
+			{
+				File.WriteAllText(BlacklistPath, string.Empty);
+			}
+
+			var lines = File.ReadAllLines(BlacklistPath);
+
+			BlacklistPositions.Clear();
+			foreach (var line in lines)
+			{
+				if (string.IsNullOrWhiteSpace(line))
+				{
+					continue;
+				}
+
+				BlacklistPositions.Add(new BlacklistPosition(line));
+			}
+		}
+
+		public static void AddBlacklist(string symbol, PositionSide side, DateTime triggerTime, DateTime releaseTime)
+		{
+			var blacklistPosition = new BlacklistPosition(symbol, side, triggerTime, releaseTime);
+			var blacklist = BlacklistPositions.Where(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+			if (blacklist.Any())
+			{
+				BlacklistPositions.Remove(blacklist.ElementAt(0));
+			}
+
+			BlacklistPositions.Add(blacklistPosition);
+		}
+
+		public static bool IsBannedPosition(string symbol, PositionSide side, DateTime time)
+		{
+			var blacklist = BlacklistPositions.Where(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+			if (blacklist.Any())
+			{
+				return blacklist.ElementAt(0).IsBanned(time);
+			}
+
+			return false;
+		}
+
+		#endregion
 	}
 }

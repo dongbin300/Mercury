@@ -4,11 +4,9 @@ using Mercury.Charts;
 using Mercury.Enums;
 using Mercury.Maths;
 
-using System;
-
 namespace Mercury.Backtests
 {
-	public class EasyBacktester(string strategyId, List<string> symbols, KlineInterval interval, KlineInterval subInterval, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals, decimal money, int leverage)
+	public class EasyBacktester(string strategyId, List<string> symbols, KlineInterval interval, KlineInterval subInterval, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals, decimal money, int leverage, decimal blacklistLossThresholdPercent = -10m, int blacklistBanHour = 24 * 7, decimal closeBodyLengthMin = 0.1m)
 	{
 		public int Win { get; set; } = 0;
 		public int Lose { get; set; } = 0;
@@ -43,6 +41,10 @@ namespace Mercury.Backtests
 		public int LongExitCount = 0;
 		public int ShortFillCount = 0;
 		public int ShortExitCount = 0;
+		public List<BlacklistPosition> BlacklistPositions { get; set; } = [];
+		public decimal BlacklistLossThresholdPercent { get; set; } = blacklistLossThresholdPercent;
+		public int BlacklistBanHour { get; set; } = blacklistBanHour;
+		public decimal CloseBodyLengthMin { get; set; } = closeBodyLengthMin;
 
 		public void InitIndicators(params decimal[] p)
 		{
@@ -284,6 +286,7 @@ namespace Mercury.Backtests
 										&& c1.BodyLength > 0.05m
 										&& c2.BodyLength > 0.05m
 										&& c3.BodyLength > 0.05m
+										&& !IsBannedPosition(symbol, PositionSide.Long, time)
 										)
 									{
 										//if (c0.Quote.Low < c1.Quote.Close)
@@ -367,12 +370,18 @@ namespace Mercury.Backtests
 									//longPosition.Stage == 0 &&
 									c1.CandlestickType == CandlestickType.Bullish
 									&& c2.CandlestickType == CandlestickType.Bullish
+									&& c1.BodyLength + c2.BodyLength >= CloseBodyLengthMin
 									)
 								{
 									//if (c0.Quote.High > c1.Quote.Close)
 									//{
 									//	LongExitCount++;
 									ExitPosition(longPosition, c1, c1.Quote.Close);
+									if (Calculator.Roe(PositionSide.Long, longPosition.EntryPrice, c1.Quote.Close) <= BlacklistLossThresholdPercent) // 손실이 임계치를 벗어나면 블랙리스트 등록
+									{
+										var blacklistPosition = new BlacklistPosition(symbol, PositionSide.Long, time, time.AddHours(BlacklistBanHour));
+										AddBlacklist(blacklistPosition);
+									}
 									//ExitPositionHalf(longPosition, c1.Quote.Close);
 									//}
 								}
@@ -492,6 +501,7 @@ namespace Mercury.Backtests
 										&& c1.BodyLength > 0.05m
 										&& c2.BodyLength > 0.05m
 										&& c3.BodyLength > 0.05m
+										&& !IsBannedPosition(symbol, PositionSide.Short, time)
 										)
 									{
 										//if (c0.Quote.High > c1.Quote.Close)
@@ -576,12 +586,18 @@ namespace Mercury.Backtests
 									//shortPosition.Stage == 0 &&
 									c1.CandlestickType == CandlestickType.Bearish
 									&& c2.CandlestickType == CandlestickType.Bearish
+									&& c1.BodyLength + c2.BodyLength >= CloseBodyLengthMin
 									)
 								{
 									//if (c0.Quote.Low < c1.Quote.Close)
 									//{
 									//	ShortExitCount++;
 									ExitPosition(shortPosition, c1, c1.Quote.Close);
+									if (Calculator.Roe(PositionSide.Short, shortPosition.EntryPrice, c1.Quote.Close) <= BlacklistLossThresholdPercent) // 손실이 임계치를 벗어나면 블랙리스트 등록
+									{
+										var blacklistPosition = new BlacklistPosition(symbol, PositionSide.Short, time, time.AddHours(BlacklistBanHour));
+										AddBlacklist(blacklistPosition);
+									}
 									//ExitPositionHalf(shortPosition, c1.Quote.Close);
 									//}
 								}
@@ -1016,5 +1032,31 @@ namespace Mercury.Backtests
 			var endTime = startTime + mainChartInterval.ToTimeSpan() - TimeSpan.FromSeconds(1);
 			return SubCharts[symbol].Where(d => d.DateTime >= startTime && d.DateTime <= endTime);
 		}
+
+		#region Blacklist Position
+		void AddBlacklist(BlacklistPosition position)
+		{
+			var blacklist = BlacklistPositions.Where(x => x.Symbol.Equals(position.Symbol) && x.Side.Equals(position.Side));
+
+			if (blacklist.Any())
+			{
+				BlacklistPositions.Remove(blacklist.ElementAt(0));
+			}
+
+			BlacklistPositions.Add(position);
+		}
+
+		bool IsBannedPosition(string symbol, PositionSide side, DateTime time)
+		{
+			var blacklist = BlacklistPositions.Where(x => x.Symbol.Equals(symbol) && x.Side.Equals(side));
+
+			if (blacklist.Any())
+			{
+				return blacklist.ElementAt(0).IsBanned(time);
+			}
+
+			return false;
+		}
+		#endregion
 	}
 }

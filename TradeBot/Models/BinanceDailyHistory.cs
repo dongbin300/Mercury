@@ -1,4 +1,8 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Windows.Media;
+
+using TradeBot.Extensions;
 
 namespace TradeBot.Models
 {
@@ -9,6 +13,15 @@ namespace TradeBot.Models
 		public decimal Change { get; set; }
 		public decimal ChangePer { get; set; }
 		public decimal MaxPer { get; set; }
+
+		[Browsable(false)]
+		public string ChangePerString => ChangePer.ToString("P");
+		[Browsable(false)]
+		public string MaxPerString => MaxPer.ToString("P");
+		[Browsable(false)]
+		public SolidColorBrush ChangeColor => Change > 0 ? Common.LongColor : Change < 0 ? Common.ShortColor : Common.ForegroundColor;
+		[Browsable(false)]
+		public SolidColorBrush MaxPerColor => MaxPer == 1 ? Common.LongColor : Common.ForegroundColor;
 
 		public BinanceDailyHistory(DateTime time, decimal estimated, decimal change, decimal changePer, decimal maxPer)
 		{

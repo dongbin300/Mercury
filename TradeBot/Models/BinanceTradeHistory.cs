@@ -1,6 +1,8 @@
 ﻿using Binance.Net.Enums;
 
 using System;
+using System.ComponentModel;
+using System.Windows.Media;
 
 namespace TradeBot.Models
 {
@@ -12,11 +14,19 @@ namespace TradeBot.Models
 		public OrderSide Side { get; set; }
 		public decimal Price { get; set; }
 		public decimal Quantity { get; set; }
+		/// <summary>
+		/// Price * Quantity
+		/// </summary>
 		public decimal QuoteQuantity { get; set; }
 		public decimal Fee { get; set; }
 		public string FeeAsset { get; set; }
 		public decimal RealizedPnl { get; set; }
 		public bool IsMaker { get; set; }
+
+		[Browsable(false)]
+		public SolidColorBrush PositionSideColor => PositionSide == PositionSide.Long ? Common.LongColor : Common.ShortColor;
+		[Browsable(false)]
+		public SolidColorBrush RealizedPnlColor => RealizedPnl > 0 ? Common.LongColor : RealizedPnl < 0 ? Common.ShortColor : Common.ForegroundColor;
 
 		public BinanceTradeHistory(DateTime time, string symbol, PositionSide positionSide, OrderSide side, decimal price, decimal quantity, decimal quoteQuantity, decimal fee, string feeAsset, decimal realizedPnl, bool isMaker)
 		{

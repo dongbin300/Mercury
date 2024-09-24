@@ -3,14 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:local="clr-namespace:TradeBot.Views"
         mc:Ignorable="d"
-        Title="Report" Height="600" Width="800" Background="{DynamicResource BackgroundBrush}">
+        Title="Report" Height="800" Width="1100" Background="{DynamicResource BackgroundBrush}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="24"/>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="250"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -28,13 +32,22 @@
 
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button x:Name="IncomeButton" Style="{StaticResource HorizontalButton}" Click="IncomeButton_Click">Income</Button>
+            <Button x:Name="OrderButton" Style="{StaticResource HorizontalButton}" Click="OrderButton_Click">Order</Button>
             <Button x:Name="TradeButton" Style="{StaticResource HorizontalButton}" Click="TradeButton_Click">Trade</Button>
+            <Button x:Name="PositionButton" Style="{StaticResource HorizontalButton}" Click="PositionButton_Click">Position</Button>
             <Button x:Name="BotReportButton" Style="{StaticResource HorizontalButton}" Click="BotReportButton_Click">Bot Report</Button>
             <Button x:Name="DailyButton" Style="{StaticResource HorizontalButton}" Click="DailyButton_Click">Daily</Button>
+            <Button x:Name="TodayPnlButton" Style="{StaticResource HorizontalButton}" Click="TodayPnlButton_Click">Today PNL</Button>
         </StackPanel>
 
-        <DataGrid Grid.Row="2" x:Name="ReportDataGrid" IsReadOnly="True" AutoGeneratingColumn="ReportDataGrid_AutoGeneratingColumn">
+        <DataGrid Grid.Row="2" x:Name="ReportDataGrid" IsReadOnly="True"
+                  AutoGeneratingColumn="ReportDataGrid_AutoGeneratingColumn" LoadingRow="ReportDataGrid_LoadingRow">
             
         </DataGrid>
+
+        <oxy:PlotView Grid.Row="3" x:Name="PlotChart" Background="Transparent"/>
+
+        <TextBlock Grid.Row="4" x:Name="StatusText" VerticalAlignment="Center" Margin="3"></TextBlock>
+        <ProgressBar Grid.Row="5" x:Name="Progress" Foreground="{DynamicResource LongBrush}"/>
     </Grid>
 </Window>

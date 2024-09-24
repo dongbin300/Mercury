@@ -80,7 +80,8 @@ namespace TradeBot.Bots
 								&& c3.CandlestickType == CandlestickType.Bearish
 								&& c1.BodyLength > 0.05m
 								&& c2.BodyLength > 0.05m
-								&& c3.BodyLength > 0.05m)
+								&& c3.BodyLength > 0.05m
+								&& !Common.IsBannedPosition(symbol, side, DateTime.UtcNow))
 							{
 								if (Common.IsCoolTime(symbol, side))
 								{
@@ -89,7 +90,7 @@ namespace TradeBot.Bots
 
 								if (!Common.IsAdmin)
 								{
-									await Task.Delay(300);
+									await Task.Delay(400);
 								}
 
 								var price = c0.Quote.Close;
@@ -139,6 +140,7 @@ namespace TradeBot.Bots
 							if (
 								c1.CandlestickType == CandlestickType.Bullish
 								&& c2.CandlestickType == CandlestickType.Bullish
+								&& c1.BodyLength + c2.BodyLength >= 0.05m // 몸통 2개 합쳐서 0.05%가 넘어야함
 								)
 							{
 								if (Common.IsCoolTime(symbol, side))
@@ -148,7 +150,7 @@ namespace TradeBot.Bots
 
 								if (!Common.IsAdmin)
 								{
-									await Task.Delay(200);
+									await Task.Delay(400);
 								}
 
 								var position = Common.GetPosition(symbol, side);
@@ -159,6 +161,14 @@ namespace TradeBot.Bots
 
 								var price = c0.Quote.Close;
 								var quantity = Math.Abs(position.Quantity);
+
+								// 손실이 -8%를 넘어가면 24시간 블랙리스트 등록
+								// 체결이 되던지 안되던지 상관없이 차트 상에서 8% 이상 움직였으면 블랙리스트 등록
+								if (Common.IsAdmin && position.Roe / Leverage <= -8.0m)
+								{
+									Common.AddBlacklist(symbol, side, DateTime.UtcNow, DateTime.UtcNow.AddHours(23).AddMinutes(30));
+								}
+
 								await CloseSell(symbol, price, quantity).ConfigureAwait(false);
 								Common.AddPositionCoolTime(symbol, side);
 							}
@@ -217,8 +227,6 @@ namespace TradeBot.Bots
 				var errorString = string.Empty;
 				for (int i = 1; i <= 25; i++) // 지정가 주문이 성공할 떄까지 주문금액을 계속 낮춤(0.02% ~ 0.5%)
 				{
-					limitPrice = limitPrice.ToDownTickPricePercent(symbol, 0.02m);
-
 					var result = await BinanceClients.OpenBuy(symbol, limitPrice, quantity).ConfigureAwait(false);
 					if (result.Success)
 					{
@@ -233,6 +241,8 @@ namespace TradeBot.Bots
 					{
 						errorString = result.Error?.Message ?? string.Empty;
 					}
+
+					limitPrice = limitPrice.ToDownTickPricePercent(symbol, 0.02m);
 				}
 				Common.AddHistory("Long Bot", $"Open Buy {symbol}, {errorString}");
 				return false;
@@ -252,8 +262,6 @@ namespace TradeBot.Bots
 				var errorString = string.Empty;
 				for (int i = 1; i <= 25; i++) // 지정가 주문이 성공할 떄까지 주문금액을 계속 높힘(0.02% ~ 0.5%)
 				{
-					limitPrice = limitPrice.ToUpTickPricePercent(symbol, 0.02m);
-
 					var result = await BinanceClients.CloseSell(symbol, limitPrice, quantity).ConfigureAwait(false);
 					if (result.Success)
 					{
@@ -264,6 +272,8 @@ namespace TradeBot.Bots
 					{
 						errorString = result.Error?.Message ?? string.Empty;
 					}
+
+					limitPrice = limitPrice.ToUpTickPricePercent(symbol, 0.02m);
 				}
 				Common.AddHistory("Long Bot", $"Close Sell {symbol}, {errorString}");
 				return false;
