@@ -1,17 +1,18 @@
 ﻿using Binance.Net.Enums;
 
 using Mercury.Charts;
+using Mercury.Extensions;
 
 namespace Mercury.Backtests
 {
-	/// <summary>
-	/// Grid Bot Predictive Ranges Backtester
-	/// 
-	/// 1. Predictive Ranges Average(PRA) 값이 바뀌면 전량 정리 후 그 봉은 매매하지 않음
-	/// 2. 다음 봉 시가를 기준가로 그리드 재설정
-	/// 3. 그리드 타입은 항상 Neutral
-	/// </summary>
-	public class GridPredictiveRangesBacktester(string symbol, List<Price> prices, List<ChartInfo> charts, string reportFileName, int gridCount)
+    /// <summary>
+    /// Grid Bot Predictive Ranges Backtester
+    /// 
+    /// 1. Predictive Ranges Average(PRA) 값이 바뀌면 전량 정리 후 그 봉은 매매하지 않음
+    /// 2. 다음 봉 시가를 기준가로 그리드 재설정
+    /// 3. 그리드 타입은 항상 Neutral
+    /// </summary>
+    public class GridPredictiveRangesBacktester(string symbol, List<Price> prices, List<ChartInfo> charts, string reportFileName, int gridCount)
 	{
 		public decimal Seed = 1_000_000;
 		public decimal Money = 1_000_000;

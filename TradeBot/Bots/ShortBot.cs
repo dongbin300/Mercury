@@ -90,7 +90,7 @@ namespace TradeBot.Bots
 
 								if (!Common.IsAdmin)
 								{
-									await Task.Delay(400);
+									await Task.Delay(1000);
 								}
 
 								var price = c0.Quote.Close;
@@ -150,7 +150,7 @@ namespace TradeBot.Bots
 
 								if (!Common.IsAdmin)
 								{
-									await Task.Delay(400);
+									await Task.Delay(1000);
 								}
 
 								var position = Common.GetPosition(symbol, side);
@@ -164,7 +164,7 @@ namespace TradeBot.Bots
 
 								// 손실이 -8%를 넘어가면 24시간 블랙리스트 등록
 								// 체결이 되던지 안되던지 상관없이 차트 상에서 8% 이상 움직였으면 블랙리스트 등록
-								if (Common.IsAdmin && position.Roe / Leverage <= -8.0m)
+								if (position.Roe / position.Leverage <= -8.0m)
 								{
 									Common.AddBlacklist(symbol, side, DateTime.UtcNow, DateTime.UtcNow.AddHours(23).AddMinutes(30));
 								}
@@ -259,24 +259,36 @@ namespace TradeBot.Bots
 		{
 			try
 			{
-				var limitPrice = price;
+				//var limitPrice = price;
 				var errorString = string.Empty;
-				for (int i = 1; i <= 25; i++) // 지정가 주문이 성공할 떄까지 주문금액을 계속 높힘(0.02% ~ 0.5%)
-				{
-					var result = await BinanceClients.CloseBuy(symbol, limitPrice, quantity).ConfigureAwait(false);
-					if (result.Success)
-					{
-						Common.AddHistory("Short Bot", $"Close Buy {symbol}, {limitPrice}, {quantity} ({i})");
-						return true;
-					}
-					else
-					{
-						errorString = result.Error?.Message ?? string.Empty;
-					}
 
-					limitPrice = limitPrice.ToDownTickPricePercent(symbol, 0.02m);
+				var result = await BinanceClients.CloseBuyMarket(symbol, quantity).ConfigureAwait(false);
+				if (result.Success)
+				{
+					Common.AddHistory("Short Bot", $"Close Buy Market {symbol}, {quantity}");
+					return true;
 				}
-				Common.AddHistory("Short Bot", $"Close Sell {symbol}, {errorString}");
+				else
+				{
+					errorString = result.Error?.Message ?? string.Empty;
+				}
+
+				//for (int i = 1; i <= 25; i++) // 지정가 주문이 성공할 떄까지 주문금액을 계속 높힘(0.02% ~ 0.5%)
+				//{
+				//	var result = await BinanceClients.CloseBuy(symbol, limitPrice, quantity).ConfigureAwait(false);
+				//	if (result.Success)
+				//	{
+				//		Common.AddHistory("Short Bot", $"Close Buy {symbol}, {limitPrice}, {quantity} ({i})");
+				//		return true;
+				//	}
+				//	else
+				//	{
+				//		errorString = result.Error?.Message ?? string.Empty;
+				//	}
+
+				//	limitPrice = limitPrice.ToDownTickPricePercent(symbol, 0.02m);
+				//}
+				Common.AddHistory("Short Bot", $"Close Buy Market {symbol}, {errorString}");
 				return false;
 			}
 			catch (Exception ex)

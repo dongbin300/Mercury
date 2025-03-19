@@ -7,8 +7,8 @@ using MarinerX.Utils;
 
 using Mercury;
 using Mercury.Apis;
-
-using MercuryTradingModel.Charts;
+using Mercury.Charts;
+using Mercury.Extensions;
 
 using System;
 using System.Collections.Generic;
@@ -72,7 +72,7 @@ namespace MarinerX.Charts
 									Close = decimal.Parse(e[4]),
 									Volume = decimal.Parse(e[5])
 								};
-								chartPack.AddChart(new MercuryChartInfo(symbol, quote));
+								chartPack.AddChart(new ChartInfo(symbol, quote));
 							}
 						}, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
 						break;
@@ -96,7 +96,7 @@ namespace MarinerX.Charts
 								Close = decimal.Parse(e[4]),
 								Volume = decimal.Parse(e[5])
 							};
-							chartPack.AddChart(new MercuryChartInfo(symbol, quote));
+							chartPack.AddChart(new ChartInfo(symbol, quote));
 						}
 						break;
 
@@ -161,7 +161,7 @@ namespace MarinerX.Charts
 									Close = decimal.Parse(e[4]),
 									Volume = decimal.Parse(e[5])
 								};
-								chartPack.AddChart(new MercuryChartInfo(symbol, quote));
+								chartPack.AddChart(new ChartInfo(symbol, quote));
 							}
 						}, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
 						break;
@@ -185,7 +185,7 @@ namespace MarinerX.Charts
 								Close = decimal.Parse(e[4]),
 								Volume = decimal.Parse(e[5])
 							};
-							chartPack.AddChart(new MercuryChartInfo(symbol, quote));
+							chartPack.AddChart(new ChartInfo(symbol, quote));
 						}
 						break;
 
@@ -508,7 +508,7 @@ namespace MarinerX.Charts
 								Close = decimal.Parse(e[4]),
 								Volume = decimal.Parse(e[5])
 							};
-							chartPack.AddChart(new MercuryChartInfo(symbol, quote));
+							chartPack.AddChart(new ChartInfo(symbol, quote));
 						}
 					}
 
@@ -542,10 +542,10 @@ namespace MarinerX.Charts
 		}
 
 		/// <summary>
-		/// 1분봉 데이터를 이용해 5분봉 데이터를 파일로 생성
+		/// 1분봉 데이터를 이용해 n분봉 데이터를 파일로 생성
 		/// </summary>
 		/// <param name="worker"></param>
-		public static void ExtractCandle(Worker worker, KlineInterval interval, string intervalString)
+		public static void ExtractCandle(Worker worker, KlineInterval interval)
 		{
 			try
 			{
@@ -556,9 +556,18 @@ namespace MarinerX.Charts
 				worker.SetProgressBar(0, csvFileCount);
 
 				int s = 0;
-				foreach (var symbol in symbols)
+				for (int j = 0; j < symbols.Count; j++)
 				{
+					var symbol = symbols[j];
 					var startTime = manualStartTime;
+					var fileName = PathUtil.BinanceFuturesData.Down(interval.ToIntervalString(), $"{symbol}.csv");
+
+					// 파일이 존재하면 가장 마지막 줄의 시간을 가져옴
+					if (File.Exists(fileName))
+					{
+						startTime = SymbolUtil.GetEndDateTime(symbol, interval);
+					}
+
 					var dayCount = (DateTime.Today - startTime).Days + 1;
 					var chartPack = new ChartPack(interval);
 
@@ -576,16 +585,22 @@ namespace MarinerX.Charts
 							foreach (var d in data)
 							{
 								var e = d.Split(',');
+								var time = e[0].ToDateTime();
+								if (time <= startTime)
+								{
+									continue;
+								}
+
 								var quote = new Quote
 								{
-									Date = DateTime.Parse(e[0]),
-									Open = decimal.Parse(e[1]),
-									High = decimal.Parse(e[2]),
-									Low = decimal.Parse(e[3]),
-									Close = decimal.Parse(e[4]),
-									Volume = decimal.Parse(e[5])
+									Date = time,
+									Open = e[1].ToDecimal(),
+									High = e[2].ToDecimal(),
+									Low = e[3].ToDecimal(),
+									Close = e[4].ToDecimal(),
+									Volume = e[5].ToDecimal()
 								};
-								chartPack.AddChart(new MercuryChartInfo(symbol, quote));
+								chartPack.AddChart(new ChartInfo(symbol, quote));
 							}
 						}
 						catch (FileNotFoundException)
@@ -600,10 +615,13 @@ namespace MarinerX.Charts
 						.Select(x => string.Join(',', [
 							x.Date.ToString("yyyy-MM-dd HH:mm:ss"), x.Open.ToString(), x.High.ToString(), x.Low.ToString(), x.Close.ToString(), x.Volume.ToString()
 						]))
-						.ToList();
+						.ToList()
+						.SkipLast(1); // 마지막 데이터는 완성되지 않은 데이터이므로 스킵한다.
 
-					var path = PathUtil.BinanceFuturesData.Down(intervalString, $"{symbol}.csv");
-					File.WriteAllLines(path, newData);
+					File.AppendAllLines(fileName, newData);
+
+					s = (j + 1) * dayCountTemp;
+					worker.Progress(s);
 				}
 			}
 			catch (FileNotFoundException)
@@ -620,30 +638,29 @@ namespace MarinerX.Charts
 		{
 			try
 			{
-				var getStartTime = SymbolUtil.GetEndDate("BTCUSDT");
+				var startTime = SymbolUtil.GetEndDate("ZRXUSDT");
+				var EndTime = DateTime.Today;
 				var symbols = LocalApi.SymbolNames;
-				var csvFileCount = ((DateTime.Today - getStartTime).Days + 1) * symbols.Count;
+				var csvFileCount = ((EndTime - startTime).Days + 1) * symbols.Count;
 				worker.SetProgressBar(0, csvFileCount);
 
 				int p = 0;
-				foreach (var symbol in symbols)
+				for (int i = 0; i < 400; i++)
 				{
-					var startTime = getStartTime;
-					var count = 400;
-					var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
+					var standardTime = startTime.AddDays(i);
 
-					if (!Directory.Exists(symbolPath))
+					if (DateTime.Compare(standardTime, EndTime) > 0)
 					{
-						Directory.CreateDirectory(symbolPath);
+						break;
 					}
 
-					for (int i = 0; i < count; i++)
+					foreach (var symbol in symbols)
 					{
-						var standardTime = startTime.AddDays(i);
+						var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
 
-						if (DateTime.Compare(standardTime, DateTime.Today) > 0)
+						if (!Directory.Exists(symbolPath))
 						{
-							break;
+							Directory.CreateDirectory(symbolPath);
 						}
 
 						worker.Progress(++p);
@@ -654,6 +671,35 @@ namespace MarinerX.Charts
 						Thread.Sleep(500);
 					}
 				}
+
+				//foreach (var symbol in symbols)
+				//{
+				//	var startTime = getStartTime;
+				//	var count = 400;
+				//	var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
+
+				//	if (!Directory.Exists(symbolPath))
+				//	{
+				//		Directory.CreateDirectory(symbolPath);
+				//	}
+
+				//	for (int i = 0; i < count; i++)
+				//	{
+				//		var standardTime = startTime.AddDays(i);
+
+				//		if (DateTime.Compare(standardTime, EndTime) > 0)
+				//		{
+				//			break;
+				//		}
+
+				//		worker.Progress(++p);
+				//		worker.ProgressText($"{symbol}, {standardTime:yyyy-MM-dd}");
+
+				//		BinanceRestApi.GetCandleDataForOneDay(symbol, standardTime);
+
+				//		Thread.Sleep(500);
+				//	}
+				//}
 			}
 			catch (Exception ex)
 			{

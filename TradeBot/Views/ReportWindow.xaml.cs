@@ -248,7 +248,13 @@ namespace TradeBot.Views
 			ReportDataGrid.ItemsSource = daily;
 			Title = "Daily";
 
-			if (daily.Count > 0 && daily[0].Time != DateTime.Today) // 최종날짜가 오늘날짜가 아니면 자동 수집
+			// 한국시간 기준 매일 오전 9시에 리포트 생성
+			var yesterdayReportTime = new DateTime(DateTime.Today.AddDays(-1).Year, DateTime.Today.AddDays(-1).Month, DateTime.Today.AddDays(-1).Day, 9, 0, 0);
+			if (daily.Count > 0 && daily[0].Time != yesterdayReportTime && DateTime.Now.TimeOfDay >= new TimeSpan(9, 0, 0)) // 최종날짜가 오늘날짜가 아니면 자동 수집
+			{
+				CollectButton_Click(sender, e);
+			}
+			else if (daily.Count == 0)
 			{
 				CollectButton_Click(sender, e);
 			}
@@ -411,6 +417,7 @@ namespace TradeBot.Views
 						{
 							ReportDataGrid.ItemsSource = null;
 							ReportDataGrid.ItemsSource = daily;
+							SetPlotChart(daily.Select(x => x.Estimated).Reverse().ToList());
 						});
 						break;
 
@@ -470,14 +477,6 @@ namespace TradeBot.Views
 			plotModel.Series.Add(series);
 			PlotChart.Model = plotModel;
 			PlotChart.Visibility = Visibility.Visible;
-		}
-
-		private void ReportDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
-		{
-			if (e.Row.GetIndex() == 0)
-			{
-				e.Row.Background = new SolidColorBrush(Color.FromRgb(56, 56, 56));
-			}
 		}
 	}
 }

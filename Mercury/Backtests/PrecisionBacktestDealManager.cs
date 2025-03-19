@@ -1,11 +1,12 @@
 ﻿using Binance.Net.Enums;
 
 using Mercury.Charts;
+using Mercury.Extensions;
 using Mercury.Maths;
 
 namespace Mercury.Backtests
 {
-	public class PrecisionBacktestDealManager
+    public class PrecisionBacktestDealManager
 	{
 		public int MaxActiveDeals { get; set; }
 		public decimal TakeProfitRoe { get; set; }

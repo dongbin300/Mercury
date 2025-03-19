@@ -5,295 +5,346 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Trade Bot 240924.1" Height="950" Width="1400" Background="{DynamicResource BackgroundBrush}"
+        Title="Trade Bot 241012.1" Height="950" Width="1400" Background="{DynamicResource BackgroundBrush}"
         Closing="Window_Closing" KeyDown="Window_KeyDown">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="130"/>
-        </Grid.RowDefinitions>
+        <!-- Simple Screen -->
+        <Grid x:Name="SimpleGrid" Visibility="Hidden">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="9*"/>
-                <ColumnDefinition Width="15*"/>
-                <!--<ColumnDefinition Width="240"/>-->
-            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" x:Name="SimpleBalanceText" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="90" FontWeight="Bold" Margin="100 0"></TextBlock>
+            <TextBlock Grid.Row="1" x:Name="SimpleBnbText" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="90" FontWeight="Bold" Margin="100 0" Foreground="{StaticResource Binance}"></TextBlock>
+        </Grid>
+        
+        <!-- Common Screen -->
+        <Grid x:Name="MainGrid" Visibility="Visible">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="120"/>
+            </Grid.RowDefinitions>
 
-            <GroupBox Grid.Column="0" Header="Bot Settings" Margin="0">
-                <StackPanel Orientation="Vertical">
-                    <Grid Height="18">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="18"/>
-                            <ColumnDefinition Width="18"/>
-                            <ColumnDefinition Width="18"/>
-                            <ColumnDefinition Width="18"/>
-                            <ColumnDefinition Width="18"/>
-                        </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="10*"/>
+                    <ColumnDefinition Width="15*"/>
+                    <!--<ColumnDefinition Width="240"/>-->
+                </Grid.ColumnDefinitions>
 
-                        <Rectangle Grid.Column="0" x:Name="ThemeColorRectangle" Fill="{DynamicResource ThemeBrush}" MouseLeftButtonDown="ThemeColorRectangle_MouseLeftButtonDown"/>
-                        <xctk:ColorPicker Name="ThemeColorPicker" SelectedColorChanged="ThemeColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
-                        
-                        <Rectangle Grid.Column="1" x:Name="ForegroundColorRectangle" Fill="{DynamicResource ForegroundBrush}" MouseLeftButtonDown="ForegroundColorRectangle_MouseLeftButtonDown"/>
-                        <xctk:ColorPicker Name="ForegroundColorPicker" SelectedColorChanged="ForegroundColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
+                <GroupBox Grid.Column="0" Header="Bot Settings" Margin="0">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Height="18">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="18"/>
+                            </Grid.ColumnDefinitions>
 
-                        <Rectangle Grid.Column="2" x:Name="BackgroundColorRectangle" Fill="{DynamicResource BackgroundBrush}" MouseLeftButtonDown="BackgroundColorRectangle_MouseLeftButtonDown"/>
-                        <xctk:ColorPicker Name="BackgroundColorPicker" SelectedColorChanged="BackgroundColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
+                            <Rectangle Grid.Column="0" x:Name="ThemeColorRectangle" Fill="{DynamicResource ThemeBrush}" MouseLeftButtonDown="ThemeColorRectangle_MouseLeftButtonDown"/>
+                            <xctk:ColorPicker Name="ThemeColorPicker" SelectedColorChanged="ThemeColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
 
-                        <Rectangle Grid.Column="3" x:Name="LongColorRectangle" Fill="{DynamicResource LongBrush}" MouseLeftButtonDown="LongColorRectangle_MouseLeftButtonDown"/>
-                        <xctk:ColorPicker Name="LongColorPicker" SelectedColorChanged="LongColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
+                            <Rectangle Grid.Column="1" x:Name="ForegroundColorRectangle" Fill="{DynamicResource ForegroundBrush}" MouseLeftButtonDown="ForegroundColorRectangle_MouseLeftButtonDown"/>
+                            <xctk:ColorPicker Name="ForegroundColorPicker" SelectedColorChanged="ForegroundColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
 
-                        <Rectangle Grid.Column="4" x:Name="ShortColorRectangle" Fill="{DynamicResource ShortBrush}" MouseLeftButtonDown="ShortColorRectangle_MouseLeftButtonDown"/>
-                        <xctk:ColorPicker Name="ShortColorPicker" SelectedColorChanged="ShortColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
-                    </Grid>
+                            <Rectangle Grid.Column="2" x:Name="BackgroundColorRectangle" Fill="{DynamicResource BackgroundBrush}" MouseLeftButtonDown="BackgroundColorRectangle_MouseLeftButtonDown"/>
+                            <xctk:ColorPicker Name="BackgroundColorPicker" SelectedColorChanged="BackgroundColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
 
-                    <!--<TextBlock Style="{StaticResource Description}">Time</TextBlock>-->
-                    <TextBlock x:Name="TimeText" HorizontalAlignment="Right" FontSize="12">2024-01-01 12:34:56</TextBlock>
-                    <!--<TextBlock Style="{StaticResource Description}">UTC</TextBlock>
-                    <TextBlock x:Name="UtcTimeText" HorizontalAlignment="Right" FontSize="12">2024-01-01 12:34:56</TextBlock>-->
-                    <!--<TextBlock Style="{StaticResource Description}">Mock Bot</TextBlock>
-                    <CheckBox x:Name="MockBotCheckBox" HorizontalAlignment="Right" Checked="MockBotCheckBox_Checked" Unchecked="MockBotCheckBox_Unchecked"/>-->
-                    <TextBlock Style="{StaticResource Description}">Long Bot</TextBlock>
-                    <CheckBox x:Name="LongBotCheckBox" HorizontalAlignment="Right" Checked="LongBotCheckBox_Checked" Unchecked="LongBotCheckBox_Unchecked"/>
-                    <TextBlock Style="{StaticResource Description}">Short Bot</TextBlock>
-                    <CheckBox x:Name="ShortBotCheckBox" HorizontalAlignment="Right" Checked="ShortBotCheckBox_Checked" Unchecked="ShortBotCheckBox_Unchecked"/>
-                    <!--<TextBlock Style="{StaticResource Description}">Sound</TextBlock>
-                    <CheckBox x:Name="SoundCheckBox" HorizontalAlignment="Right" Checked="SoundCheckBox_Checked" Unchecked="SoundCheckBox_Unchecked"/>
-                    <TextBlock Style="{StaticResource Description}">Upper Alarm</TextBlock>
-                    <TextBox x:Name="UpperAlarmTextBox" HorizontalContentAlignment="Right" Text="80"/>
-                    <TextBlock Style="{StaticResource Description}">Lower Alarm</TextBlock>
-                    <TextBox x:Name="LowerAlarmTextBox" HorizontalContentAlignment="Right" Text="70"/>-->
-                    <TextBlock Style="{StaticResource Description}">Base Order Size</TextBlock>
-                    <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Text="500" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
-                    <TextBlock Style="{StaticResource Description}">Leverage</TextBlock>
-                    <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="5" TextChanged="LeverageTextBox_TextChanged"/>
-                    <TextBlock Style="{StaticResource Description}">Max Active Deals Type</TextBlock>
-                    <ComboBox x:Name="MaxActiveDealsTypeComboBox" SelectedIndex="0" SelectionChanged="MaxActiveDealsTypeComboBox_SelectionChanged">
-                        <ComboBoxItem>Total</ComboBoxItem>
-                        <ComboBoxItem>Each</ComboBoxItem>
-                    </ComboBox>
-                    <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
-                    <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Text="9" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
-                    <!--<TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
-                    <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.85"/>
-                    <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>
-                    <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.925"/>-->
-                    <TextBlock Style="{StaticResource Description}">Require Asset</TextBlock>
-                    <TextBlock x:Name="RequireAssetText" HorizontalAlignment="Right" Foreground="{DynamicResource LongBrush}"/>
-                   
-                    <!--<TextBlock Style="{StaticResource Description}">Today PNL</TextBlock>
-                    <TextBlock x:Name="TodayPnlText" HorizontalAlignment="Right" FontSize="16" FontWeight="Bold" MouseLeftButtonDown="TodayPnlText_MouseLeftButtonDown"/>-->
-                    <!--<Button x:Name="AssetCalculatorButton" Click="AssetCalculatorButton_Click">Calculator</Button>-->
-                    <!--<Button x:Name="CollectTradeButton" Click="CollectTradeButton_Click">Collect Trade</Button>-->
-                    <!--<Button x:Name="CollectIncomeButton" Click="CollectIncomeButton_Click">Collect Income</Button>
-                    <Button x:Name="CollectDailyButton" Click="CollectDailyButton_Click">Collect Daily</Button>-->
-                    <TextBlock Style="{StaticResource Description}" x:Name="AdminText"/>
-                </StackPanel>
-            </GroupBox>
+                            <Rectangle Grid.Column="3" x:Name="LongColorRectangle" Fill="{DynamicResource LongBrush}" MouseLeftButtonDown="LongColorRectangle_MouseLeftButtonDown"/>
+                            <xctk:ColorPicker Name="LongColorPicker" SelectedColorChanged="LongColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
 
-            <GroupBox Grid.Column="2" Header="Histories" Margin="0">
-                <DataGrid x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Time" Width="180" Binding="{Binding Time}"/>
-                        <DataGridTextColumn Header="Subject" Width="120" Binding="{Binding Subject}"/>
-                        <DataGridTextColumn Header="Text" Width="1*" Binding="{Binding Text}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{Binding TextColor}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </GroupBox>
+                            <Rectangle Grid.Column="4" x:Name="ShortColorRectangle" Fill="{DynamicResource ShortBrush}" MouseLeftButtonDown="ShortColorRectangle_MouseLeftButtonDown"/>
+                            <xctk:ColorPicker Name="ShortColorPicker" SelectedColorChanged="ShortColorPicker_SelectedColorChanged"  Visibility="Collapsed"/>
+                        </Grid>
 
-            <Grid Grid.Column="1" Margin="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="1.6*"/>
-                    <RowDefinition Height="1.2*"/>
-                </Grid.RowDefinitions>
+                        <!--<TextBlock Style="{StaticResource Description}">Time</TextBlock>-->
+                        <TextBlock x:Name="TimeText" HorizontalAlignment="Right" FontSize="16">2024-01-01 12:34:56</TextBlock>
+                        <!--<TextBlock Style="{StaticResource Description}">UTC</TextBlock>
+                <TextBlock x:Name="UtcTimeText" HorizontalAlignment="Right" FontSize="12">2024-01-01 12:34:56</TextBlock>-->
+                        <!--<TextBlock Style="{StaticResource Description}">Mock Bot</TextBlock>
+                <CheckBox x:Name="MockBotCheckBox" HorizontalAlignment="Right" Checked="MockBotCheckBox_Checked" Unchecked="MockBotCheckBox_Unchecked"/>-->
+                        <TextBlock Style="{StaticResource Description}">Smart Seed</TextBlock>
+                        <CheckBox x:Name="SmartSeedCheckBox" HorizontalAlignment="Right" Checked="SmartSeedCheckBox_Checked" Unchecked="SmartSeedCheckBox_Unchecked"/>
+                        <TextBlock Style="{StaticResource Description}">Long Bot</TextBlock>
+                        <CheckBox x:Name="LongBotCheckBox" HorizontalAlignment="Right" Checked="LongBotCheckBox_Checked" Unchecked="LongBotCheckBox_Unchecked"/>
+                        <TextBlock Style="{StaticResource Description}">Short Bot</TextBlock>
+                        <CheckBox x:Name="ShortBotCheckBox" HorizontalAlignment="Right" Checked="ShortBotCheckBox_Checked" Unchecked="ShortBotCheckBox_Unchecked"/>
+                        <TextBlock Style="{StaticResource Description}">Base Order Size</TextBlock>
+                        <TextBox x:Name="BaseOrderSizeTextBox" HorizontalContentAlignment="Right" Foreground="{DynamicResource ThemeBrush}" FontWeight="Bold" Text="500" TextChanged="BaseOrderSizeTextBox_TextChanged"/>
+                        <TextBlock Style="{StaticResource Description}">Leverage</TextBlock>
+                        <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Foreground="{DynamicResource ThemeBrush}" FontWeight="Bold" Text="5" TextChanged="LeverageTextBox_TextChanged"/>
+                        <TextBlock Style="{StaticResource Description}">Max Active Deals Type</TextBlock>
+                        <ComboBox x:Name="MaxActiveDealsTypeComboBox" FontWeight="Bold" SelectedIndex="0" SelectionChanged="MaxActiveDealsTypeComboBox_SelectionChanged">
+                            <ComboBoxItem>Total</ComboBoxItem>
+                            <ComboBoxItem>Each</ComboBoxItem>
+                        </ComboBox>
+                        <TextBlock Style="{StaticResource Description}">Max Active Deals</TextBlock>
+                        <TextBox x:Name="MaxActiveDealsTextBox" HorizontalContentAlignment="Right" Foreground="{DynamicResource ThemeBrush}" FontWeight="Bold" Text="9" TextChanged="MaxActiveDealsTextBox_TextChanged"/>
+                        <!--<TextBlock Style="{StaticResource Description}">Target Profit (%)</TextBlock>
+                <TextBox x:Name="TargetProfitTextBox" HorizontalContentAlignment="Right" Text="1.85"/>
+                <TextBlock Style="{StaticResource Description}">Stop Loss (%)</TextBlock>
+                <TextBox x:Name="StopLossTextBox" HorizontalContentAlignment="Right" Text="0.925"/>-->
+                        <TextBlock Style="{StaticResource Description}">Require Asset</TextBlock>
+                        <TextBlock x:Name="RequireAssetText" FontWeight="Bold" HorizontalAlignment="Right" Foreground="{DynamicResource LongBrush}"/>
+                        <TextBlock Style="{StaticResource Description}" x:Name="AdminText"/>
+                    </StackPanel>
+                </GroupBox>
 
-                <GroupBox Grid.Row="0" Header="Positions" Margin="0">
-                    <DataGrid x:Name="PositionDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0">
+                <GroupBox Grid.Column="2" Header="Histories" Margin="0">
+                    <DataGrid x:Name="HistoryDataGrid" HeadersVisibility="None">
                         <DataGrid.Columns>
-                            <!--<DataGridTextColumn Header="Time" Width="160" Binding="{Binding Time}"/>
-            <DataGridTextColumn Header="Symbol" Width="90" Binding="{Binding Symbol}"/>
-            <DataGridTextColumn Header="Side" Width="60" Binding="{Binding Side}"/>
-            <DataGridTextColumn Header="EntryPrice" Width="80" Binding="{Binding EntryPrice}"/>
-            <DataGridTextColumn Header="Quantity" Width="100" Binding="{Binding Quantity}"/>-->
-                            <DataGridTemplateColumn Header="" Width="1">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0">
-                                            <Rectangle Fill="{Binding PositionSideColor}"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}"/>
-                            <DataGridTextColumn Header="Margin" Width="90" Binding="{Binding Margin}"/>
-                            <DataGridTextColumn Header="PNL" Width="1*" Binding="{Binding PnlString}">
+                            <DataGridTextColumn Header="Time" Width="180" Binding="{Binding Time}"/>
+                            <DataGridTextColumn Header="Subject" Width="120" Binding="{Binding Subject}"/>
+                            <DataGridTextColumn Header="Text" Width="1*" Binding="{Binding Text}">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{Binding PnlColor}" />
+                                        <Setter Property="Foreground" Value="{Binding TextColor}" />
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
                         </DataGrid.Columns>
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="FontFamily" Value="Meiryo UI" />
-                                <Setter Property="FontSize" Value="12" />
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="Margin" Value="0" />
-                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
-                                <Setter Property="Background" Value="Transparent" />
-                            </Style>
-                        </DataGrid.CellStyle>
-                        <!--<DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PositionSide}" Value="Long">
-                                        <Setter Property="Background" Value="{DynamicResource LongBrush}" />
-                                    </DataTrigger>
-
-                                    <DataTrigger Binding="{Binding PositionSide}" Value="Short">
-                                        <Setter Property="Background" Value="{DynamicResource ShortBrush}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.RowStyle>-->
                     </DataGrid>
                 </GroupBox>
 
-                <GroupBox Grid.Row="1" Header="Orders" Margin="0">
-                    <DataGrid x:Name="OrderDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="" Width="1" >
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Rectangle Fill="{Binding PositionSideColor}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}"/>
-                            <DataGridTextColumn Header="Price" Width="90" Binding="{Binding Price}"/>
-                            <DataGridTextColumn Header="Filled" Width="1*" Binding="{Binding FilledString}"/>
-                        </DataGrid.Columns>
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="FontFamily" Value="Meiryo UI" />
-                                <Setter Property="FontSize" Value="12" />
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="Margin" Value="0" />
-                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
-                                <Setter Property="Background" Value="Transparent" />
-                            </Style>
-                        </DataGrid.CellStyle>
-                    </DataGrid>
-                </GroupBox>
+                <Grid Grid.Column="1" Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition Height="1.6*"/>
+                        <RowDefinition Height="1.2*"/>
+                    </Grid.RowDefinitions>
 
-                <GroupBox Grid.Row="2" Header="Blacklists" Margin="0">
-                    <DataGrid x:Name="BlacklistDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0">
+                    <!-- POSITION -->
+                    <GroupBox Grid.Row="0" Header="Positions" Margin="0">
+                        <DataGrid x:Name="PositionDataGrid" HeadersVisibility="None">
+                            <DataGrid.Columns>
+                                <!--<DataGridTextColumn Header="Time" Width="160" Binding="{Binding Time}"/>
+        <DataGridTextColumn Header="Symbol" Width="90" Binding="{Binding Symbol}"/>
+        <DataGridTextColumn Header="Side" Width="60" Binding="{Binding Side}"/>
+        <DataGridTextColumn Header="EntryPrice" Width="80" Binding="{Binding EntryPrice}"/>
+        <DataGridTextColumn Header="Quantity" Width="100" Binding="{Binding Quantity}"/>-->
+                                <DataGridTemplateColumn Header="" Width="1">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0">
+                                                <Rectangle Fill="{Binding PositionSideColor}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Symbol" Width="90" Binding="{Binding Symbol}"/>
+                                <DataGridTextColumn Header="Size" Width="70" Binding="{Binding SizeA}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="TextAlignment" Value="Right"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                
+                                <DataGridTemplateColumn Header="PNL" Width="1*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Rectangle Height="20" VerticalAlignment="Center" Fill="{Binding PnlColor}" HorizontalAlignment="Right" Opacity="0.35">
+                                                    <Rectangle.Width>
+                                                        <MultiBinding Converter="{StaticResource pbw}">
+                                                            <Binding RelativeSource="{RelativeSource AncestorType=DataGrid}" Path="ActualWidth" />
+                                                            <Binding Path="BarPer" />
+                                                        </MultiBinding>
+                                                    </Rectangle.Width>
+                                                </Rectangle>
+                                                <TextBlock Text="{Binding PnlString}" Foreground="{Binding PnlColor}" HorizontalAlignment="Right" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                
+                                <!--<DataGridTextColumn Header="PNL" Width="1*" Binding="{Binding PnlString}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{Binding PnlColor}" />
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="TextAlignment" Value="Right"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>-->
+                                <DataGridTemplateColumn Header="" Width="25">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                                <Rectangle Width="5" Margin="1" Fill="{Binding Quotes[2], Converter={StaticResource cc}}" />
+                                                <Rectangle Width="5" Margin="1" Fill="{Binding Quotes[1], Converter={StaticResource cc}}" />
+                                                <Rectangle Width="5" Margin="1" Fill="{Binding Quotes[0], Converter={StaticResource cc}}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                            <!--<DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PositionSide}" Value="Long">
+                                    <Setter Property="Background" Value="{DynamicResource LongBrush}" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding PositionSide}" Value="Short">
+                                    <Setter Property="Background" Value="{DynamicResource ShortBrush}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>-->
+                        </DataGrid>
+                    </GroupBox>
+
+                    <!-- ORDER -->
+                    <GroupBox Grid.Row="1" Header="Orders" Margin="0">
+                        <DataGrid x:Name="OrderDataGrid" HeadersVisibility="None">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="" Width="1" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Rectangle Fill="{Binding PositionSideColor}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Symbol" Width="90" Binding="{Binding Symbol}"/>
+                                <DataGridTextColumn Header="Price" Width="70" Binding="{Binding Price}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="TextAlignment" Value="Right"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="Filled" Width="1*">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Rectangle Height="20" VerticalAlignment="Center" Fill="{Binding PositionSideColor}" HorizontalAlignment="Right" Opacity="0.35">
+                                                    <Rectangle.Width>
+                                                        <MultiBinding Converter="{StaticResource pbw}">
+                                                            <Binding RelativeSource="{RelativeSource AncestorType=DataGrid}" Path="ActualWidth" />
+                                                            <Binding Path="BarPer" />
+                                                        </MultiBinding>
+                                                    </Rectangle.Width>
+                                                </Rectangle>
+                                                <TextBlock Text="{Binding FilledString}" HorizontalAlignment="Right" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <!--<DataGridTextColumn Header="Filled" Width="1*" Binding="{Binding FilledString}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="TextAlignment" Value="Right"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>-->
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+
+                    <!-- BLACKLIST -->
+                    <GroupBox Grid.Row="2" Header="Blacklists" Margin="0">
+                        <DataGrid x:Name="BlacklistDataGrid" HeadersVisibility="None">
+                            <DataGrid.Columns>
+                                <DataGridTemplateColumn Header="" Width="1" >
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Rectangle Fill="{Binding PositionSideColor}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="Symbol" Width="90" Binding="{Binding Symbol}"/>
+                                <DataGridTextColumn Header="Release" Width="1*" Binding="{Binding ReleaseTimeString}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+                </Grid>
+
+                <!-- INDICATOR-->
+                <GroupBox Grid.Column="3" Header="Indicators" x:Name="IndicatorsGroupBox" Visibility="Collapsed">
+                    <DataGrid x:Name="IndicatorDataGrid" MouseDoubleClick="IndicatorDataGrid_MouseDoubleClick">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="" Width="1" >
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Rectangle Fill="{Binding PositionSideColor}"/>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}"/>
-                            <DataGridTextColumn Header="Release" Width="1*" Binding="{Binding ReleaseTimeString}"/>
-                        </DataGrid.Columns>
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="FontFamily" Value="Meiryo UI" />
-                                <Setter Property="FontSize" Value="12" />
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="BorderThickness" Value="0" />
-                                <Setter Property="Margin" Value="0" />
-                                <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
-                                <Setter Property="Background" Value="Transparent" />
+                            <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{Binding SymbolColor}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Entry Rate" Width="1*" Binding="{Binding EntryRate}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{Binding EntryRateColor}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <!--<DataGridTextColumn Header="Price" Width="100" Binding="{Binding CurrentPrice}"/>
+                    <DataGridTextColumn Header="MACD^4" Width="1*" Binding="{Binding CurrentMacd}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{Binding CurrentMacdColor}" />
                             </Style>
-                        </DataGrid.CellStyle>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Signal^4" Width="1*" Binding="{Binding CurrentSignal}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{Binding CurrentSignalColor}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="ADX" Width="1*" Binding="{Binding CurrentAdx}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{Binding CurrentAdxColor}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="Supertrend" Width="1*" Binding="{Binding CurrentSupertrend}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{Binding CurrentSupertrendColor}" />
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>-->
+                        </DataGrid.Columns>
                     </DataGrid>
                 </GroupBox>
             </Grid>
-            
 
-            <GroupBox Grid.Column="3" Header="Indicators" x:Name="IndicatorsGroupBox" Visibility="Collapsed">
-                <DataGrid x:Name="IndicatorDataGrid" IsReadOnly="True" AutoGenerateColumns="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" Margin="0" MouseDoubleClick="IndicatorDataGrid_MouseDoubleClick">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Symbol" Width="110" Binding="{Binding Symbol}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{Binding SymbolColor}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Entry Rate" Width="1*" Binding="{Binding EntryRate}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{Binding EntryRateColor}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <!--<DataGridTextColumn Header="Price" Width="100" Binding="{Binding CurrentPrice}"/>
-                        <DataGridTextColumn Header="MACD^4" Width="1*" Binding="{Binding CurrentMacd}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{Binding CurrentMacdColor}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Signal^4" Width="1*" Binding="{Binding CurrentSignal}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{Binding CurrentSignalColor}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="ADX" Width="1*" Binding="{Binding CurrentAdx}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{Binding CurrentAdxColor}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Supertrend" Width="1*" Binding="{Binding CurrentSupertrend}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{Binding CurrentSupertrendColor}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>-->
-                    </DataGrid.Columns>
-                </DataGrid>
+            <!-- ACCOUNT -->
+            <GroupBox Grid.Row="1" Header="Account" Margin="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Style="{StaticResource Description}">Balance</TextBlock>
+                    <TextBlock Grid.Column="0" x:Name="BalanceText" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                       FontSize="48" FontWeight="Bold" Margin="0 2 30 0"></TextBlock>
+                    <TextBlock Grid.Column="1" Style="{StaticResource Description}">BNB</TextBlock>
+                    <TextBlock Grid.Column="1" x:Name="BnbText" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                       FontSize="48" FontWeight="Bold" Margin="0 2 30 0" Foreground="{StaticResource Binance}"></TextBlock>
+                </Grid>
             </GroupBox>
+
         </Grid>
-
-        <GroupBox Grid.Row="1" Header="Account" Margin="0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="1*"/>
-                    <!--<ColumnDefinition Width="1*"/>-->
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Style="{StaticResource Description}">Balance</TextBlock>
-                <TextBlock Grid.Column="0" x:Name="BalanceText" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                           FontSize="48" FontWeight="Bold" Margin="0 10 30 0"></TextBlock>
-                <TextBlock Grid.Column="1" Style="{StaticResource Description}">BNB</TextBlock>
-                <TextBlock Grid.Column="1" x:Name="BnbText" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                           FontSize="48" FontWeight="Bold" Margin="0 10 30 0" Foreground="{StaticResource Binance}"></TextBlock>
-            </Grid>
-        </GroupBox>
-           
     </Grid>
+    
 </Window>

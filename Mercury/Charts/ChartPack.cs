@@ -1,5 +1,7 @@
 ﻿using Binance.Net.Enums;
 
+using Mercury.Extensions;
+
 namespace Mercury.Charts
 {
 	public class ChartPack(KlineInterval interval)
@@ -275,6 +277,20 @@ namespace Mercury.Charts
 			}
 		}
 
+		public void UseTripleSupertrend(int atrPeriod1, double factor1, int atrPeriod2, double factor2, int atrPeriod3, double factor3)
+		{
+			var tripleSupertrend = Charts.Select(x => x.Quote).GetTripleSupertrend(atrPeriod1, factor1, atrPeriod2, factor2, atrPeriod3, factor3);
+			var supertrend1 = tripleSupertrend.Select(x => x.Supertrend1);
+			var supertrend2 = tripleSupertrend.Select(x => x.Supertrend2);
+			var supertrend3 = tripleSupertrend.Select(x => x.Supertrend3);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Supertrend1 = supertrend1.ElementAt(i);
+				Charts[i].Supertrend2 = supertrend2.ElementAt(i);
+				Charts[i].Supertrend3 = supertrend3.ElementAt(i);
+			}
+		}
+
 		public void UseBollingerBands(int period = 20, double deviation = 2.0)
 		{
 			var bollingerBands = Charts.Select(x => x.Quote).GetBollingerBands(period, deviation);
@@ -312,7 +328,7 @@ namespace Mercury.Charts
 		public void UsePredictiveRanges(int period = 200, double factor = 6.0)
 		{
 			var predictiveRanges = Charts.Select(x => x.Quote).GetPredictiveRanges(period, factor);
-			for(int i=0; i < Charts.Count; i++)
+			for (int i = 0; i < Charts.Count; i++)
 			{
 				var pr = predictiveRanges.ElementAt(i);
 				Charts[i].PredictiveRangesUpper2 = pr.Upper2;

@@ -5,8 +5,6 @@ VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mercury", "Mercury\Mercury.csproj", "{5FC41F55-E1F3-4E11-A532-E9B5DF849D60}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercuryTradingModel", "MercuryTradingModel\MercuryTradingModel.csproj", "{E423E089-DDE1-4955-8442-C4D20956184B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MercuryEditor", "MercuryEditor\MercuryEditor.csproj", "{633E75B2-2E18-42D1-B161-20BAE42E1CF4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lab", "Lab\Lab.csproj", "{55D6B738-93DD-4431-BEFD-CA3AC1933336}"
@@ -55,6 +53,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BacktestViewer", "BacktestV
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Predictor", "Predictor\Predictor.pyproj", "{91515147-EA84-4A29-BAA7-4F933B42FB27}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfMdi", "..\..\Reference\WpfMdi Example\WpfMdi\WpfMdi.csproj", "{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,18 +77,6 @@ Global
 		{5FC41F55-E1F3-4E11-A532-E9B5DF849D60}.Release|x64.Build.0 = Release|Any CPU
 		{5FC41F55-E1F3-4E11-A532-E9B5DF849D60}.Release|x86.ActiveCfg = Release|Any CPU
 		{5FC41F55-E1F3-4E11-A532-E9B5DF849D60}.Release|x86.Build.0 = Release|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Debug|x64.Build.0 = Debug|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Debug|x86.Build.0 = Debug|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Release|x64.ActiveCfg = Release|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Release|x64.Build.0 = Release|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Release|x86.ActiveCfg = Release|Any CPU
-		{E423E089-DDE1-4955-8442-C4D20956184B}.Release|x86.Build.0 = Release|Any CPU
 		{633E75B2-2E18-42D1-B161-20BAE42E1CF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{633E75B2-2E18-42D1-B161-20BAE42E1CF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{633E75B2-2E18-42D1-B161-20BAE42E1CF4}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -347,6 +335,18 @@ Global
 		{91515147-EA84-4A29-BAA7-4F933B42FB27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91515147-EA84-4A29-BAA7-4F933B42FB27}.Release|x64.ActiveCfg = Release|Any CPU
 		{91515147-EA84-4A29-BAA7-4F933B42FB27}.Release|x86.ActiveCfg = Release|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Debug|x64.Build.0 = Debug|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Debug|x86.Build.0 = Debug|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Release|x64.ActiveCfg = Release|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Release|x64.Build.0 = Release|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Release|x86.ActiveCfg = Release|Any CPU
+		{2B2A2E87-9AE3-4DD4-A880-69E5A996F197}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -97,8 +97,18 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="Supertrend1CheckBox">Supertrend</CheckBox>
-                    <TextBox x:Name="Supertrend1PeriodText">12</TextBox>
-                    <TextBox x:Name="Supertrend1FactorText">3</TextBox>
+                    <TextBox x:Name="Supertrend1PeriodText">20</TextBox>
+                    <TextBox x:Name="Supertrend1FactorText">2</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Supertrend2CheckBox">Supertrend</CheckBox>
+                    <TextBox x:Name="Supertrend2PeriodText">60</TextBox>
+                    <TextBox x:Name="Supertrend2FactorText">3</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Supertrend3CheckBox">Supertrend</CheckBox>
+                    <TextBox x:Name="Supertrend3PeriodText">120</TextBox>
+                    <TextBox x:Name="Supertrend3FactorText">6</TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="RSupertrend1CheckBox">R-Supertrend</CheckBox>

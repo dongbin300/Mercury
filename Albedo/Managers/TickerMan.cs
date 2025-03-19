@@ -68,8 +68,7 @@ namespace Albedo.Managers
         }
         public static void UpdateBinanceFuturesTicker(BinanceSocketClient client, MenuControl menu)
         {
-            client.UsdFuturesApi
-                .SubscribeToAllTickerUpdatesAsync((obj) =>
+            client.UsdFuturesApi.ExchangeData.SubscribeToAllTickerUpdatesAsync((obj) =>
             {
                 if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
                 {
@@ -114,8 +113,7 @@ namespace Albedo.Managers
         }
         public static void UpdateBinanceCoinFuturesTicker(BinanceSocketClient client, MenuControl menu)
         {
-            client.CoinFuturesApi
-                .SubscribeToAllTickerUpdatesAsync((obj) =>
+            client.CoinFuturesApi.SubscribeToAllTickerUpdatesAsync((obj) =>
             {
                 if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
                 {
@@ -159,8 +157,7 @@ namespace Albedo.Managers
         #region Bybit
         public static void UpdateBybitSpotTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
         {
-            client.V5SpotApi
-                .SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            client.V5SpotApi.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
             {
                 var item = obj.Data;
                 var quoteAsset = BybitSymbolMapper.GetPairQuoteAsset(item.Symbol);
@@ -200,8 +197,7 @@ namespace Albedo.Managers
         }
         public static void UpdateBybitLinearTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
         {
-            client.V5LinearApi
-                .SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            client.V5LinearApi.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
             {
                 var item = obj.Data;
                 decimal price = 0;
@@ -252,16 +248,15 @@ namespace Albedo.Managers
         }
         public static void UpdateBybitInverseTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
         {
-            client.InversePerpetualApi
-                .SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            client.V5InverseApi.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
             {
                 var item = obj.Data;
                 decimal price = 0;
                 decimal change = 0;
-                if (item.LastPrice != null && item.PriceChangePercentage24H != null)
+                if (item.LastPrice != null && item.PricePercentage24h != null)
                 {
                     price = item.LastPrice.Value;
-                    change = item.PriceChangePercentage24H.Value;
+                    change = item.PricePercentage24h.Value;
                 }
                 else
                 {
@@ -304,8 +299,7 @@ namespace Albedo.Managers
         }
         public static void UpdateBybitOptionTicker(BybitSocketClient client, MenuControl menu, IEnumerable<string> symbols)
         {
-            client.V5OptionsApi
-                .SubscribeToTickerUpdatesAsync(symbols, (obj) =>
+            client.V5OptionsApi.SubscribeToTickerUpdatesAsync(symbols, (obj) =>
             {
                 if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
                 {

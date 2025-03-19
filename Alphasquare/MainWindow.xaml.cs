@@ -1,6 +1,6 @@
 ﻿using Mercury;
 using Mercury.Charts;
-
+using Mercury.Extensions;
 using SkiaSharp;
 
 using System;

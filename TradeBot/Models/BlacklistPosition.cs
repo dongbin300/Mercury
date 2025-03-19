@@ -1,13 +1,11 @@
 ﻿using Binance.Net.Enums;
-
-using Mercury;
-
+using Mercury.Extensions;
 using System;
 using System.Windows.Media;
 
 namespace TradeBot.Models
 {
-	public class BlacklistPosition
+    public class BlacklistPosition
 	{
 		public string Symbol { get; set; }
 		public PositionSide Side { get; set; }

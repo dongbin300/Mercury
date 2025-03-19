@@ -6,11 +6,36 @@
         xmlns:local="clr-namespace:Lab"
           xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="300" Width="400">
-    <Grid Background="Black">
-        <oxy:PlotView x:Name="plot" Background="Black">
-        </oxy:PlotView>
-        <!--<Button x:Name="Test" Content="Click" Click="Test_Click"/>-->
-        <!--<local:NumericPlusTextBox CaretBrush="#05DAC5" Width="300" Height="35" FontSize="14"/>-->
+        Title="MainWindow" Height="300" Width="400" Background="Black">
+
+    <Window.Resources>
+        <local:PercentToBarWidthConverter x:Key="pbw"/>
+    </Window.Resources>
+    
+    <Grid>
+        <DataGrid x:Name="SampleDataGrid" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="*" />
+
+                <DataGridTemplateColumn Header="Change" Width="3*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Rectangle Height="20" VerticalAlignment="Center" Fill="{Binding BarColor}" HorizontalAlignment="Right" Opacity="0.5">
+                                    <Rectangle.Width>
+                                        <MultiBinding Converter="{StaticResource pbw}">
+                                            <Binding RelativeSource="{RelativeSource AncestorType=DataGrid}" Path="ActualWidth" />
+                                            <Binding Path="BarPer" />
+                                        </MultiBinding>
+                                    </Rectangle.Width>
+                                </Rectangle>
+
+                                <TextBlock Text="{Binding Change}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="Black" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </Window>

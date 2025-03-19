@@ -32,36 +32,36 @@ namespace Mercury.Apis
 		#region Market API
 		public static async void GetKlineUpdatesAsync(string symbol, KlineInterval interval)
 		{
-			var result = await BinanceClient.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.ExchangeData.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage);
 		}
 
 		public static async void GetKlineUpdatesAsync2(string symbol, KlineInterval interval)
 		{
-			var result = await BinanceClient.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage2);
+			var result = await BinanceClient.UsdFuturesApi.ExchangeData.SubscribeToKlineUpdatesAsync(symbol, interval, KlineUpdatesOnMessage2);
 		}
 
 		public static async void GetContinuousKlineUpdatesAsync(string symbol, KlineInterval interval)
 		{
-			var result = await BinanceClient.UsdFuturesApi.SubscribeToContinuousContractKlineUpdatesAsync(symbol, ContractType.Perpetual, interval, ContinuousKlineUpdatesOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.ExchangeData.SubscribeToContinuousContractKlineUpdatesAsync(symbol, ContractType.Perpetual, interval, ContinuousKlineUpdatesOnMessage);
 		}
 
 		public static async void GetBnbMarkPriceUpdatesAsync()
 		{
-			var result = await BinanceClient.UsdFuturesApi.SubscribeToMarkPriceUpdatesAsync("BNBUSDT", 1000, BnbMarkPriceUpdatesAsyncOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.ExchangeData.SubscribeToMarkPriceUpdatesAsync("BNBUSDT", 1000, BnbMarkPriceUpdatesAsyncOnMessage);
 		}
 
 		public static async void GetAllMarketMiniTickersAsync()
 		{
-			var result = await BinanceClient.UsdFuturesApi.SubscribeToAllMiniTickerUpdatesAsync(AllMarketMiniTickersOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.ExchangeData.SubscribeToAllMiniTickerUpdatesAsync(AllMarketMiniTickersOnMessage);
 		}
 
 		public static async void SubscribeToUserDataUpdatesAsync()
 		{
 			var listenKey = BinanceRestApi.StartUserStream();
-			var result = await BinanceClient.UsdFuturesApi.SubscribeToUserDataUpdatesAsync(listenKey, null, null, AccountUpdateOnMessage, null, ListenKeyExpiredOnMessage);
+			var result = await BinanceClient.UsdFuturesApi.Account.SubscribeToUserDataUpdatesAsync(listenKey, null, null, AccountUpdateOnMessage, null, ListenKeyExpiredOnMessage);
 		}
 
-		public static void ListenKeyExpiredOnMessage(DataEvent<BinanceStreamEvent> obj)
+		public static void ListenKeyExpiredOnMessage(DataEvent<BinanceFuturesStreamTradeUpdate> obj)
 		{
 			
 		}

@@ -1,7 +1,7 @@
 ﻿using Binance.Net.Enums;
 
-using Mercury;
 using Mercury.Apis;
+using Mercury.Extensions;
 
 using System;
 using System.Windows;

@@ -1,12 +1,11 @@
-﻿using Mercury;
+﻿using Mercury.Extensions;
+using Mercury.TradingModels;
 
 using MercuryEditor.Editor;
 using MercuryEditor.Enums;
 using MercuryEditor.Inspection.SystemCode;
 using MercuryEditor.Inspection.V1;
 using MercuryEditor.IO;
-
-using MercuryTradingModel.TradingModels;
 
 using Newtonsoft.Json;
 
@@ -17,7 +16,7 @@ using System.Linq;
 
 namespace MercuryEditor.Inspection
 {
-    internal class MercuryInspector
+	internal class MercuryInspector
     {
         public string InspectedPath { get; set; } = string.Empty;
         private List<TextLine> code = new();

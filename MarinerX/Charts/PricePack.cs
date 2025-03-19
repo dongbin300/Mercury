@@ -3,15 +3,9 @@ using System.Collections.Generic;
 
 namespace MarinerX.Charts
 {
-    internal class PricePack
-    {
-        public string Symbol { get; set; }
-        public Dictionary<DateTime, List<decimal>> Prices { get; set; }
-
-        public PricePack(string symbol)
-        {
-            Symbol = symbol;
-            Prices = new();
-        }
-    }
+    internal class PricePack(string symbol)
+	{
+		public string Symbol { get; set; } = symbol;
+		public Dictionary<DateTime, List<decimal>> Prices { get; set; } = new();
+	}
 }

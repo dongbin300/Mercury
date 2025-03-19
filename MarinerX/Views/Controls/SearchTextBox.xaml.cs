@@ -48,6 +48,9 @@ namespace MarinerX.Views.Controls
 			InitializeComponent();
 			DataContext = this;
 			Suggestions = [];
+
+			_suggestions = [];
+			_searchText = string.Empty;
 		}
 
 		private void FilterSuggestions()

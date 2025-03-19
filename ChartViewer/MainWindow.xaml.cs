@@ -1,9 +1,9 @@
 ﻿using Binance.Net.Enums;
 
-using Mercury;
 using Mercury.Backtests;
 using Mercury.Charts;
 using Mercury.Charts.Technicals;
+using Mercury.Extensions;
 using Mercury.Maths;
 
 using Microsoft.Win32;
@@ -47,6 +47,7 @@ namespace ChartViewer
 		private List<decimal> LongPoints = [];
 		private List<decimal> ShortPoints = [];
 
+		private const int ERROR_VALUE = -39909;
 		private readonly SKFont CandleInfoFont = new(SKTypeface.FromFamilyName("Meiryo UI"), 11);
 		private readonly SKPaint CandleInfoPaint = new() { Color = SKColors.White };
 		private readonly SKPaint HorizontalLinePointerPaint = new() { Color = SKColors.Silver };
@@ -85,10 +86,9 @@ namespace ChartViewer
 			CandleCountTextBox.Text = Settings.Default.CandleCount;
 			IntervalComboBox.SelectedIndex = Settings.Default.Interval;
 			CandleCountTextBox.Focus();
-			Ema1CheckBox.IsChecked = true;
-			Ema2CheckBox.IsChecked = true;
-			Ema3CheckBox.IsChecked = true;
-			EmaAtrCheckBox.IsChecked = true;
+			Supertrend1CheckBox.IsChecked = true;
+			Supertrend2CheckBox.IsChecked = true;
+			Supertrend3CheckBox.IsChecked = true;
 		}
 
 		private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -148,7 +148,7 @@ namespace ChartViewer
 				var ma = quotes.GetSma(Ma1Text.Text.ToInt()).Select(x => x.Sma);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Sma1 = ma.ElementAt(i) == 0 ? -39909 : ma.ElementAt(i);
+					Charts[i].Sma1 = ma.ElementAt(i) == 0 ? ERROR_VALUE : ma.ElementAt(i);
 				}
 			}
 			if (Ma2CheckBox.IsChecked ?? true)
@@ -156,7 +156,7 @@ namespace ChartViewer
 				var ma = quotes.GetSma(Ma2Text.Text.ToInt()).Select(x => x.Sma);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Sma2 = ma.ElementAt(i) == 0 ? -39909 : ma.ElementAt(i);
+					Charts[i].Sma2 = ma.ElementAt(i) == 0 ? ERROR_VALUE : ma.ElementAt(i);
 				}
 			}
 			if (Ma3CheckBox.IsChecked ?? true)
@@ -164,7 +164,7 @@ namespace ChartViewer
 				var ma = quotes.GetSma(Ma3Text.Text.ToInt()).Select(x => x.Sma);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Sma3 = ma.ElementAt(i) == 0 ? -39909 : ma.ElementAt(i);
+					Charts[i].Sma3 = ma.ElementAt(i) == 0 ? ERROR_VALUE : ma.ElementAt(i);
 				}
 			}
 			if (Ema1CheckBox.IsChecked ?? true)
@@ -172,7 +172,7 @@ namespace ChartViewer
 				var ema = quotes.GetEma(Ema1Text.Text.ToInt()).Select(x => x.Ema);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Ema1 = ema.ElementAt(i) == 0 ? -39909 : ema.ElementAt(i);
+					Charts[i].Ema1 = ema.ElementAt(i) == 0 ? ERROR_VALUE : ema.ElementAt(i);
 				}
 			}
 			if (Ema2CheckBox.IsChecked ?? true)
@@ -180,7 +180,7 @@ namespace ChartViewer
 				var ema = quotes.GetEma(Ema2Text.Text.ToInt()).Select(x => x.Ema);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Ema2 = ema.ElementAt(i) == 0 ? -39909 : ema.ElementAt(i);
+					Charts[i].Ema2 = ema.ElementAt(i) == 0 ? ERROR_VALUE : ema.ElementAt(i);
 				}
 			}
 			if (Ema3CheckBox.IsChecked ?? true)
@@ -188,7 +188,7 @@ namespace ChartViewer
 				var ema = quotes.GetEma(Ema3Text.Text.ToInt()).Select(x => x.Ema);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Ema3 = ema.ElementAt(i) == 0 ? -39909 : ema.ElementAt(i);
+					Charts[i].Ema3 = ema.ElementAt(i) == 0 ? ERROR_VALUE : ema.ElementAt(i);
 				}
 			}
 			if (Supertrend1CheckBox.IsChecked ?? true)
@@ -196,7 +196,23 @@ namespace ChartViewer
 				var st = quotes.GetSupertrend(Supertrend1PeriodText.Text.ToInt(), Supertrend1FactorText.Text.ToDouble()).Select(x => x.Supertrend);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Supertrend1 = st.ElementAt(i) == 0 ? -39909 : st.ElementAt(i);
+					Charts[i].Supertrend1 = st.ElementAt(i) == 0 ? ERROR_VALUE : st.ElementAt(i);
+				}
+			}
+			if (Supertrend2CheckBox.IsChecked ?? true)
+			{
+				var st = quotes.GetSupertrend(Supertrend2PeriodText.Text.ToInt(), Supertrend2FactorText.Text.ToDouble()).Select(x => x.Supertrend);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Supertrend2 = st.ElementAt(i) == 0 ? ERROR_VALUE : st.ElementAt(i);
+				}
+			}
+			if (Supertrend3CheckBox.IsChecked ?? true)
+			{
+				var st = quotes.GetSupertrend(Supertrend3PeriodText.Text.ToInt(), Supertrend3FactorText.Text.ToDouble()).Select(x => x.Supertrend);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Supertrend3 = st.ElementAt(i) == 0 ? ERROR_VALUE : st.ElementAt(i);
 				}
 			}
 			if (RSupertrend1CheckBox.IsChecked ?? true)
@@ -204,7 +220,7 @@ namespace ChartViewer
 				var st = quotes.GetReverseSupertrend(RSupertrend1PeriodText.Text.ToInt(), RSupertrend1FactorText.Text.ToDouble()).Select(x => x.Supertrend);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].ReverseSupertrend1 = st.ElementAt(i) == 0 ? -39909 : st.ElementAt(i);
+					Charts[i].ReverseSupertrend1 = st.ElementAt(i) == 0 ? ERROR_VALUE : st.ElementAt(i);
 				}
 			}
 			if (CustomCheckBox.IsChecked ?? true)
@@ -216,10 +232,10 @@ namespace ChartViewer
 				var player = custom.Select(x => x.Player);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].CustomUpper = upper.ElementAt(i) == 0 ? -39909 : upper.ElementAt(i);
-					Charts[i].CustomLower = lower.ElementAt(i) == 0 ? -39909 : lower.ElementAt(i);
-					Charts[i].CustomPioneer = pioneer.ElementAt(i) == 0 ? -39909 : pioneer.ElementAt(i);
-					Charts[i].CustomPlayer = player.ElementAt(i) == 0 ? -39909 : player.ElementAt(i);
+					Charts[i].CustomUpper = upper.ElementAt(i) == 0 ? ERROR_VALUE : upper.ElementAt(i);
+					Charts[i].CustomLower = lower.ElementAt(i) == 0 ? ERROR_VALUE : lower.ElementAt(i);
+					Charts[i].CustomPioneer = pioneer.ElementAt(i) == 0 ? ERROR_VALUE : pioneer.ElementAt(i);
+					Charts[i].CustomPlayer = player.ElementAt(i) == 0 ? ERROR_VALUE : player.ElementAt(i);
 				}
 			}
 			if (TrendLineCheckBox.IsChecked ?? true)
@@ -229,10 +245,10 @@ namespace ChartViewer
 				for (int i = 0; i < Charts.Count; i++)
 				{
 					var highPoint = checkpoints.HighPoints.Where(x => x.Time.Equals(Charts[i].DateTime));
-					Charts[i].TrendLineUpper = highPoint.Any() ? (double)highPoint.First().Price : -39909;
+					Charts[i].TrendLineUpper = highPoint.Any() ? (double)highPoint.First().Price : ERROR_VALUE;
 
 					var lowPoint = checkpoints.LowPoints.Where(x => x.Time.Equals(Charts[i].DateTime));
-					Charts[i].TrendLineLower = lowPoint.Any() ? (double)lowPoint.First().Price : -39909;
+					Charts[i].TrendLineLower = lowPoint.Any() ? (double)lowPoint.First().Price : ERROR_VALUE;
 				}
 
 				FillTrendLineValue();
@@ -243,7 +259,7 @@ namespace ChartViewer
 				for (int i = 0; i < Charts.Count; i++)
 				{
 					Charts[i].TrendRiderTrend = trendRider.ElementAt(i).Trend;
-					Charts[i].TrendRiderSupertrend = trendRider.ElementAt(i).Supertrend == 0 ? -39909 : trendRider.ElementAt(i).Supertrend;
+					Charts[i].TrendRiderSupertrend = trendRider.ElementAt(i).Supertrend == 0 ? ERROR_VALUE : trendRider.ElementAt(i).Supertrend;
 				}
 			}
 			if (EmaAtrCheckBox.IsChecked ?? true)
@@ -254,13 +270,13 @@ namespace ChartViewer
 				{
 					if (i == 0)
 					{
-						Charts[i].EmaAtrLower = -39909;
-						Charts[i].EmaAtrUpper = -39909;
+						Charts[i].EmaAtrLower = ERROR_VALUE;
+						Charts[i].EmaAtrUpper = ERROR_VALUE;
 						continue;
 					}
 
-					Charts[i].EmaAtrLower = ema.ElementAt(i).Ema == 0 ? -39909 : ema.ElementAt(i).Ema - atr.ElementAt(i).Atr;
-					Charts[i].EmaAtrUpper = ema.ElementAt(i).Ema == 0 ? -39909 : ema.ElementAt(i).Ema + atr.ElementAt(i).Atr;
+					Charts[i].EmaAtrLower = ema.ElementAt(i).Ema == 0 ? ERROR_VALUE : ema.ElementAt(i).Ema - atr.ElementAt(i).Atr;
+					Charts[i].EmaAtrUpper = ema.ElementAt(i).Ema == 0 ? ERROR_VALUE : ema.ElementAt(i).Ema + atr.ElementAt(i).Atr;
 				}
 			}
 
@@ -273,7 +289,7 @@ namespace ChartViewer
 			double startValue = -1;
 			for (int i = 0; i < Charts.Count; i++)
 			{
-				if (Charts[i].TrendLineUpper != -39909)
+				if (Charts[i].TrendLineUpper != ERROR_VALUE)
 				{
 					if (startIndex == -1)
 					{
@@ -300,7 +316,7 @@ namespace ChartViewer
 
 			for (int i = 0; i < Charts.Count; i++)
 			{
-				if (Charts[i].TrendLineLower != -39909)
+				if (Charts[i].TrendLineLower != ERROR_VALUE)
 				{
 					if (startIndex == -1)
 					{
@@ -328,7 +344,7 @@ namespace ChartViewer
 
 		private void DrawIndicator(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color, float strokeWidth = 1)
 		{
-			if (preValue == -39909 || value == -39909)
+			if (preValue == ERROR_VALUE || value == ERROR_VALUE)
 			{
 				return;
 			}
@@ -346,7 +362,7 @@ namespace ChartViewer
 
 		private void DrawSupertrend(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color)
 		{
-			if (preValue == -39909 || value == -39909 || (preValue < 0 && value >= 0) || (preValue >= 0 && value < 0))
+			if (preValue == ERROR_VALUE || value == ERROR_VALUE || (preValue < 0 && value >= 0) || (preValue >= 0 && value < 0))
 			{
 				return;
 			}
@@ -383,27 +399,37 @@ namespace ChartViewer
 			if (Ema1CheckBox.IsChecked ?? true)
 			{
 				yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema1));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema1 != -39909).Min(x => x.Ema1));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema1 != ERROR_VALUE).Min(x => x.Ema1));
 			}
 			if (Ema2CheckBox.IsChecked ?? true)
 			{
 				yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema2));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema2 != -39909).Min(x => x.Ema2));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema2 != ERROR_VALUE).Min(x => x.Ema2));
 			}
 			if (Ema3CheckBox.IsChecked ?? true)
 			{
 				yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema3));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema3 != -39909).Min(x => x.Ema3));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema3 != ERROR_VALUE).Min(x => x.Ema3));
 			}
 			if (Supertrend1CheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend1 != -39909).Max(x => Math.Abs(x.Supertrend1)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend1 != -39909).Min(x => Math.Abs(x.Supertrend1)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend1 != ERROR_VALUE).Max(x => Math.Abs(x.Supertrend1)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend1 != ERROR_VALUE).Min(x => Math.Abs(x.Supertrend1)));
+			}
+			if (Supertrend2CheckBox.IsChecked ?? true)
+			{
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend2 != ERROR_VALUE).Max(x => Math.Abs(x.Supertrend2)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend2 != ERROR_VALUE).Min(x => Math.Abs(x.Supertrend2)));
+			}
+			if (Supertrend3CheckBox.IsChecked ?? true)
+			{
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend3 != ERROR_VALUE).Max(x => Math.Abs(x.Supertrend3)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend3 != ERROR_VALUE).Min(x => Math.Abs(x.Supertrend3)));
 			}
 			if (RSupertrend1CheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.ReverseSupertrend1 != -39909).Max(x => Math.Abs(x.ReverseSupertrend1)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.ReverseSupertrend1 != -39909).Min(x => Math.Abs(x.ReverseSupertrend1)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.ReverseSupertrend1 != ERROR_VALUE).Max(x => Math.Abs(x.ReverseSupertrend1)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.ReverseSupertrend1 != ERROR_VALUE).Min(x => Math.Abs(x.ReverseSupertrend1)));
 			}
 			if (CustomCheckBox.IsChecked ?? true)
 			{
@@ -411,13 +437,13 @@ namespace ChartViewer
 			}
 			if (TrendRiderCheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.TrendRiderSupertrend != -39909).Max(x => Math.Abs(x.TrendRiderSupertrend)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.TrendRiderSupertrend != -39909).Min(x => Math.Abs(x.TrendRiderSupertrend)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.TrendRiderSupertrend != ERROR_VALUE).Max(x => Math.Abs(x.TrendRiderSupertrend)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.TrendRiderSupertrend != ERROR_VALUE).Min(x => Math.Abs(x.TrendRiderSupertrend)));
 			}
 			if (EmaAtrCheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.EmaAtrUpper != -39909).Max(x => Math.Abs(x.EmaAtrUpper)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.EmaAtrLower != -39909).Min(x => Math.Abs(x.EmaAtrLower)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.EmaAtrUpper != ERROR_VALUE).Max(x => Math.Abs(x.EmaAtrUpper)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.EmaAtrLower != ERROR_VALUE).Min(x => Math.Abs(x.EmaAtrLower)));
 			}
 
 			// Draw Quote and Indicator
@@ -457,6 +483,7 @@ namespace ChartViewer
 					);
 				#endregion
 
+				#region Indicator
 				if (Ma1CheckBox.IsChecked ?? true)
 				{
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].Sma1 : Charts[i - 1].Sma1, Charts[i].Sma1, yMax, yMin, new SKColor(128, 128, 128));
@@ -484,6 +511,14 @@ namespace ChartViewer
 				if (Supertrend1CheckBox.IsChecked ?? true)
 				{
 					DrawSupertrend(canvas, i, i == 0 ? Charts[i].Supertrend1 : Charts[i - 1].Supertrend1, Charts[i].Supertrend1, yMax, yMin, Charts[i].Supertrend1 > 0 ? LongColor : ShortColor);
+				}
+				if (Supertrend2CheckBox.IsChecked ?? true)
+				{
+					DrawSupertrend(canvas, i, i == 0 ? Charts[i].Supertrend2 : Charts[i - 1].Supertrend2, Charts[i].Supertrend2, yMax, yMin, Charts[i].Supertrend2 > 0 ? LongColor : ShortColor);
+				}
+				if (Supertrend3CheckBox.IsChecked ?? true)
+				{
+					DrawSupertrend(canvas, i, i == 0 ? Charts[i].Supertrend3 : Charts[i - 1].Supertrend3, Charts[i].Supertrend3, yMax, yMin, Charts[i].Supertrend3 > 0 ? LongColor : ShortColor);
 				}
 				if (RSupertrend1CheckBox.IsChecked ?? true)
 				{
@@ -521,6 +556,7 @@ namespace ChartViewer
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].EmaAtrUpper : Charts[i - 1].EmaAtrUpper, Charts[i].EmaAtrUpper, yMax, yMin, SKColors.White);
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].EmaAtrLower : Charts[i - 1].EmaAtrLower, Charts[i].EmaAtrLower, yMax, yMin, SKColors.White);
 				}
+				#endregion
 			}
 
 			// Draw Pointer
@@ -705,18 +741,30 @@ namespace ChartViewer
 
 		private void CandleChart_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
-			var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
+			try
+			{
+				var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
 
-			LongPoints.Clear();
-			LongPoints.Add(pointingChart.Quote.Close);
+				LongPoints.Clear();
+				LongPoints.Add(pointingChart.Quote.Close);
+			}
+			catch
+			{
+			}
 		}
 
 		private void CandleChart_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
 		{
-			var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
+			try
+			{
+				var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
 
-			ShortPoints.Clear();
-			ShortPoints.Add(pointingChart.Quote.Close);
+				ShortPoints.Clear();
+				ShortPoints.Add(pointingChart.Quote.Close);
+			}
+			catch
+			{
+			}
 		}
 	}
 }

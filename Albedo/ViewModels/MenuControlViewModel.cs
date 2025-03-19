@@ -22,7 +22,7 @@ namespace Albedo.ViewModels
         }
         #endregion Notify Property Changed
 
-        private ObservableCollection<PairControl> pairControls = new();
+        private ObservableCollection<PairControl> pairControls = [];
         public ObservableCollection<PairControl> PairControls
         {
             get => pairControls;
@@ -32,7 +32,7 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(PairControls));
             }
         }
-        private ObservableCollection<PairControl> resultPairControls = new();
+		private ObservableCollection<PairControl> resultPairControls = [];
         public ObservableCollection<PairControl> ResultPairControls
         {
             get => resultPairControls;
@@ -42,7 +42,7 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(ResultPairControls));
             }
         }
-        private ObservableCollection<PairControl> simplePairControls = new();
+        private ObservableCollection<PairControl> simplePairControls = [];
         public ObservableCollection<PairControl> SimplePairControls
         {
             get => simplePairControls;
@@ -52,7 +52,7 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(SimplePairControls));
             }
         }
-        private ObservableCollection<PairMarketModel> pairMarkets = new();
+        private ObservableCollection<PairMarketModel> pairMarkets = [];
         public ObservableCollection<PairMarketModel> PairMarkets
         {
             get => pairMarkets;
@@ -62,7 +62,7 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(PairMarkets));
             }
         }
-        private ObservableCollection<PairMarketTypeModel> pairMarketTypes = new();
+        private ObservableCollection<PairMarketTypeModel> pairMarketTypes = [];
         public ObservableCollection<PairMarketTypeModel> PairMarketTypes
         {
             get => pairMarketTypes;
@@ -72,7 +72,7 @@ namespace Albedo.ViewModels
                 OnPropertyChanged(nameof(PairMarketTypes));
             }
         }
-        private ObservableCollection<PairQuoteAssetModel> pairQuoteAssets = new();
+        private ObservableCollection<PairQuoteAssetModel> pairQuoteAssets = [];
         public ObservableCollection<PairQuoteAssetModel> PairQuoteAssets
         {
             get => pairQuoteAssets;

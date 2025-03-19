@@ -26,10 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\Images\mercury.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -51,6 +47,10 @@
     <Content Include="Resources\Themes\LightTheme.xaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mercury\Mercury.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -128,7 +128,7 @@ namespace Albedo.Managers
 
                 binanceSocketClient.UsdFuturesApi
                     .UnsubscribeAsync(subId);
-                var klineUpdateResult = binanceSocketClient.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                var klineUpdateResult = binanceSocketClient.UsdFuturesApi.ExchangeData.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {
@@ -277,9 +277,8 @@ namespace Albedo.Managers
                 chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
-                bybitSocketClient.UnsubscribeAsync(subId);
-                var klineUpdateResult = bybitSocketClient.V5SpotApi
-                    .SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                bybitSocketClient.V5SpotApi.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.V5SpotApi.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {
@@ -349,9 +348,8 @@ namespace Albedo.Managers
                 chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
-                bybitSocketClient.UnsubscribeAsync(subId);
-                var klineUpdateResult = bybitSocketClient.V5LinearApi
-                    .SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                bybitSocketClient.V5LinearApi.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.V5LinearApi.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {
@@ -421,9 +419,8 @@ namespace Albedo.Managers
                 chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
-                bybitSocketClient.UnsubscribeAsync(subId);
-                var klineUpdateResult = bybitSocketClient.InversePerpetualApi
-                    .SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                bybitSocketClient.V5InverseApi.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.V5InverseApi.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {
@@ -433,7 +430,7 @@ namespace Albedo.Managers
                             case CandleInterval.TenMinutes:
                                 chartControl.UpdateQuote(new Quote
                                 {
-                                    Date = updateQuote.OpenTime,
+                                    Date = updateQuote.StartTime,
                                     Open = updateQuote.OpenPrice,
                                     High = updateQuote.HighPrice,
                                     Low = updateQuote.LowPrice,
@@ -445,7 +442,7 @@ namespace Albedo.Managers
                             default:
                                 chartControl.UpdateQuote(new Quote
                                 {
-                                    Date = updateQuote.OpenTime,
+                                    Date = updateQuote.StartTime,
                                     Open = updateQuote.OpenPrice,
                                     High = updateQuote.HighPrice,
                                     Low = updateQuote.LowPrice,
@@ -493,9 +490,8 @@ namespace Albedo.Managers
                 chartControl.Init(quotes);
                 chartControl.ViewStartPosition = Math.Max(chartControl.ViewEndPosition - SettingsMan.DefaultCandleCount * chartControl.ItemFullWidth, 0);
 
-                bybitSocketClient.UnsubscribeAsync(subId);
-                var klineUpdateResult = bybitSocketClient.V5OptionsApi
-                    .SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                bybitSocketClient.V5OptionsApi.UnsubscribeAsync(subId);
+                var klineUpdateResult = bybitSocketClient.V5OptionsApi.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {

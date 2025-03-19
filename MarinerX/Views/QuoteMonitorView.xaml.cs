@@ -1,9 +1,7 @@
 ﻿using Binance.Net.Enums;
-
-using Mercury;
 using Mercury.Apis;
 using Mercury.Charts;
-
+using Mercury.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,10 +10,10 @@ using System.Windows.Threading;
 
 namespace MarinerX.Views
 {
-	/// <summary>
-	/// QuoteMonitorView.xaml에 대한 상호 작용 논리
-	/// </summary>
-	public class QuoteMonitorData
+    /// <summary>
+    /// QuoteMonitorView.xaml에 대한 상호 작용 논리
+    /// </summary>
+    public class QuoteMonitorData
     {
         public string Symbol { get; set; } = string.Empty;
         public double Rsi { get; set; }

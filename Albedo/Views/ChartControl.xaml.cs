@@ -5,7 +5,7 @@ using Albedo.Models;
 using Albedo.Utils;
 
 using Mercury;
-
+using Mercury.Extensions;
 using SkiaSharp;
 
 using System;

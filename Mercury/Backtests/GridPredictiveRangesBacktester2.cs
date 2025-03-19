@@ -1,25 +1,26 @@
 ﻿using Mercury.Charts;
 using Mercury.Enums;
+using Mercury.Extensions;
 using Mercury.Maths;
 
 namespace Mercury.Backtests
 {
-	/// <summary>
-	/// 아이디어
-	/// 1. PR이 바뀐날 종가에 Neutral 종료
-	/// 즉시 하루 동안 상향이면 Long, 하향이면 Short로 시작
-	/// 만약 다음 날부터 종가가 PRA 크로스한 날이 오면 종가에 Long/Short 종료 후 Neutral로 전환
-	/// PR이 바뀌면 바뀐 PR로 다시 Long/Short 시작
-	/// 
-	/// 바이낸스 백테스트 기능 써보기
-	/// 하나의 파라미터로 백테스터가 정상적으로 작동하는지 확인 후 파라미터 찾기
-	/// </summary>
-	/// <param name="symbol"></param>
-	/// <param name="prices"></param>
-	/// <param name="charts"></param>
-	/// <param name="reportFileName"></param>
-	/// <param name="gridCount"></param>
-	public class GridPredictiveRangesBacktester2 : GridBacktester
+    /// <summary>
+    /// 아이디어
+    /// 1. PR이 바뀐날 종가에 Neutral 종료
+    /// 즉시 하루 동안 상향이면 Long, 하향이면 Short로 시작
+    /// 만약 다음 날부터 종가가 PRA 크로스한 날이 오면 종가에 Long/Short 종료 후 Neutral로 전환
+    /// PR이 바뀌면 바뀐 PR로 다시 Long/Short 시작
+    /// 
+    /// 바이낸스 백테스트 기능 써보기
+    /// 하나의 파라미터로 백테스터가 정상적으로 작동하는지 확인 후 파라미터 찾기
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <param name="prices"></param>
+    /// <param name="charts"></param>
+    /// <param name="reportFileName"></param>
+    /// <param name="gridCount"></param>
+    public class GridPredictiveRangesBacktester2 : GridBacktester
 	{
 		public decimal PredictiveRangesRiskMargin { get; set; }
 

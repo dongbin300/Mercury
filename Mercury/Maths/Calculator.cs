@@ -1,4 +1,5 @@
 ﻿using Binance.Net.Enums;
+using Mercury.Extensions;
 
 namespace Mercury.Maths
 {

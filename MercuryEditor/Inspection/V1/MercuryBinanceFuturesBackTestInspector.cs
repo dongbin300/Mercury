@@ -1,16 +1,18 @@
-﻿using MercuryEditor.Editor;
+﻿using Mercury.Enums;
+using Mercury.Formulae;
+using Mercury.Interfaces;
+using Mercury.Orders;
+using Mercury.TradingModels;
+
+using MercuryEditor.Editor;
 
 using MercuryTradingModel.Assets;
 using MercuryTradingModel.Cues;
 using MercuryTradingModel.Elements;
-using MercuryTradingModel.Enums;
 using MercuryTradingModel.Extensions;
 using MercuryTradingModel.Formulae;
-using MercuryTradingModel.Interfaces;
 using MercuryTradingModel.Intervals;
-using MercuryTradingModel.Orders;
 using MercuryTradingModel.Signals;
-using MercuryTradingModel.TradingModels;
 
 using System;
 using System.Collections.Generic;
@@ -18,7 +20,7 @@ using System.Linq;
 
 namespace MercuryEditor.Inspection.V1
 {
-    internal class MercuryBinanceFuturesBackTestInspector
+	internal class MercuryBinanceFuturesBackTestInspector
     {
         private int lineNumber = 0;
         public MercuryBackTestTradingModel TradingModel { get; private set; } = new MercuryBackTestTradingModel();
@@ -428,7 +430,7 @@ namespace MercuryEditor.Inspection.V1
                 var element1 = ParseElement(crossSegments[0]);
                 var element2 = ParseElement(crossSegments[1]);
 
-                return new CrossFormula(element1, Cross.GoldenCross, element2);
+                return new CrossFormula(element1, MtmCross.GoldenCross, element2);
             }
             catch
             {
@@ -449,7 +451,7 @@ namespace MercuryEditor.Inspection.V1
                 var element1 = ParseElement(crossSegments[0]);
                 var element2 = ParseElement(crossSegments[1]);
 
-                return new CrossFormula(element1, Cross.DeadCross, element2);
+                return new CrossFormula(element1, MtmCross.DeadCross, element2);
             }
             catch
             {
@@ -476,7 +478,7 @@ namespace MercuryEditor.Inspection.V1
                 {
                     return new ValueElement(value);
                 }
-                else if (Enum.TryParse<TradeElementType>(segment2[0], out var tradeElementType))
+                else if (Enum.TryParse<MtmTradeElementType>(segment2[0], out var tradeElementType))
                 {
                     return new TradeElement(tradeElementType, decimal.Parse(segment2[1]));
                 }
@@ -518,7 +520,7 @@ namespace MercuryEditor.Inspection.V1
         /// </summary>
         /// <param name="orderValue"></param>
         /// <returns></returns>
-        private BackTestOrder? ParseOrder(string orderValue)
+        private BacktestOrder? ParseOrder(string orderValue)
         {
             try
             {
@@ -530,37 +532,37 @@ namespace MercuryEditor.Inspection.V1
 
                 var positionSide = segments[0] switch
                 {
-                    "long" => PositionSide.Long,
-                    "short" => PositionSide.Short,
-                    "open" => PositionSide.Open,
-                    "close" => PositionSide.Close,
-                    _ => PositionSide.None
+                    "long" => MtmPositionSide.Long,
+                    "short" => MtmPositionSide.Short,
+                    "open" => MtmPositionSide.Open,
+                    "close" => MtmPositionSide.Close,
+                    _ => MtmPositionSide.None
                 };
 
-                if (positionSide == PositionSide.Open || positionSide == PositionSide.Close)
+                if (positionSide == MtmPositionSide.Open || positionSide == MtmPositionSide.Close)
                 {
                     var _value = decimal.Parse(segments[1]);
-                    return new BackTestOrder(OrderType.Market, positionSide, new OrderAmount(OrderAmountType.None, _value));
+                    return new BackTestOrder(MtmOrderType.Market, positionSide, new OrderAmount(MtmOrderAmountType.None, _value));
                 }
 
-                OrderType orderType = OrderType.None;
-                OrderAmountType orderAmountType = OrderAmountType.None;
+                MtmOrderType orderType = MtmOrderType.None;
+                MtmOrderAmountType orderAmountType = MtmOrderAmountType.None;
                 decimal value = 0m;
                 decimal? price = null;
 
                 // Fixed Symbol
                 if (decimal.TryParse(segments[1], out decimal d1))
                 {
-                    orderAmountType = OrderAmountType.FixedSymbol;
+                    orderAmountType = MtmOrderAmountType.FixedSymbol;
                     value = d1;
 
                     orderType = segments[2] switch
                     {
-                        "market" => OrderType.Market,
-                        "limit" => OrderType.Limit,
-                        _ => OrderType.None
+                        "market" => MtmOrderType.Market,
+                        "limit" => MtmOrderType.Limit,
+                        _ => MtmOrderType.None
                     };
-                    if (orderType == OrderType.Limit)
+                    if (orderType == MtmOrderType.Limit)
                     {
                         price = decimal.Parse(segments[3]);
                     }
@@ -568,13 +570,13 @@ namespace MercuryEditor.Inspection.V1
                 // Fixed
                 else if (decimal.TryParse(segments[1].Replace("t", ""), out decimal d2))
                 {
-                    orderAmountType = OrderAmountType.Fixed;
+                    orderAmountType = MtmOrderAmountType.Fixed;
                     value = d2;
 
                     orderType = segments[2] switch
                     {
-                        "market" => OrderType.Market,
-                        _ => OrderType.None
+                        "market" => MtmOrderType.Market,
+                        _ => MtmOrderType.None
                     };
                 }
                 else
@@ -582,30 +584,30 @@ namespace MercuryEditor.Inspection.V1
                     switch (segments[1])
                     {
                         case "seed":
-                            orderAmountType = OrderAmountType.Seed;
+                            orderAmountType = MtmOrderAmountType.Seed;
                             value = decimal.Parse(segments[2]);
                             break;
 
                         case "balance":
-                            orderAmountType = OrderAmountType.Balance;
+                            orderAmountType = MtmOrderAmountType.Balance;
                             value = decimal.Parse(segments[2]);
                             break;
 
                         case "asset":
-                            orderAmountType = OrderAmountType.Asset;
+                            orderAmountType = MtmOrderAmountType.Asset;
                             value = decimal.Parse(segments[2]);
                             break;
 
                         case "balancesymbol":
-                            orderAmountType = OrderAmountType.BalanceSymbol;
+                            orderAmountType = MtmOrderAmountType.BalanceSymbol;
                             value = decimal.Parse(segments[2]);
                             break;
                     }
 
                     orderType = segments[3] switch
                     {
-                        "market" => OrderType.Market,
-                        _ => OrderType.None
+                        "market" => MtmOrderType.Market,
+                        _ => MtmOrderType.None
                     };
                 }
 

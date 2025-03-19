@@ -1,11 +1,18 @@
 ﻿using Binance.Net.Enums;
 
+using Mercury.Extensions;
+
 namespace Mercury.Charts
 {
 	public class ChartLoader
 	{
 		public static List<ChartPack> Charts { get; set; } = [];
+		public static List<TradePack> Trades { get; set; } = [];
+		public static List<PricePack> Prices { get; set; } = [];
+
 		public static ChartPack GetChartPack(string symbol, KlineInterval interval) => Charts.Find(x => x.Symbol.Equals(symbol) && x.Interval.Equals(interval)) ?? default!;
+		public static TradePack GetTradePack(string symbol) => Trades.Find(x => x.Symbol.Equals(symbol)) ?? default!;
+		public static PricePack GetPricePack(string symbol) => Prices.Find(x => x.Symbol.Equals(symbol)) ?? default!;
 
 		static bool IsFileWithinDateRange(string filePath, DateTime? startDate, DateTime? endDate)
 		{

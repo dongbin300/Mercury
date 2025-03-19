@@ -1,6 +1,5 @@
 ﻿using Mercury.Apis;
-
-using MercuryTradingModel.TradingModels;
+using Mercury.TradingModels;
 
 using System.Windows;
 

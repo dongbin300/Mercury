@@ -7,6 +7,7 @@ using Mercury.Backtests;
 using Mercury.Charts;
 using Mercury.Charts.Technicals;
 using Mercury.Cryptos;
+using Mercury.Extensions;
 using Mercury.Maths;
 
 using System;

@@ -1,15 +1,14 @@
-﻿using Mercury;
-
+﻿using Mercury.Extensions;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace BacktestViewer
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// </summary>
-	public partial class MainWindow : Window
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
 	{
 		List<Backtest> currentBacktests = [];
 		List<BacktestEvent> currentBacktestEvents = [];

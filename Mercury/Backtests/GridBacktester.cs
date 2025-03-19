@@ -2,10 +2,11 @@
 
 using Mercury.Charts;
 using Mercury.Enums;
+using Mercury.Extensions;
 
 namespace Mercury.Backtests
 {
-	public class GridBacktester()
+    public class GridBacktester()
 	{
 		public decimal Seed = 1_000_000;
 		public decimal Money = 1_000_000;

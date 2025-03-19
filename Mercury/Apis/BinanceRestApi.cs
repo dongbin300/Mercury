@@ -5,13 +5,13 @@ using Binance.Net.Objects.Models.Spot;
 using CryptoExchange.Net.Authentication;
 
 using Mercury.Cryptos.Binance;
-
+using Mercury.Extensions;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Mercury.Apis
 {
-	public class BinanceRestApi
+    public class BinanceRestApi
 	{
 		#region Initialize
 		public static BinanceRestClient BinanceClient = new();
@@ -95,6 +95,11 @@ namespace Mercury.Apis
 				startTime.AddMinutes(1439),
 				1500);
 			result.Wait();
+
+			if (!result.Result.Success)
+			{
+				return;
+			}
 
 			var builder = new StringBuilder();
 			foreach (var data in result.Result.Data)
@@ -301,7 +306,7 @@ namespace Mercury.Apis
 					 x.Asset,
 					 x.WalletBalance,
 					 x.AvailableBalance,
-					 x.CrossUnrealizedPnl
+					 x.CrossUnrealizedPnl ?? 0m
 					))
 				.ToList();
 		}
@@ -314,7 +319,7 @@ namespace Mercury.Apis
 				result.Wait();
 				var balance = result.Result.Data;
 				var usdtBalance = balance.First(b => b.Asset.Equals("USDT"));
-				var usdt = usdtBalance.WalletBalance + usdtBalance.CrossUnrealizedPnl;
+				var usdt = usdtBalance.WalletBalance + usdtBalance.CrossUnrealizedPnl ?? 0;
 				var bnb = balance.First(b => b.Asset.Equals("BNB")).WalletBalance * (decimal)Common.BnbPrice;
 				return usdt + bnb;
 			}

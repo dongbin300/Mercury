@@ -2,19 +2,20 @@
 
 using Mercury.Charts;
 using Mercury.Enums;
+using Mercury.Extensions;
 
 namespace Mercury.Backtests
 {
-	/// <summary>
-	/// Grid Bot Daily EMA Backtester
-	/// </summary>
-	/// <param name="symbol"></param>
-	/// <param name="prices"></param>
-	/// <param name="longTermCharts"></param>
-	/// <param name="gridType"></param>
-	/// <param name="gridTypeChange"></param>
-	/// <param name="reportFileName"></param>
-	public class GridDailyEmaBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, GridType gridType, GridTypeChange gridTypeChange, string reportFileName)
+    /// <summary>
+    /// Grid Bot Daily EMA Backtester
+    /// </summary>
+    /// <param name="symbol"></param>
+    /// <param name="prices"></param>
+    /// <param name="longTermCharts"></param>
+    /// <param name="gridType"></param>
+    /// <param name="gridTypeChange"></param>
+    /// <param name="reportFileName"></param>
+    public class GridDailyEmaBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, GridType gridType, GridTypeChange gridTypeChange, string reportFileName)
 	{
 		public decimal Seed = 1_000_000;
 		public decimal Money = 1_000_000;

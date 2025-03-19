@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows7.0</TargetFramework>
+		<TargetFramework>net9.0-windows7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
@@ -37,11 +37,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="EPPlus" Version="6.2.10" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
+		<PackageReference Include="EPPlus" Version="7.5.2" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.72" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\MercuryTradingModel\MercuryTradingModel.csproj" />
+	  <ProjectReference Include="..\..\..\Reference\WpfMdi Example\WpfMdi\WpfMdi.csproj" />
+	  <ProjectReference Include="..\Mercury\Mercury.csproj" />
 	</ItemGroup>
 </Project>

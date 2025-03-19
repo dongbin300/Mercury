@@ -386,7 +386,7 @@ namespace TradeBot.Bots
 				var parts = line.Split(botReportSeparator, StringSplitOptions.RemoveEmptyEntries);
 				var time = DateTime.Parse(parts[0]);
 
-				if (time.Hour == 0)
+				if (time.Hour == 9)
 				{
 					var usdtPart = parts[1].Split(',')[0].Trim();
 					var est = decimal.Parse(usdtPart.Replace("USDT", "").Trim());

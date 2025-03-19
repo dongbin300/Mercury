@@ -1,10 +1,8 @@
 ﻿using Binance.Net.Enums;
 
 using ChartViewerPrism.Events;
-
-using Mercury;
 using Mercury.Charts;
-
+using Mercury.Extensions;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
@@ -19,7 +17,7 @@ using System.Windows.Input;
 
 namespace ChartViewerPrism.ViewModels
 {
-	public class MainWindowViewModel : BindableBase
+    public class MainWindowViewModel : BindableBase
 	{
 		private string _title = "Chart Viewer Prism";
 		public string Title

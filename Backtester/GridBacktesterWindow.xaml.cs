@@ -7,6 +7,7 @@ using Mercury.Backtests;
 using Mercury.Backtests.Calculators;
 using Mercury.Charts;
 using Mercury.Enums;
+using Mercury.Extensions;
 
 using System;
 using System.Collections.Generic;

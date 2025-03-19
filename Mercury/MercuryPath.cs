@@ -1,4 +1,6 @@
-﻿namespace Mercury
+﻿using Mercury.Extensions;
+
+namespace Mercury
 {
     public class MercuryPath
     {

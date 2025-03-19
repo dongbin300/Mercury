@@ -8,6 +8,12 @@ namespace TradeBot.Bots
 	{
 		public string Name { get; set; } = name;
 		public string Description { get; set; } = description;
+
+		/// <summary>
+		/// 요일별 변동성 레버리지
+		/// </summary>
+		public readonly int[] FixedLeverages = [11, 7, 7, 7, 5, 11, 3];
+
 		protected List<string> MonitorSymbols { get; set; } =
 		[
 			"JASMYUSDT",

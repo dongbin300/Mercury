@@ -3,14 +3,12 @@
 using MarinerX.Charts;
 using MarinerX.Utils;
 
-using Mercury;
 using Mercury.Apis;
-
-using MercuryTradingModel.Assets;
-using MercuryTradingModel.Enums;
-using MercuryTradingModel.Extensions;
-using MercuryTradingModel.Orders;
-using MercuryTradingModel.Trades;
+using Mercury.Assets;
+using Mercury.Enums;
+using Mercury.Extensions;
+using Mercury.Orders;
+using Mercury.Trades;
 
 using System;
 using System.Collections.Generic;
@@ -162,7 +160,7 @@ namespace MarinerX.Views
                 //chartViewer.AddChartInfo(info);
                 if (priceSequences[i] <= gridPrices[currentIndex - 1]) // Buy
                 {
-                    var order = new BackTestOrder(OrderType.Limit, PositionSide.Long, new OrderAmount(OrderAmountType.FixedSymbol, quantity), gridPrices[currentIndex - 1]);
+                    var order = new BacktestOrder(MtmOrderType.Limit, MtmPositionSide.Long, new OrderAmount(MtmOrderAmountType.FixedSymbol, quantity), gridPrices[currentIndex - 1]);
                     var tradeInfo = order.Run(asset, model.Target);
                     trades.Add(tradeInfo);
 
@@ -170,7 +168,7 @@ namespace MarinerX.Views
                 }
                 else if (priceSequences[i] >= gridPrices[currentIndex + 1]) // Sell
                 {
-                    var order = new BackTestOrder(OrderType.Limit, PositionSide.Short, new OrderAmount(OrderAmountType.FixedSymbol, quantity), gridPrices[currentIndex + 1]);
+                    var order = new BacktestOrder(MtmOrderType.Limit, MtmPositionSide.Short, new OrderAmount(MtmOrderAmountType.FixedSymbol, quantity), gridPrices[currentIndex + 1]);
                     var tradeInfo = order.Run(asset, model.Target);
                     trades.Add(tradeInfo);
 

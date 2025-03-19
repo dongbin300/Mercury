@@ -28,10 +28,17 @@ using System.Windows.Media;
 
 namespace Lab
 {
+	public class Position
+	{
+		public string Symbol { get; set; }
+		public decimal Change { get; set; }
+		public decimal BarPer { get; set; }
+		public SolidColorBrush BarColor => Change > 0 ? new SolidColorBrush(Color.FromRgb(0, 0, 255)) : new SolidColorBrush(Color.FromRgb(255, 0, 0));
+	}
+
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// TODO
-	/// Order History View 추가
 	/// CubeAlgorithmCreator
 	/// SC Mini
 	/// </summary>
@@ -105,11 +112,14 @@ namespace Lab
 		{
 			InitializeComponent();
 
-			var startTime = new DateTime(2024, 9, 16);
-			var endTime = new DateTime(2024, 9, 22);
+			var startTime = new DateTime(2022, 5, 15);
+			var endTime = new DateTime(2024, 5, 15);
 
 			BinanceRestApi.Init();
-			var result1 = BinanceRestApi.BinanceClient.UsdFuturesApi.Trading.GetOrdersAsync("ZECUSDT", null, startTime, endTime, 1000).Result;
+			var result = BinanceRestApi.BinanceClient.UsdFuturesApi.Account.GetAccountInfoV3Async().Result;
+
+			//var result = BinanceRestApi.GetQuotes("BTCUSDT", KlineInterval.OneMinute, startTime, null, 1000);
+			//var result1 = BinanceRestApi.BinanceClient.UsdFuturesApi.Trading.GetOrdersAsync("ZECUSDT", null, startTime, endTime, 1000).Result;
 			//var result2 = BinanceRestApi.GetFuturesTradeHistory(new string[] { "JASMYUSDT" }, new DateTime(2024, 8, 30)).ToList();
 
 			/* trade history */

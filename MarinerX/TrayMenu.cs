@@ -11,13 +11,12 @@ using MarinerX.Markets;
 using MarinerX.Utils;
 using MarinerX.Views;
 
-using Mercury;
 using Mercury.Apis;
-
-using MercuryTradingModel.Extensions;
-using MercuryTradingModel.IO;
-using MercuryTradingModel.Maths;
-using MercuryTradingModel.TradingModels;
+using Mercury.Enums;
+using Mercury.Extensions;
+using Mercury.IO;
+using Mercury.Maths;
+using Mercury.TradingModels;
 
 using Newtonsoft.Json;
 
@@ -43,7 +42,7 @@ namespace MarinerX
 		private static ProgressView[] progressViews = new ProgressView[80];
 		private string iconFileName = "Resources/Images/chart2.ico";
 		private Image iconImage;
-		private List<BackTestTmFile> tmBackTestFiles = [];
+		private List<MtmBacktestTmFile> tmBackTestFiles = [];
 		private List<string> tmMockTradeFileNames = [];
 		private List<string> tmRealTradeFileNames = [];
 		private List<string> backTestResultFileNames = [];
@@ -97,7 +96,7 @@ namespace MarinerX
 
 		private void RefreshTmFile()
 		{
-			tmBackTestFiles = Directory.GetFiles(TradingModelPath.InspectedBackTestDirectory).Select(x => new BackTestTmFile(x)).ToList();
+			tmBackTestFiles = Directory.GetFiles(TradingModelPath.InspectedBackTestDirectory).Select(x => new MtmBacktestTmFile(x)).ToList();
 			tmMockTradeFileNames = [.. Directory.GetFiles(TradingModelPath.InspectedMockTradeDirectory)];
 			tmRealTradeFileNames = [.. Directory.GetFiles(TradingModelPath.InspectedRealTradeDirectory)];
 			backTestResultFileNames = [.. Directory.GetFiles(PathUtil.Base.Down("MarinerX"), "*.csv")];
@@ -202,6 +201,7 @@ namespace MarinerX
 
 			var menu5 = new ToolStripMenuItem("데이터 분석");
 			menu5.DropDownItems.Add("벤치마킹", null, new EventHandler(SymbolBenchmarkingEvent));
+			menu5.DropDownItems.Add("벤치마킹-2", null, new EventHandler(SymbolBenchmarking2Event));
 			menu5.DropDownItems.Add("PNL 분석", null, new EventHandler(PnlAnalysisEvent));
 			menuStrip.Items.Add(menu5);
 
@@ -240,6 +240,7 @@ namespace MarinerX
 			menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask", null, RunBackTestFlaskEvent));
 			menu7.DropDownItems.Add(new ToolStripMenuItem("Run Back Test Flask Multi", null, RunBackTestFlaskMultiEvent));
 			menu7.DropDownItems.Add(new ToolStripMenuItem("Significant Rise and Fall", null, SignificantRiseAndFallRatioEvent));
+			menu7.DropDownItems.Add(new ToolStripMenuItem("WPF MDI Test", null, WpfMdiTestEvent));
 			menuStrip.Items.Add(menu7);
 
 			var menu8 = new ToolStripMenuItem("3Commas 테스트");
@@ -405,7 +406,7 @@ namespace MarinerX
 		{
 			try
 			{
-				ChartLoader.Extract1DCandle(worker);
+				ChartLoader.ExtractCandle(worker, KlineInterval.OneDay);
 				DispatcherService.Invoke(progressView.Hide);
 
 				MessageBox.Show("바이낸스 1일봉 데이터 추출 완료");
@@ -431,7 +432,7 @@ namespace MarinerX
 		{
 			try
 			{
-				ChartLoader.ExtractCandle(worker, KlineInterval.FiveMinutes, "5m");
+				ChartLoader.ExtractCandle(worker, KlineInterval.FiveMinutes);
 				DispatcherService.Invoke(progressView.Hide);
 
 				MessageBox.Show("바이낸스 5분봉 데이터 추출 완료");
@@ -457,7 +458,7 @@ namespace MarinerX
 		{
 			try
 			{
-				ChartLoader.ExtractCandle(worker, KlineInterval.OneHour, "1h");
+				ChartLoader.ExtractCandle(worker, KlineInterval.OneHour);
 				DispatcherService.Invoke(progressView.Hide);
 
 				MessageBox.Show("바이낸스 1시간봉 데이터 추출 완료");
@@ -648,7 +649,7 @@ namespace MarinerX
 				return;
 			}
 
-			var menuNameSegments = menuItem.Name.Split("|+|");
+			var menuNameSegments = (menuItem.Name ?? "").Split("|+|");
 			var jsonString = File.ReadAllText(menuNameSegments[0]);
 			var isShowChart = bool.Parse(menuNameSegments[3]);
 			var result = JsonConvert.DeserializeObject<MercuryBackTestTradingModel>(jsonString, new JsonSerializerSettings
@@ -669,7 +670,7 @@ namespace MarinerX
 
 		public static void BackTestBotRun(Worker worker, object? obj)
 		{
-			BackTestBot? bot = default!;
+			BacktestBot? bot = default!;
 			try
 			{
 				if (obj is not BackTestParameter param)
@@ -683,7 +684,7 @@ namespace MarinerX
 					throw new Exception("BackTest Trading Model Null");
 				}
 
-				bot = new BackTestBot(param.model, worker, param.isShowChart);
+				bot = new BacktestBot(param.model, worker, param.isShowChart);
 				var result = bot.Run();
 				DispatcherService.Invoke(progressView.Hide);
 
@@ -723,7 +724,7 @@ namespace MarinerX
 				return;
 			}
 
-			var fileName = item.Text;
+			var fileName = item.Text ?? "";
 			var historyView = new BackTestTradingHistoryView();
 			historyView.Init(fileName);
 			historyView.Show();
@@ -768,6 +769,22 @@ namespace MarinerX
 			}
 		}
 
+		private void SymbolBenchmarking2Event(object? sender, EventArgs e)
+		{
+			try
+			{
+				BinanceMarket.Init2();
+
+				var benchmarkView = new SymbolBenchmarkingView();
+				benchmarkView.Init2(BinanceMarket.Benchmarks2);
+				benchmarkView.Show();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
 		private void PnlAnalysisEvent(object? sender, EventArgs e)
 		{
 			try
@@ -804,7 +821,7 @@ namespace MarinerX
 					return;
 				}
 
-				var symbol = menuItem.Name;
+				var symbol = menuItem.Name ?? "";
 				var interval = 3;
 
 				positionMonitorView.Init(symbol, interval);
@@ -1000,10 +1017,23 @@ namespace MarinerX
 			try
 			{
 				var data = LocalApi.GetOneDayQuotes("BTCUSDT");
-				var significantCount = data.Count(x => Math.Abs(StockUtil.Roe(MercuryTradingModel.Enums.PositionSide.Long, x.Open, x.Close)) >= 4.0m);
+				var significantCount = data.Count(x => Math.Abs(Calculator.Roe(PositionSide.Long, x.Open, x.Close)) >= 4.0m);
 				var ratio = (double)significantCount / data.Count * 100;
 
 				MessageBox.Show($"Significant Count: {significantCount} / {data.Count} ({ratio:f2}%)");
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
+		private void WpfMdiTestEvent(object? sender, EventArgs e)
+		{
+			try
+			{
+				var view = new MdiTestView();
+				view.Show();
 			}
 			catch (Exception ex)
 			{

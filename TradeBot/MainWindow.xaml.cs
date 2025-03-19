@@ -1,6 +1,5 @@
-﻿using Mercury;
-using Mercury.Enums;
-
+﻿using Mercury.Enums;
+using Mercury.Extensions;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -21,12 +20,12 @@ using TradeBot.Views;
 
 namespace TradeBot
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// TODO
-	/// 자산 소켓으로 
-	/// </summary>
-	public partial class MainWindow : Window
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// TODO
+    /// 자산 소켓으로 
+    /// </summary>
+    public partial class MainWindow : Window
 	{
 		#region Properties
 		DispatcherTimer timer = new();
@@ -41,7 +40,6 @@ namespace TradeBot
 
 		//IEnumerable<BinanceRealizedPnlHistory> todayRealizedPnlHistory = default!;
 
-		decimal balance = -1;
 		decimal todayPnl = 0;
 		decimal usdt = 0;
 		decimal bnb = 0;
@@ -133,7 +131,7 @@ namespace TradeBot
 			var commResult = BinanceClients.Init();
 			Common.AddHistory("API", commResult);
 
-			await manager.GetAllKlines(5).ConfigureAwait(false);
+			await manager.GetAllKlines(10).ConfigureAwait(false);
 			await manager.StartBinanceFuturesTicker().ConfigureAwait(false);
 
 			timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -149,6 +147,11 @@ namespace TradeBot
 			timer5m.Start();
 
 			#endregion
+
+			DispatcherService.Invoke(() =>
+			{
+				SmartSeedCheckBox.IsChecked = true;
+			});
 		}
 
 		private void Timer5m_Tick(object? sender, EventArgs e)
@@ -157,29 +160,27 @@ namespace TradeBot
 			{
 				Common.SaveBlacklist();
 
-				// 소리 재생 안하면 스킵
-				//if (!Common.IsSound)
-				//{
-				//	return;
-				//}
+				var hour = DateTime.Now.Hour;
+				var minute = DateTime.Now.Minute;
+				var dayOfWeek = DateTime.Now.DayOfWeek;
 
-				//// 자산이 상한선을 넘으면 소리 재생
-				//if (decimal.TryParse(UpperAlarmTextBox.Text, out var upper))
-				//{
-				//	if (balance > upper)
-				//	{
-				//		Sound.Play("Resources/upper.wav", 0.5);
-				//	}
-				//}
+				/* 매일 오전 8시 53~58분 사이에 스마트 시드 */
+				DispatcherService.Invoke(() =>
+				{
+					if ((SmartSeedCheckBox.IsChecked ?? false) && hour == 8 && minute >= 53 && minute <= 58)
+					{
+						var todayLeverage = longBot.FixedLeverages[(int)dayOfWeek];
+						var todayBaseOrderSize = longBot.MaxActiveDealsType == MaxActiveDealsType.Total ?
+						Common.Balance * 0.99m * todayLeverage / longBot.MaxActiveDeals :
+						Common.Balance * 0.99m * todayLeverage / longBot.MaxActiveDeals / 2;
 
-				//// 자산이 하한선을 넘으면 소리 재생
-				//if (decimal.TryParse(LowerAlarmTextBox.Text, out var lower))
-				//{
-				//	if (balance < lower)
-				//	{
-				//		Sound.Play("Resources/lower.wav", 0.5);
-				//	}
-				//}
+						BaseOrderSizeTextBox.Text = ((int)todayBaseOrderSize).ToString();
+						LeverageTextBox.Text = todayLeverage.ToString();
+
+						LongBotCheckBox_Checked(sender, new RoutedEventArgs());
+						ShortBotCheckBox_Checked(sender, new RoutedEventArgs());
+					}
+				});
 
 				/* 주문 모니터링 - 5분이 넘도록 체결이 안되는 주문 취소 (이 부분은 좀 더 테스트 필요) */
 				//await longPosition.MonitorOpenOrderTimeout().ConfigureAwait(false);
@@ -208,10 +209,29 @@ namespace TradeBot
 				var minute = DateTime.Now.Minute;
 				var second = DateTime.Now.Second;
 
-				/* 매시 0분 0초에 보고서 작성 */
-				if (minute == 0 && second == 0)
+				/* 매시 0분 0,1,2,6,7,8,12,13,14,...초에 포지션 정리 */
+				if (minute == 0 && second % 6 <= 2)
 				{
-					Logger.LogReport(usdt, bnb, todayPnl, longBot.BaseOrderSize, longBot.Leverage, longBot.MaxActiveDeals);
+					if (longBot.IsRunning)
+					{
+						await longBot.EvaluateClose().ConfigureAwait(false);
+					}
+					if (shortBot.IsRunning)
+					{
+						await shortBot.EvaluateClose().ConfigureAwait(false);
+					}
+				}
+				/* 매시 0분 3,4,5,9,10,11,15,16,17,...초에 포지션 진입 */
+				else if (minute == 0 && second % 6 > 2)
+				{
+					if (longBot.IsRunning)
+					{
+						await longBot.EvaluateOpen().ConfigureAwait(false);
+					}
+					if (shortBot.IsRunning)
+					{
+						await shortBot.EvaluateOpen().ConfigureAwait(false);
+					}
 				}
 
 				/* 매시 15분 2초에 모든 미체결주문 취소 */
@@ -224,29 +244,10 @@ namespace TradeBot
 					}
 				}
 
-				/* 매시 0분 0초부터 0분 5초까지는 포지션 정리 */
-				if (minute * 60 + second <= 5)
+				/* 매시 0분 0초에 보고서 작성 */
+				if (minute == 0 && second == 0)
 				{
-					if (longBot.IsRunning)
-					{
-						await longBot.EvaluateClose().ConfigureAwait(false);
-					}
-					if (shortBot.IsRunning)
-					{
-						await shortBot.EvaluateClose().ConfigureAwait(false);
-					}
-				}
-				/* 매시 0분 6초부터 2분 0초까지는 포지션 진입 */
-				else if (minute * 60 + second >= 6 && minute * 60 + second <= 120)
-				{
-					if (longBot.IsRunning)
-					{
-						await longBot.EvaluateOpen().ConfigureAwait(false);
-					}
-					if (shortBot.IsRunning)
-					{
-						await shortBot.EvaluateOpen().ConfigureAwait(false);
-					}
+					Logger.LogReport(usdt, bnb, todayPnl, longBot.BaseOrderSize, longBot.Leverage, longBot.MaxActiveDeals);
 				}
 			}
 			catch (Exception ex)
@@ -270,9 +271,11 @@ namespace TradeBot
 					//IndicatorDataGrid.ItemsSource = null;
 					//IndicatorDataGrid.ItemsSource = Common.PairQuotes.OrderBy(x => x.Symbol);
 
-					balance = usdt;
+					Common.Balance = usdt;
 					BalanceText.Text = $"{usdt:#,###.###} USDT";
-					BnbText.Text = $"{bnb:#,###.####} BNB";
+					SimpleBalanceText.Text = $"{usdt:#,###.###}";
+					BnbText.Text = $"{bnb:#,###.###} BNB";
+					SimpleBnbText.Text = $"{bnb:#,###.###}";
 
 					/* 설정 저장 */
 					Settings.Default.BaseOrderSize = BaseOrderSizeTextBox.Text;
@@ -281,28 +284,6 @@ namespace TradeBot
 					Settings.Default.MaxActiveDeals = MaxActiveDealsTextBox.Text;
 					Settings.Default.Save();
 				});
-
-				/* 수익 모니터링 */
-				//todayRealizedPnlHistory = await manager.GetBinanceTodayRealizedPnlHistory();
-				//DispatcherService.Invoke(() =>
-				//{
-				//	if (todayRealizedPnlHistory != null && !todayRealizedPnlHistory.Any(x => x == null))
-				//	{
-				//		todayPnl = todayRealizedPnlHistory.Sum(x => x.RealizedPnl);
-				//		if (todayPnl >= 0)
-				//		{
-				//			TodayPnlText.Foreground = Common.LongColor;
-				//			TodayPnlText.Text = $"+{todayPnl:#,###.###} USDT";
-				//		}
-				//		else
-				//		{
-				//			TodayPnlText.Foreground = Common.ShortColor;
-				//			TodayPnlText.Text = $"{todayPnl:#,###.###} USDT";
-				//		}
-				//	}
-
-
-				//});
 			}
 			catch (Exception ex)
 			{
@@ -467,50 +448,6 @@ namespace TradeBot
 		}
 		#endregion
 
-		#region Collect Info
-		//private async void CollectTradeButton_Click(object sender, RoutedEventArgs e)
-		//{
-		//	try
-		//	{
-		//		await reportBot.WriteTradeReport().ConfigureAwait(false);
-		//		Common.AddHistory("Master", "Collect Trade Complete");
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		Common.AddHistory("Master", ex.Message);
-		//		Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
-		//	}
-		//}
-
-		//private async void CollectIncomeButton_Click(object sender, RoutedEventArgs e)
-		//{
-		//	try
-		//	{
-		//		await reportBot.WriteIncomeReport().ConfigureAwait(false);
-		//		Common.AddHistory("Master", "Collect Income Complete");
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		Common.AddHistory("Master", ex.Message);
-		//		Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
-		//	}
-		//}
-
-		//private void CollectDailyButton_Click(object sender, RoutedEventArgs e)
-		//{
-		//	try
-		//	{
-		//		reportBot.WriteDailyReport();
-		//		Common.AddHistory("Master", "Collect Daily Complete");
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		Common.AddHistory("Master", ex.Message);
-		//		Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
-		//	}
-		//}
-		#endregion
-
 		#region Mock
 		private void MockBotCheckBox_Checked(object sender, RoutedEventArgs e)
 		{
@@ -538,7 +475,7 @@ namespace TradeBot
 						/* 자산 모니터링 */
 						DispatcherService.Invoke(() =>
 						{
-							balance = mockBot.Money;
+							Common.Balance = mockBot.Money;
 							BalanceText.Text = $"{mockBot.Money.Round(2)} USDT";
 							//BnbText.Text = $"{bnb} BNB";
 						});
@@ -604,7 +541,7 @@ namespace TradeBot
 		#endregion
 
 		#region Bot Activate
-		private void LongBotCheckBox_Checked(object sender, RoutedEventArgs e)
+		private void LongBotCheckBox_Checked(object? sender, RoutedEventArgs e)
 		{
 			try
 			{
@@ -623,7 +560,7 @@ namespace TradeBot
 			}
 		}
 
-		private void LongBotCheckBox_Unchecked(object sender, RoutedEventArgs e)
+		private void LongBotCheckBox_Unchecked(object? sender, RoutedEventArgs e)
 		{
 			try
 			{
@@ -636,7 +573,7 @@ namespace TradeBot
 			}
 		}
 
-		private void ShortBotCheckBox_Checked(object sender, RoutedEventArgs e)
+		private void ShortBotCheckBox_Checked(object? sender, RoutedEventArgs e)
 		{
 			try
 			{
@@ -655,7 +592,7 @@ namespace TradeBot
 			}
 		}
 
-		private void ShortBotCheckBox_Unchecked(object sender, RoutedEventArgs e)
+		private void ShortBotCheckBox_Unchecked(object? sender, RoutedEventArgs e)
 		{
 			try
 			{
@@ -733,22 +670,19 @@ namespace TradeBot
 		}
 		#endregion
 
+		#region Smart Seed
+		private void SmartSeedCheckBox_Checked(object? sender, RoutedEventArgs e)
+		{
+			Common.AddHistory("Master", $"Smart Seed On");
+		}
 
-		//private void TodayPnlText_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-		//{
-		//	try
-		//	{
-		//		var pnlWindow = new RealizedPnlWindow();
-		//		pnlWindow.Init(todayRealizedPnlHistory);
-		//		pnlWindow.Show();
-		//	}
-		//	catch (Exception ex)
-		//	{
-		//		Logger.Log(nameof(MainWindow), MethodBase.GetCurrentMethod()?.Name, ex);
-		//	}
-		//}
+		private void SmartSeedCheckBox_Unchecked(object? sender, RoutedEventArgs e)
+		{
+			Common.AddHistory("Master", $"Smart Seed Off");
+		}
+		#endregion
 
-
+		#region Indicator Grid
 		private static T? FindParent<T>(DependencyObject child) where T : DependencyObject
 		{
 			var parent = VisualTreeHelper.GetParent(child);
@@ -779,16 +713,7 @@ namespace TradeBot
 				Start(url);
 			}
 		}
-
-		private void SoundCheckBox_Checked(object sender, RoutedEventArgs e)
-		{
-			Common.IsSound = true;
-		}
-
-		private void SoundCheckBox_Unchecked(object sender, RoutedEventArgs e)
-		{
-			Common.IsSound = false;
-		}
+		#endregion
 
 		/// <summary>
 		/// 프로그램 종료
@@ -803,6 +728,7 @@ namespace TradeBot
 			{
 				if (MessageBox.Show("로봇이 작동 중입니다.\n정말 종료하시겠습니까?", "확인", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
 				{
+					Common.AddHistory("Program", "Program End");
 					e.Cancel = false;
 				}
 				else
@@ -812,16 +738,28 @@ namespace TradeBot
 			}
 		}
 
-		private void AssetCalculatorButton_Click(object sender, RoutedEventArgs e)
-		{
-			var calculatorView = new AssetCalculatorWindow();
-			calculatorView.Show();
-		}
-
+		/// <summary>
+		/// 프로그램 키 입력
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void Window_KeyDown(object sender, KeyEventArgs e)
 		{
 			switch (e.Key)
 			{
+				case Key.F8: // 기본/심플 화면 전환
+					if (MainGrid.Visibility == Visibility.Visible)
+					{
+						MainGrid.Visibility = Visibility.Hidden;
+						SimpleGrid.Visibility = Visibility.Visible;
+					}
+					else
+					{
+						MainGrid.Visibility = Visibility.Visible;
+						SimpleGrid.Visibility = Visibility.Hidden;
+					}
+					break;
+
 				case Key.F9:
 					var debugWindow = new DebugWindow()
 					{
@@ -831,7 +769,7 @@ namespace TradeBot
 					debugWindow.Show();
 					break;
 
-				case Key.F11:
+				case Key.F11: // 창/전체 화면 전환
 					FullScreen();
 					break;
 

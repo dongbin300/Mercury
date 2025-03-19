@@ -43,6 +43,10 @@ namespace TradeBot.Bots
 		#endregion
 
 		private static readonly SemaphoreSlim semaphore = new(1, 1);
+		/// <summary>
+		/// DDDUDUU / UUUU
+		/// </summary>
+		/// <returns></returns>
 		public async Task EvaluateOpen()
 		{
 			try
@@ -55,6 +59,9 @@ namespace TradeBot.Bots
 					var c2 = pairQuote.Charts[^3]; // 2봉전 정보
 					var c3 = pairQuote.Charts[^4]; // 3봉전 정보
 					var c4 = pairQuote.Charts[^5]; // 4봉전 정보
+					var c5 = pairQuote.Charts[^6]; // 5봉전 정보
+					var c6 = pairQuote.Charts[^7]; // 6봉전 정보
+					var c7 = pairQuote.Charts[^8]; // 7봉전 정보
 
 					if (c0.Quote.Date.Hour != DateTime.UtcNow.Hour) // 차트 시간과 현재 시간의 동기화 실패
 					{
@@ -78,9 +85,13 @@ namespace TradeBot.Bots
 							if (c1.CandlestickType == CandlestickType.Bearish
 								&& c2.CandlestickType == CandlestickType.Bearish
 								&& c3.CandlestickType == CandlestickType.Bearish
-								&& c1.BodyLength > 0.05m
-								&& c2.BodyLength > 0.05m
-								&& c3.BodyLength > 0.05m
+								&& c4.CandlestickType == CandlestickType.Bearish
+								&& c5.CandlestickType == CandlestickType.Bearish
+								&& c6.CandlestickType == CandlestickType.Bearish
+								&& c7.CandlestickType == CandlestickType.Bearish
+								//&& c1.BodyLength > 0.05m
+								//&& c2.BodyLength > 0.05m
+								//&& c3.BodyLength > 0.05m
 								&& !Common.IsBannedPosition(symbol, side, DateTime.UtcNow))
 							{
 								if (Common.IsCoolTime(symbol, side))
@@ -90,7 +101,7 @@ namespace TradeBot.Bots
 
 								if (!Common.IsAdmin)
 								{
-									await Task.Delay(400);
+									await Task.Delay(1000);
 								}
 
 								var price = c0.Quote.Close;
@@ -150,7 +161,7 @@ namespace TradeBot.Bots
 
 								if (!Common.IsAdmin)
 								{
-									await Task.Delay(400);
+									await Task.Delay(1000);
 								}
 
 								var position = Common.GetPosition(symbol, side);
@@ -164,7 +175,7 @@ namespace TradeBot.Bots
 
 								// 손실이 -8%를 넘어가면 24시간 블랙리스트 등록
 								// 체결이 되던지 안되던지 상관없이 차트 상에서 8% 이상 움직였으면 블랙리스트 등록
-								if (Common.IsAdmin && position.Roe / Leverage <= -8.0m)
+								if (position.Roe / position.Leverage <= -8.0m)
 								{
 									Common.AddBlacklist(symbol, side, DateTime.UtcNow, DateTime.UtcNow.AddHours(23).AddMinutes(30));
 								}
@@ -258,24 +269,36 @@ namespace TradeBot.Bots
 		{
 			try
 			{
-				var limitPrice = price;
+				//var limitPrice = price;
 				var errorString = string.Empty;
-				for (int i = 1; i <= 25; i++) // 지정가 주문이 성공할 떄까지 주문금액을 계속 높힘(0.02% ~ 0.5%)
-				{
-					var result = await BinanceClients.CloseSell(symbol, limitPrice, quantity).ConfigureAwait(false);
-					if (result.Success)
-					{
-						Common.AddHistory("Long Bot", $"Close Sell {symbol}, {limitPrice}, {quantity} ({i})");
-						return true;
-					}
-					else
-					{
-						errorString = result.Error?.Message ?? string.Empty;
-					}
 
-					limitPrice = limitPrice.ToUpTickPricePercent(symbol, 0.02m);
+				var result = await BinanceClients.CloseSellMarket(symbol, quantity).ConfigureAwait(false);
+				if (result.Success)
+				{
+					Common.AddHistory("Long Bot", $"Close Sell Market {symbol}, {quantity}");
+					return true;
 				}
-				Common.AddHistory("Long Bot", $"Close Sell {symbol}, {errorString}");
+				else
+				{
+					errorString = result.Error?.Message ?? string.Empty;
+				}
+
+				//for (int i = 1; i <= 25; i++) // 지정가 주문이 성공할 떄까지 주문금액을 계속 높힘(0.02% ~ 0.5%)
+				//{
+				//	var result = await BinanceClients.CloseSell(symbol, limitPrice, quantity).ConfigureAwait(false);
+				//	if (result.Success)
+				//	{
+				//		Common.AddHistory("Long Bot", $"Close Sell {symbol}, {limitPrice}, {quantity} ({i})");
+				//		return true;
+				//	}
+				//	else
+				//	{
+				//		errorString = result.Error?.Message ?? string.Empty;
+				//	}
+
+				//	limitPrice = limitPrice.ToUpTickPricePercent(symbol, 0.02m);
+				//}
+				Common.AddHistory("Long Bot", $"Close Sell Market {symbol}, {errorString}");
 				return false;
 			}
 			catch (Exception ex)

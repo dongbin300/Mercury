@@ -40,9 +40,19 @@
             <Button x:Name="TodayPnlButton" Style="{StaticResource HorizontalButton}" Click="TodayPnlButton_Click">Today PNL</Button>
         </StackPanel>
 
-        <DataGrid Grid.Row="2" x:Name="ReportDataGrid" IsReadOnly="True"
-                  AutoGeneratingColumn="ReportDataGrid_AutoGeneratingColumn" LoadingRow="ReportDataGrid_LoadingRow">
-            
+        <DataGrid Grid.Row="2" x:Name="ReportDataGrid" AutoGenerateColumns="True" AutoGeneratingColumn="ReportDataGrid_AutoGeneratingColumn">
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="FontFamily" Value="Meiryo UI" />
+                    <Setter Property="FontSize" Value="12" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="Margin" Value="10 0" />
+                    <Setter Property="Height" Value="22" />
+                    <Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+            </DataGrid.CellStyle>
         </DataGrid>
 
         <oxy:PlotView Grid.Row="3" x:Name="PlotChart" Background="Transparent"/>

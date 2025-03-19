@@ -1,6 +1,7 @@
 ﻿using MarinerX.Utils;
 
 using Mercury.Apis;
+using Mercury.Extensions;
 
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace MarinerX.Markets
 	public class BinanceMarket
 	{
 		public static List<SymbolBenchmark> Benchmarks = [];
+		public static List<SymbolBenchmark2> Benchmarks2 = [];
 
 		public static void Init()
 		{
@@ -52,6 +54,35 @@ namespace MarinerX.Markets
 				}
 			}
 			#endregion
+		}
+
+		public static void Init2()
+		{
+			var symbols = LocalApi.GetSymbols();
+			var currentPrices = BinanceRestApi.GetFuturesPrices();
+			var maxLeverages = BinanceRestApi.GetMaxLeverages();
+
+			foreach (var symbol in symbols)
+			{
+				var name = symbol.Name;
+				var listingDate = symbol.ListingDate;
+				var _currentPrice = currentPrices.Find(x => x.Symbol.Equals(name));
+				var currentPrice = _currentPrice == null ? -1m : _currentPrice.Price;
+				var tickSize = symbol.TickSize ?? 1m;
+				var tickPer = (tickSize / currentPrice).Round(5);
+				var elapsedDays = (int)(DateTime.Today - listingDate).TotalDays;
+				if (!maxLeverages.TryGetValue(name, out var maxLeverage))
+				{
+					maxLeverage = 0;
+				}
+
+				var maxDate = new DateTime(2021, 12, 1); // 백테스팅 시작 날짜보다 앞이어야함.
+				var dayThreshold = (int)(DateTime.Today - maxDate).TotalDays;
+				var tickPerThreshold = 0.0002m; // 한 호가 퍼센트 0.02% 미만
+				var pass = elapsedDays >= dayThreshold && tickPer < tickPerThreshold ? name : string.Empty;
+
+				Benchmarks2.Add(new SymbolBenchmark2(name, listingDate, tickSize, currentPrice, tickPer, elapsedDays, maxLeverage, pass));
+			}
 		}
 	}
 }

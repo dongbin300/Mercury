@@ -1,9 +1,8 @@
-﻿using Mercury;
-
-using TradeBot.Models;
+﻿using TradeBot.Models;
 
 using System;
 using System.IO;
+using Mercury.Extensions;
 
 namespace TradeBot
 {

@@ -50,15 +50,15 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Button Grid.Row="0" x:Name="CopyButton" Content="Copy Data" Click="CopyButton_Click"/>
-        <DataGrid Grid.Row="1" x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="False">
-            <DataGrid.Columns>
+        <DataGrid Grid.Row="1" x:Name="HistoryDataGrid" IsReadOnly="True" AutoGenerateColumns="True" AutoGeneratingColumn="HistoryDataGrid_AutoGeneratingColumn">
+            <!--<DataGrid.Columns>
                 <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="120"/>
                 <DataGridTextColumn Header="Leverage" Binding="{Binding MaxLeverageString}" Width="1*"/>
                 <DataGridTextColumn Header="Market Cap" Binding="{Binding MarketCapWon}" Width="2*"/>
                 <DataGridTextColumn Header="Volatility" Binding="{Binding Volatility}" Width="1*"/>
                 <DataGridTextColumn Header="Score" Binding="{Binding BenchmarkScore}" Width="1*"/>
                 <DataGridTextColumn Header="Listing Date" Binding="{Binding ListingDate}" Width="1*"/>
-            </DataGrid.Columns>
+            </DataGrid.Columns>-->
         </DataGrid>
     </Grid>
 </Window>

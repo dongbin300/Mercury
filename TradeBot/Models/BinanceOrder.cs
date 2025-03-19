@@ -17,5 +17,6 @@ namespace TradeBot.Models
 		public decimal Price { get; set; } = price;
 		public decimal QuantityFilled { get; set; } = quantityFilled;
 		public string FilledString => $"{QuantityFilled} / {Quantity}";
+		public decimal BarPer => QuantityFilled / Quantity;
 	}
 }

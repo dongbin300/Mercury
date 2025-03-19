@@ -2,20 +2,21 @@
 
 using Mercury.Charts;
 using Mercury.Enums;
+using Mercury.Extensions;
 
 namespace Mercury.Backtests
 {
-	/// <summary>
-	/// Grid Bot Backtester
-	/// </summary>
-	/// <param name="prices"></param>
-	/// <param name="longTermCharts"></param>
-	/// <param name="midTermCharts"></param>
-	/// <param name="shortTermCharts"></param>
-	/// <param name="interval"></param>
-	/// <param name="gridIntervalRatio"></param>
-	/// <param name="gridType"></param>
-	public class GridDetailBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> midTermCharts, List<ChartInfo> shortTermCharts, decimal gridIntervalRatio, GridType gridType)
+    /// <summary>
+    /// Grid Bot Backtester
+    /// </summary>
+    /// <param name="prices"></param>
+    /// <param name="longTermCharts"></param>
+    /// <param name="midTermCharts"></param>
+    /// <param name="shortTermCharts"></param>
+    /// <param name="interval"></param>
+    /// <param name="gridIntervalRatio"></param>
+    /// <param name="gridType"></param>
+    public class GridDetailBacktester(string symbol, List<Price> prices, List<ChartInfo> longTermCharts, List<ChartInfo> midTermCharts, List<ChartInfo> shortTermCharts, decimal gridIntervalRatio, GridType gridType)
 	{
 		public decimal Money = 1_000_000;
 		public decimal UpperPrice { get; set; }

@@ -1,7 +1,5 @@
 ﻿using Binance.Net.Enums;
-
-using Mercury;
-
+using Mercury.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +13,7 @@ using TradeBot.Models;
 
 namespace TradeBot
 {
-	public class Common
+    public class Common
 	{
 		public static readonly int NullIntValue = -39909;
 		public static readonly double NullDoubleValue = -39909;
@@ -27,6 +25,7 @@ namespace TradeBot
 
 		public static readonly SolidColorBrush OffColor = new(Color.FromRgb(80, 80, 80));
 		public static readonly SolidColorBrush WhiteColor = new(Color.FromRgb(222, 222, 222));
+		public static SolidColorBrush ThemeColor => Settings.Default.ThemeColor.ToSolidColorBrush();
 		public static SolidColorBrush ForegroundColor => Settings.Default.ForegroundColor.ToSolidColorBrush();
 		public static SolidColorBrush LongColor => Settings.Default.LongColor.ToSolidColorBrush(); //new(Color.FromRgb(14, 203, 129));
 		public static SolidColorBrush ShortColor => Settings.Default.ShortColor.ToSolidColorBrush(); //new(Color.FromRgb(246, 70, 93));
@@ -37,6 +36,8 @@ namespace TradeBot
 
 		public static bool IsSound = false;
 		public static bool IsAdmin = false;
+
+		public static decimal Balance = -1m;
 
 		/// <summary>
 		/// For check admin

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Backtester"
         mc:Ignorable="d"
-        Title="BACKTEST" Height="600" Width="500" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+        Title="BACKTEST" Height="640" Width="500" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"/>
@@ -13,7 +13,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="120"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Column="0">
@@ -32,13 +32,15 @@
                 <TextBlock Style="{StaticResource Description}">End Date</TextBlock>
                 <TextBox x:Name="EndDateTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="2023-06-07"/>
                 <TextBlock Style="{StaticResource Description}">Interval</TextBlock>
-                <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
+                <ComboBox x:Name="IntervalComboBox" SelectedIndex="2" SelectionChanged="IntervalComboBox_SelectionChanged">
                     <ComboBoxItem>1m</ComboBoxItem>
                     <ComboBoxItem>3m</ComboBoxItem>
                     <ComboBoxItem>5m</ComboBoxItem>
                     <ComboBoxItem>15m</ComboBoxItem>
                     <ComboBoxItem>30m</ComboBoxItem>
                     <ComboBoxItem>1h</ComboBoxItem>
+                    <ComboBoxItem>2h</ComboBoxItem>
+                    <ComboBoxItem>4h</ComboBoxItem>
                     <ComboBoxItem>1D</ComboBoxItem>
                 </ComboBox>
                 <ComboBox x:Name="SubIntervalComboBox" SelectedIndex="0">
@@ -48,6 +50,8 @@
                     <ComboBoxItem>15m</ComboBoxItem>
                     <ComboBoxItem>30m</ComboBoxItem>
                     <ComboBoxItem>1h</ComboBoxItem>
+                    <ComboBoxItem>2h</ComboBoxItem>
+                    <ComboBoxItem>4h</ComboBoxItem>
                     <ComboBoxItem>1D</ComboBoxItem>
                 </ComboBox>
                 <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
@@ -101,10 +105,17 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
                 <Button Grid.Column="0" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
                 <Button Grid.Column="1" x:Name="BacktestMacroButton" Content="BACKTEST MACRO" Click="BacktestButton_Click"/>
                 <Button Grid.Column="2" x:Name="BacktestMacro2Button" Content="BACKTEST MACRO 2" Click="BacktestButton_Click"/>
+                <Button Grid.Column="3" x:Name="BacktestMacro3Button" Content="BACKTEST MACRO 3" Click="BacktestButton_Click"/>
+                <Button Grid.Column="0" Grid.Row="1" x:Name="BacktestMacroRButton" Content="RANDOM MACRO" Click="BacktestButton_Click"/>
             </Grid>
         </Grid>
     </Grid>

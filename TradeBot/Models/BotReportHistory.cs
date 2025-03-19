@@ -4,7 +4,7 @@ namespace TradeBot.Models
 {
 	public class BotReportHistory
 	{
-		public DateTime Time { get; set; }
+		public DateTime Time9 { get; set; }
 		public decimal Estimated { get; set; }
 		public decimal Bnb { get; set; }
 		public decimal TodayPnl { get; set; }
@@ -17,7 +17,7 @@ namespace TradeBot.Models
 		public BotReportHistory(string data)
 		{
 			var parts = data.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-			Time = DateTime.Parse(parts[0]);
+			Time9 = DateTime.Parse(parts[0]);
 			var parts2 = parts[1].Split(',');
 			Estimated = decimal.Parse(parts2[0].Replace("USDT", "").Trim());
 			Bnb = decimal.Parse(parts2[1].Replace("BNB", "").Trim());
@@ -29,7 +29,7 @@ namespace TradeBot.Models
 
 		public override string ToString()
 		{
-			return $"{Time},{Estimated},{Bnb},{TodayPnl},{BaseOrderSize},{Leverage},{MaxActiveDeals}";
+			return $"{Time9},{Estimated},{Bnb},{TodayPnl},{BaseOrderSize},{Leverage},{MaxActiveDeals}";
 		}
 	}
 }

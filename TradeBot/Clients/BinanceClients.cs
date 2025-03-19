@@ -95,12 +95,22 @@ namespace TradeBot.Clients
             return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Buy, FuturesOrderType.Limit, quantity, price, PositionSide.Short, TimeInForce.GoodTillCrossing).ConfigureAwait(false);
         }
 
-        public static async Task<WebCallResult<BinanceUsdFuturesOrder>> CloseSell(string symbol, decimal price, decimal quantity)
+		public static async Task<WebCallResult<BinanceUsdFuturesOrder>> CloseSell(string symbol, decimal price, decimal quantity)
         {
             return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, FuturesOrderType.Limit, quantity, price, PositionSide.Long, TimeInForce.GoodTillCrossing).ConfigureAwait(false);
         }
 
-        public static async Task<WebCallResult<BinanceUsdFuturesOrder>> SetLongTakeProfit(string symbol, decimal price, decimal quantity, decimal takePrice)
+		public static async Task<WebCallResult<BinanceUsdFuturesOrder>> CloseBuyMarket(string symbol, decimal quantity)
+		{
+			return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Buy, FuturesOrderType.Market, quantity, null, PositionSide.Short).ConfigureAwait(false);
+		}
+
+		public static async Task<WebCallResult<BinanceUsdFuturesOrder>> CloseSellMarket(string symbol, decimal quantity)
+		{
+			return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, FuturesOrderType.Market, quantity, null, PositionSide.Long).ConfigureAwait(false);
+		}
+
+		public static async Task<WebCallResult<BinanceUsdFuturesOrder>> SetLongTakeProfit(string symbol, decimal price, decimal quantity, decimal takePrice)
         {
             return await Api.UsdFuturesApi.Trading.PlaceOrderAsync(symbol, OrderSide.Sell, FuturesOrderType.TakeProfit, quantity, price, PositionSide.Long, null, null, null, takePrice).ConfigureAwait(false);
         }

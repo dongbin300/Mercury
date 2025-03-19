@@ -3,9 +3,7 @@
 using Binance.Net.Clients;
 
 using CryptoExchange.Net.Authentication;
-
-using Mercury;
-
+using Mercury.Extensions;
 using System;
 using System.IO;
 using System.Linq;

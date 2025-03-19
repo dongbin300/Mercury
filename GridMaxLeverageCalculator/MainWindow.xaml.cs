@@ -1,15 +1,13 @@
 ﻿using Binance.Net.Enums;
-
-using Mercury;
-
+using Mercury.Extensions;
 using System.Windows;
 
 namespace GridMaxLeverageCalculator
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// </summary>
-	public partial class MainWindow : Window
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
 	{
 		public MainWindow()
 		{

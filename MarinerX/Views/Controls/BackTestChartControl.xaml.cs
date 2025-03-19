@@ -1,8 +1,7 @@
 ﻿using MarinerX.Bots;
 
 using Mercury;
-
-using MercuryTradingModel.Enums;
+using Mercury.Enums;
 
 using System;
 using System.Collections.Generic;
@@ -14,10 +13,10 @@ using System.Windows.Media;
 
 namespace MarinerX.Views.Controls
 {
-    /// <summary>
-    /// BackTestChartControl.xaml에 대한 상호 작용 논리
-    /// </summary>
-    public partial class BackTestChartControl : UserControl
+	/// <summary>
+	/// BackTestChartControl.xaml에 대한 상호 작용 논리
+	/// </summary>
+	public partial class BackTestChartControl : UserControl
     {
         public List<Quote> Quotes = new();
         public List<BackTestTrade> Trades = new();
@@ -71,7 +70,7 @@ namespace MarinerX.Views.Controls
                 var trade = Trades.Find(x => x.time.Equals(quote.Date));
                 if (trade != null)
                 {
-                    if (trade.side == PositionSide.Long)
+                    if (trade.side == MtmPositionSide.Long)
                     {
                         drawingContext.DrawLine(yangPen,
                     new Point(itemWidth * (viewIndex + 0.5), ActualHeight * (double)(1.0m - (quote.Low - min) / (max - min)) + 24),

@@ -2,10 +2,14 @@
 using Binance.Net.Objects.Models.Spot;
 
 using Mercury.Cryptos.Binance;
+using Mercury.Extensions;
+
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Mercury.Apis
 {
-	public class LocalApi
+    public class LocalApi
 	{
 		public static List<string> SymbolNames = new();
 
@@ -33,10 +37,16 @@ namespace Mercury.Apis
 			{
 				var item = data[i];
 				var d = item.Split(',');
+
+				if (!DateTime.TryParseExact(d[2], "yyyy-MM-dd ddd tt h:mm:ss", new CultureInfo("ko-KR"), DateTimeStyles.None, out var listingDate))
+				{
+					listingDate = new DateTime(1900, 1, 1);
+				}
+
 				symbols.Add(new BinanceFuturesSymbol(
 					d[0],
 					Convert.ToDecimal(d[1]),
-					DateTime.Parse(d[2]),
+					listingDate,
 					Convert.ToDecimal(d[3]),
 					Convert.ToDecimal(d[4]),
 					Convert.ToDecimal(d[5]),

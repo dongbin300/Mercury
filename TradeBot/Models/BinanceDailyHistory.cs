@@ -2,8 +2,6 @@
 using System.ComponentModel;
 using System.Windows.Media;
 
-using TradeBot.Extensions;
-
 namespace TradeBot.Models
 {
 	public class BinanceDailyHistory : BinanceHistory

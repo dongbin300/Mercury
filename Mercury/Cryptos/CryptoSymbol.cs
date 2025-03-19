@@ -1,4 +1,6 @@
-﻿namespace Mercury.Cryptos
+﻿using Mercury.Extensions;
+
+namespace Mercury.Cryptos
 {
     public class CryptoSymbol
     {

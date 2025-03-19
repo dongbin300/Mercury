@@ -1,6 +1,8 @@
-﻿namespace Mercury.Charts
+﻿using Mercury.Extensions;
+
+namespace Mercury.Charts
 {
-	public class RealtimeChart(string symbol, List<Quote> quotes)
+    public class RealtimeChart(string symbol, List<Quote> quotes)
 	{
 		public string Symbol { get; set; } = symbol;
 		public List<Quote> Quotes { get; set; } = quotes;

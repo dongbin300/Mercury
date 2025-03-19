@@ -108,10 +108,11 @@ namespace TradeBot.Bots
 				Common.Positions = [.. accountInfo.Positions.Where(x => x.PositionAmount != 0).Select(x => new BinancePosition(
 					x.Symbol,
 					x.PositionSide.ToString(),
-					x.UnrealizedProfit,
+					x.Notional,
+					x.InitialMargin,
 					x.PositionAmount,
-					x.InitialMargin
-					)).OrderByDescending(x=>x.Pnl)];
+					x.UnrealizedProfit
+					)).OrderByDescending(x => x.Pnl)];
 
 				var usdt = accountInfo.TotalMarginBalance;
 				var bnb = accountInfo.Assets.First(b => b.Asset.Equals("BNB")).WalletBalance;
@@ -181,6 +182,13 @@ namespace TradeBot.Bots
 						));
 
 						Common.PairQuotes.Add(new PairQuote(symbol, quotes));
+					}
+					else
+					{
+						if (result.Error != null)
+						{
+							Common.AddHistory("Manager Bot", $"GetKline Error: {result.Error.Message}");
+						}
 					}
 
 					await Task.Delay(100);

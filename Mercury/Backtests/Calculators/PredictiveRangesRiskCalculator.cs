@@ -52,7 +52,7 @@ namespace Mercury.Backtests.Calculators
 			var gridInterval = (upper - lower) / (gridCount + 1);
 			decimal loss = 0;
 
-			if(side == PositionSide.Long)
+			if (side == PositionSide.Long)
 			{
 				for (decimal price = lower; price <= entry; price += gridInterval)
 				{
@@ -60,7 +60,7 @@ namespace Mercury.Backtests.Calculators
 					loss += (lowerLimit - price) * coinCount;
 				}
 			}
-			else if(side == PositionSide.Short)
+			else if (side == PositionSide.Short)
 			{
 				for (decimal price = upper; price >= entry; price -= gridInterval)
 				{

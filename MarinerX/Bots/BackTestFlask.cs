@@ -6,24 +6,21 @@ using MarinerX.Charts;
 using MarinerX.Utils;
 using MarinerX.Views;
 
-using MercuryTradingModel.Assets;
-using MercuryTradingModel.Charts;
-using MercuryTradingModel.Elements;
-using MercuryTradingModel.Enums;
-using MercuryTradingModel.Extensions;
-using MercuryTradingModel.Intervals;
-using MercuryTradingModel.Orders;
-using MercuryTradingModel.Trades;
+using Mercury.Assets;
+using Mercury.Charts;
+using Mercury.Elements;
+using Mercury.Enums;
+using Mercury.Extensions;
+using Mercury.Orders;
+using Mercury.Trades;
 
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-using PositionSide = MercuryTradingModel.Enums.PositionSide;
-
 namespace MarinerX.Bots
 {
-    public class BackTestFlask
+	public class BackTestFlask
     {
         public StringBuilder TradeLog { get; set; } = new();
         public Worker Worker { get; set; } = new();
@@ -56,14 +53,14 @@ namespace MarinerX.Bots
 
             Asset asset = new BackTestAsset(_asset, new Position());
             var tickCount = (int)(_period / _interval.ToTimeSpan()) + 1;
-            var charts = ChartLoader.GetChartPack(_symbol, _interval);
+            var charts = Charts.ChartLoader.GetChartPack(_symbol, _interval);
 
             // If you did not load the target chart data yet, at first, load the chart data.
             if (charts == null)
             {
 				// deprecated
 				//TrayMenu.LoadChartDataEvent(null, new EventArgs(), _symbol, _interval, true);
-				charts = ChartLoader.GetChartPack(_symbol, _interval);
+				charts = Charts.ChartLoader.GetChartPack(_symbol, _interval);
             }
 
             // Named Element Init
@@ -85,7 +82,7 @@ namespace MarinerX.Bots
                 );
 
             // Back test start!
-            MercuryChartInfo? info = default!;
+            ChartInfo? info = default!;
             var info0 = charts.Select(_startTime);
             bool first = true;
             //bool isPositioning = false;
@@ -194,17 +191,17 @@ namespace MarinerX.Bots
                 }
                 */
 
-                if(info.GetChartElementValue(ChartElementType.rsi) <= 25)
+                if(info.GetChartElementValue(MtmChartElementType.rsi) <= 25)
                 {
-                    BackTestOrder order = new BackTestOrder(OrderType.Market, PositionSide.Long, new OrderAmount(OrderAmountType.Fixed, 5000));
+                    BacktestOrder order = new BacktestOrder(MtmOrderType.Market, MtmPositionSide.Long, new OrderAmount(MtmOrderAmountType.Fixed, 5000));
                     order.Run(asset, info);
 
-                    var trade = Order(asset, info, PositionSide.Long, OrderAmountType.Fixed, 5000, "Long");
+                    var trade = Order(asset, info, MtmPositionSide.Long, MtmOrderAmountType.Fixed, 5000, "Long");
                     trades.Add(trade);
                 }
-                else if (info.GetChartElementValue(ChartElementType.rsi) >= 75)
+                else if (info.GetChartElementValue(MtmChartElementType.rsi) >= 75)
                 {
-                    var trade = Order(asset, info, PositionSide.Short, OrderAmountType.Fixed, 5000, "Short");
+                    var trade = Order(asset, info, MtmPositionSide.Short, MtmOrderAmountType.Fixed, 5000, "Short");
                     trades.Add(trade);
                 }
                 
@@ -213,40 +210,40 @@ namespace MarinerX.Bots
             return trades;
         }
 
-        public record OrderContent(PositionSide side, decimal price, decimal quantity);
+        public record OrderContent(MtmPositionSide side, decimal price, decimal quantity);
 
-        public BackTestTradeInfo Order(Asset asset, MercuryChartInfo chart, PositionSide side, OrderAmountType orderType, decimal amount, string tag = "", bool isManualPrice = false, decimal manualPrice = 0)
+        public BackTestTradeInfo Order(Asset asset, ChartInfo chart, MtmPositionSide side, MtmOrderAmountType orderType, decimal amount, string tag = "", bool isManualPrice = false, decimal manualPrice = 0)
         {
             var price = isManualPrice ? manualPrice : chart.Quote.Close;
 
             decimal quantity;
             switch (orderType)
             {
-                case OrderAmountType.Fixed:
+                case MtmOrderAmountType.Fixed:
                     quantity = decimal.Round(amount / price, 2);
                     break;
 
-                case OrderAmountType.FixedSymbol:
+                case MtmOrderAmountType.FixedSymbol:
                     quantity = amount;
                     break;
 
-                case OrderAmountType.Seed:
+                case MtmOrderAmountType.Seed:
                     var transactionAmount = decimal.Round(asset.Seed * amount, 2);
                     quantity = decimal.Round(transactionAmount / price, 2);
                     break;
 
-                case OrderAmountType.Balance:
+                case MtmOrderAmountType.Balance:
                     var transactionAmount2 = decimal.Round(asset.Balance * amount, 2);
                     quantity = decimal.Round(transactionAmount2 / price, 2);
                     break;
 
-                case OrderAmountType.Asset:
+                case MtmOrderAmountType.Asset:
                     var estimatedAsset = price * asset.Position.Value + asset.Balance;
                     var transactionAmount3 = decimal.Round(estimatedAsset * amount, 2);
                     quantity = decimal.Round(transactionAmount3 / price, 2);
                     break;
 
-                case OrderAmountType.BalanceSymbol:
+                case MtmOrderAmountType.BalanceSymbol:
                     var symbolAmount = asset.Position.Quantity;
                     var transactionAmount4 = decimal.Round(symbolAmount * amount, 2);
                     quantity = decimal.Round(transactionAmount4 / price, 2);
@@ -259,12 +256,12 @@ namespace MarinerX.Bots
 
             switch (side)
             {
-                case PositionSide.Long:
+                case MtmPositionSide.Long:
                     var buyFee = Buy(asset, price, quantity);
                     var estimatedAsset = price * asset.Position.Value + asset.Balance;
                     return new BackTestTradeInfo(chart.Symbol, chart.DateTime.ToStandardString(), "Buy", $"{price:#.####}", $"{quantity:#.####}", $"{buyFee:#.##}", $"{asset.Balance:#.##}", $"{asset.Position:#.####}", chart.BaseAsset, $"{estimatedAsset:#.##} USDT", tag);
 
-                case PositionSide.Short:
+                case MtmPositionSide.Short:
                     var sellFee = Sell(asset, price, quantity);
                     var estimatedAsset2 = price * asset.Position.Value + asset.Balance;
                     return new BackTestTradeInfo(chart.Symbol, chart.DateTime.ToStandardString(), "Sell", $"{price:#.####}", $"{quantity:#.####}", $"{sellFee:#.##}", $"{asset.Balance:#.##}", $"{asset.Position:#.####}", chart.BaseAsset, $"{estimatedAsset2:#.##} USDT", tag);

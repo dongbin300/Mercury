@@ -5,28 +5,28 @@ using MarinerX.Interfaces;
 using MarinerX.Utils;
 using MarinerX.Views;
 
-using MercuryTradingModel.Assets;
-using MercuryTradingModel.Charts;
-using MercuryTradingModel.Enums;
-using MercuryTradingModel.Interfaces;
-using MercuryTradingModel.Intervals;
-using MercuryTradingModel.Trades;
-using MercuryTradingModel.TradingModels;
+using Mercury.Assets;
+using Mercury.Charts;
+using Mercury.Enums;
+using Mercury.Extensions;
+using Mercury.Interfaces;
+using Mercury.Trades;
+using Mercury.TradingModels;
 
 using System;
 using System.Collections.Generic;
 
 namespace MarinerX.Bots
 {
-    public record BackTestTrade(DateTime time, IStrategy strategy, PositionSide side);
-    public class BackTestBot : IBot
+	public record BackTestTrade(DateTime time, IStrategy strategy, MtmPositionSide side);
+    public class BacktestBot : IBot
     {
         public MercuryBackTestTradingModel TradingModel { get; set; } = new();
         public Worker Worker { get; set; } = new();
         public ChartWindow ChartViewer { get; set; } = default!;
         public bool IsShowChart { get; set; }
 
-        public BackTestBot(MercuryBackTestTradingModel tradingModel, Worker worker, bool isShowChart = false)
+        public BacktestBot(MercuryBackTestTradingModel tradingModel, Worker worker, bool isShowChart = false)
         {
             TradingModel = tradingModel;
             Worker = worker;
@@ -45,21 +45,21 @@ namespace MarinerX.Bots
             Asset asset = new BackTestAsset(TradingModel.Asset, new Position());
 
             var tickCount = (int)(TradingModel.Period / TradingModel.Interval.ToTimeSpan()) + 1;
-            var charts = ChartLoader.GetChartPack(TradingModel.Targets[0], TradingModel.Interval); // support only one target now
+            var charts = Charts.ChartLoader.GetChartPack(TradingModel.Targets[0], TradingModel.Interval); // support only one target now
 
             // If you did not load the target chart data yet, at first, load the chart data.
             if (charts == null)
             {
                 // deprecated
                 //TrayMenu.LoadChartDataEvent(null, new EventArgs(), TradingModel.Targets[0], TradingModel.Interval, true);
-                charts = ChartLoader.GetChartPack(TradingModel.Targets[0], TradingModel.Interval);
+                charts = Charts.ChartLoader.GetChartPack(TradingModel.Targets[0], TradingModel.Interval);
             }
 
             // Calculate chart elements and named elements
             charts.CalculateIndicators(TradingModel.ChartElements, TradingModel.NamedElements);
 
             // Back test start!
-            MercuryChartInfo? info = default!;
+            ChartInfo? info = default!;
             var info0 = charts.Select(TradingModel.StartTime);
             bool first = true;
             Worker.For(0, tickCount, 1, (i) =>
