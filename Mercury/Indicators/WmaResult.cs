@@ -1,8 +1,8 @@
 ﻿namespace Mercury.Indicators
 {
-    public class WmaResult(DateTime date, double wma)
+    public class WmaResult(DateTime date, double? wma)
 	{
 		public DateTime Date { get; set; } = date;
-		public double Wma { get; set; } = wma;
+		public double? Wma { get; set; } = wma;
 	}
 }

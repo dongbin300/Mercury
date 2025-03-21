@@ -12,6 +12,8 @@ using Mercury.Apis;
 using Mercury.Backtests.Calculators;
 using Mercury.Charts;
 using Mercury.Cryptos.Binance;
+using Mercury.Extensions;
+using Mercury.Maths;
 
 using OxyPlot;
 using OxyPlot.Axes;
@@ -114,9 +116,21 @@ namespace Lab
 
 			var startTime = new DateTime(2022, 5, 15);
 			var endTime = new DateTime(2024, 5, 15);
+			var symbol = "BTCUSDT";
+			var interval = KlineInterval.OneDay;
 
-			BinanceRestApi.Init();
-			var result = BinanceRestApi.BinanceClient.UsdFuturesApi.Account.GetAccountInfoV3Async().Result;
+			//LocalApi.Init();
+			//var quotes = LocalApi.GetOneDayQuotes(symbol);
+			ChartLoader.InitCharts(symbol, interval);
+			var quotes = ChartLoader.GetChartPack(symbol, interval).Charts;
+			var close = quotes.Select(x => (double)x.Quote.Close).ToArray();
+
+			//var wma = ArrayCalculator.Wma(close, 14);
+
+			(var predict, var predictMa) = ArrayCalculator.Mlmi(close, 200, 20);
+
+			//BinanceRestApi.Init();
+			//var result = BinanceRestApi.BinanceClient.UsdFuturesApi.Account.GetAccountInfoV3Async().Result;
 
 			//var result = BinanceRestApi.GetQuotes("BTCUSDT", KlineInterval.OneMinute, startTime, null, 1000);
 			//var result1 = BinanceRestApi.BinanceClient.UsdFuturesApi.Trading.GetOrdersAsync("ZECUSDT", null, startTime, endTime, 1000).Result;

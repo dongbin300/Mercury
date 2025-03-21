@@ -232,8 +232,8 @@ namespace Mercury.Backtests
 		public void SetGrid(int chartIndex)
 		{
 			var price = Prices[chartIndex];
-			var longTermLastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
-			var shortTermLastAtr = (decimal)ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr.Round(1);
+			var longTermLastAtr = (decimal)(LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr ?? 0).Round(1);
+			var shortTermLastAtr = (decimal)(ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Atr ?? 0).Round(1);
 
 			UpperPrice = price.Value + longTermLastAtr;
 			LowerPrice = price.Value - longTermLastAtr;

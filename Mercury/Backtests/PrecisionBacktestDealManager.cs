@@ -585,13 +585,13 @@ namespace Mercury.Backtests
 		private double MinGreenSignal(ChartInfo info)
 		{
 			var supertrends = new[] { info.Supertrend1, info.Supertrend2, info.Supertrend3 };
-			return supertrends.Where(x => x > 0).Min();
+			return supertrends.Where(x => x > 0).Min() ?? 0;
 		}
 
 		private double MaxRedSignal(ChartInfo info)
 		{
 			var supertrends = new[] { info.Supertrend1, info.Supertrend2, info.Supertrend3 };
-			return supertrends.Where(x => x < 0).Select(x => Math.Abs(x)).Max();
+			return supertrends.Where(x => x < 0).Select(x => Math.Abs(x ?? 0)).Max();
 		}
 
 		/// <summary>
@@ -1039,7 +1039,7 @@ namespace Mercury.Backtests
 					if (c1.Supertrend1 > 0 && c2.Supertrend1 < 0 && c1.Supertrend2 > 0 && c1.Supertrend3 > 0)
 					{
 						var price = c0.Quote.Open;
-						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2 ?? 0);
 						var takeProfitPrice = 2 * price - 1 * stopLossPrice;
 						var quantity = BaseOrderSize / price;
 						Money -= price * quantity;
@@ -1055,7 +1055,7 @@ namespace Mercury.Backtests
 				// 포지션이 있으면
 				else
 				{
-					var st2 = (decimal)Math.Abs(c0.Supertrend2);
+					var st2 = (decimal)Math.Abs(c0.Supertrend2 ?? 0);
 					var dst2 = Calculator.TargetPrice(side, st2, -0.8m);
 
 					// 전량 정리
@@ -1139,7 +1139,7 @@ namespace Mercury.Backtests
 					if (c1.Supertrend1 < 0 && c2.Supertrend1 > 0 && c1.Supertrend2 < 0 && c1.Supertrend3 < 0)
 					{
 						var price = c0.Quote.Open;
-						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2 ?? 0);
 						var takeProfitPrice = 2 * price - 1 * stopLossPrice;
 						var quantity = BaseOrderSize / price;
 						Money += price * quantity;
@@ -1155,7 +1155,7 @@ namespace Mercury.Backtests
 				// 포지션이 있으면
 				else
 				{
-					var st2 = (decimal)Math.Abs(c0.Supertrend2);
+					var st2 = (decimal)Math.Abs(c0.Supertrend2 ?? 0);
 					var dst2 = Calculator.TargetPrice(side, st2, -0.8m);
 
 					// 전량 정리
@@ -1239,7 +1239,7 @@ namespace Mercury.Backtests
 					if (c1.Supertrend1 > 0 && c2.Supertrend1 < 0 && c1.Supertrend2 > 0 && c1.Supertrend3 > 0)
 					{
 						var price = c0.Quote.Open;
-						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2 ?? 0);
 						var takeProfitPrice = 2 * price - 1 * stopLossPrice;
 						var quantity = BaseOrderSize / price;
 						Money -= price * quantity;
@@ -1336,7 +1336,7 @@ namespace Mercury.Backtests
 					if (c1.Supertrend1 < 0 && c2.Supertrend1 > 0 && c1.Supertrend2 < 0 && c1.Supertrend3 < 0)
 					{
 						var price = c0.Quote.Open;
-						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2 ?? 0);
 						var takeProfitPrice = 2 * price - 1 * stopLossPrice;
 						var quantity = BaseOrderSize / price;
 						Money += price * quantity;
@@ -1527,7 +1527,7 @@ namespace Mercury.Backtests
 					if (IsEntryTs2LongBit(charts))
 					{
 						var price = c0.Quote.Open;
-						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2 ?? 0);
 						var takeProfitPrice = 2 * price - 1 * stopLossPrice;
 						var quantity = BaseOrderSize / price;
 						Money -= price * quantity;
@@ -1610,7 +1610,7 @@ namespace Mercury.Backtests
 					if (IsEntryTs2ShortBit(charts))
 					{
 						var price = c0.Quote.Open;
-						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2);
+						var stopLossPrice = (decimal)Math.Abs(c1.Supertrend2 ?? 0);
 						var takeProfitPrice = 2 * price - 1 * stopLossPrice;
 						var quantity = BaseOrderSize / price;
 						Money += price * quantity;
@@ -2367,7 +2367,7 @@ namespace Mercury.Backtests
 						{
 							Symbol = chart.Key,
 							CurrentSide = PositionSide.Long,
-							BasedMacd = c0.Macd,
+							BasedMacd = c0.Macd ?? 0,
 							BasedStoch = 20,
 							TakeProfitPrice = -1
 						});
@@ -2379,7 +2379,7 @@ namespace Mercury.Backtests
 						{
 							Symbol = chart.Key,
 							CurrentSide = PositionSide.Short,
-							BasedMacd = c0.Macd,
+							BasedMacd = c0.Macd ?? 0,
 							BasedStoch = 80,
 							TakeProfitPrice = -1
 						});
@@ -2412,13 +2412,13 @@ namespace Mercury.Backtests
 				if (IsMacdGoldenCross(c0, c1))
 				{
 					memory.CurrentSide = PositionSide.Long;
-					memory.BasedMacd = c0.Macd;
+					memory.BasedMacd = c0.Macd ?? 0;
 					memory.BasedStoch = 20;
 				}
 				else if (IsMacdDeadCross(c0, c1))
 				{
 					memory.CurrentSide = PositionSide.Short;
-					memory.BasedMacd = c0.Macd;
+					memory.BasedMacd = c0.Macd ?? 0;
 					memory.BasedStoch = 80;
 				}
 			}
@@ -2475,8 +2475,8 @@ namespace Mercury.Backtests
 							EntryCount = 1
 						};
 						Positions.Add(newPosition);
-						memory.BasedMacd = c1.Macd;
-						memory.BasedStoch = c1.Stoch;
+						memory.BasedMacd = c1.Macd ?? 0;
+						memory.BasedStoch = c1.Stoch ?? 0;
 						memory.TakeProfitPrice = maxPrice;
 					}
 				}
@@ -2569,8 +2569,8 @@ namespace Mercury.Backtests
 							EntryCount = 1
 						};
 						Positions.Add(newPosition);
-						memory.BasedMacd = c1.Macd;
-						memory.BasedStoch = c1.Stoch;
+						memory.BasedMacd = c1.Macd ?? 0;
+						memory.BasedStoch = c1.Stoch ?? 0;
 						memory.TakeProfitPrice = minPrice;
 					}
 				}
@@ -2589,8 +2589,8 @@ namespace Mercury.Backtests
 						position.Quantity += quantity;
 						position.EntryAmount += price * quantity;
 						position.EntryCount++;
-						memory.BasedMacd = c1.Macd;
-						memory.BasedStoch = c1.Stoch;
+						memory.BasedMacd = c1.Macd ?? 0;
+						memory.BasedStoch = c1.Stoch ?? 0;
 					}
 
 					// 정리

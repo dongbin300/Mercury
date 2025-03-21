@@ -141,9 +141,9 @@ namespace Mercury.Extensions
         {
             var result = new List<StochResult>();
 
-            var high = quotes.Select(x => (double)x.High).ToArray();
-            var low = quotes.Select(x => (double)x.Low).ToArray();
-            var close = quotes.Select(x => (double)x.Close).ToArray();
+            var high = quotes.Select(x => (double)x.High).ToArray().ToNullable();
+            var low = quotes.Select(x => (double)x.Low).ToArray().ToNullable();
+            var close = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
             var k = ArrayCalculator.Stoch(high, low, close, period);
             for (int i = 0; i < k.Length; i++)
             {
@@ -171,7 +171,7 @@ namespace Mercury.Extensions
         {
             var result = new List<SmaResult>();
 
-            var values = quotes.Select(x => (double)x.Close).ToArray();
+            var values = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
             var sma = ArrayCalculator.Sma(values, period);
             for (int i = 0; i < sma.Length; i++)
             {
@@ -185,7 +185,7 @@ namespace Mercury.Extensions
         {
             var result = new List<EmaResult>();
 
-            var values = quotes.Select(x => (double)x.Close).ToArray();
+            var values = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
             var ema = ArrayCalculator.Ema(values, period);
             for (int i = 0; i < ema.Length; i++)
             {
@@ -199,7 +199,7 @@ namespace Mercury.Extensions
         {
             var result = new List<SmaResult>();
 
-            var values = quotes.Select(x => (double)x.Volume).ToArray();
+            var values = quotes.Select(x => (double)x.Volume).ToArray().ToNullable();
             var sma = ArrayCalculator.Sma(values, period);
             for (int i = 0; i < sma.Length; i++)
             {
@@ -215,10 +215,10 @@ namespace Mercury.Extensions
 
             var values = quoteType switch
             {
-                QuoteType.Open => quotes.Select(x => (double)x.Open).ToArray(),
-                QuoteType.High => quotes.Select(x => (double)x.High).ToArray(),
-                QuoteType.Low => quotes.Select(x => (double)x.Low).ToArray(),
-                QuoteType.Close or _ => quotes.Select(x => (double)x.Close).ToArray(),
+                QuoteType.Open => quotes.Select(x => (double)x.Open).ToArray().ToNullable(),
+                QuoteType.High => quotes.Select(x => (double)x.High).ToArray().ToNullable(),
+                QuoteType.Low => quotes.Select(x => (double)x.Low).ToArray().ToNullable(),
+                QuoteType.Close or _ => quotes.Select(x => (double)x.Close).ToArray().ToNullable(),
             };
 
             (var sma, var upper, var lower) = ArrayCalculator.BollingerBands(values, period, deviation);
@@ -258,7 +258,7 @@ namespace Mercury.Extensions
         {
             var result = new List<MacdResult>();
 
-            var values = quotes.Select(x => (double)x.Close).ToArray();
+            var values = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
             (var macd, var signal, var hist) = ArrayCalculator.Macd(values, fastPeriod, slowPeriod, signalPeriod);
             for (int i = 0; i < macd.Length; i++)
             {

@@ -75,12 +75,17 @@ namespace Mercury.Extensions
 
         public static PositionSide ToPositionSide(this string side)
         {
-            return (PositionSide)Enum.Parse(typeof(PositionSide), side, true);
+            return Enum.Parse<PositionSide>(side, true);
         }
 
         public static GridType ToGridType(this string type)
         {
-            return (GridType)Enum.Parse(typeof(GridType), type, true);
+            return Enum.Parse<GridType>(type, true);
         }
-    }
+
+		public static double?[] ToNullable(this double[] source)
+		{
+			return [.. source.Select(item => (double?)item)];
+		}
+	}
 }

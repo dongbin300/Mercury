@@ -3,9 +3,9 @@
     /// <summary>
     /// Relative Strength Index Result
     /// </summary>
-    public class RsiResult(DateTime date, double rsi)
+    public class RsiResult(DateTime date, double? rsi)
 	{
 		public DateTime Date { get; set; } = date;
-		public double Rsi { get; set; } = rsi;
+		public double? Rsi { get; set; } = rsi;
 	}
 }

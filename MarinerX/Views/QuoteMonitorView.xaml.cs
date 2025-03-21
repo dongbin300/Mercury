@@ -16,12 +16,12 @@ namespace MarinerX.Views
     public class QuoteMonitorData
     {
         public string Symbol { get; set; } = string.Empty;
-        public double Rsi { get; set; }
+        public double? Rsi { get; set; }
         public string Uad { get; set; } = string.Empty;
         public double Volume { get; set; }
         public bool IsLongPosition { get; set; }
 
-        public QuoteMonitorData(string symbol, double rsi)
+        public QuoteMonitorData(string symbol, double? rsi)
         {
             Symbol = symbol;
             Rsi = rsi;
@@ -189,7 +189,7 @@ namespace MarinerX.Views
             "ZILUSDT",
             "ZRXUSDT"
         };
-        private Dictionary<string, double> RsiValues = new();
+        private Dictionary<string, double?> RsiValues = new();
 
         public QuoteMonitorView()
         {

@@ -639,7 +639,7 @@ namespace MarinerX.Charts
 			try
 			{
 				var startTime = SymbolUtil.GetEndDate("ZRXUSDT");
-				var EndTime = DateTime.Today;
+				var EndTime = new DateTime(2024, 12, 31);
 				var symbols = LocalApi.SymbolNames;
 				var csvFileCount = ((EndTime - startTime).Days + 1) * symbols.Count;
 				worker.SetProgressBar(0, csvFileCount);

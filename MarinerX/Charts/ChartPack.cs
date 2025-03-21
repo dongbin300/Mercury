@@ -88,10 +88,10 @@ namespace MarinerX.Charts
 			Charts = newChart;
 		}
 
-		public decimal GetChartElementValue(IEnumerable<double> data, int index)
+		public decimal? GetChartElementValue(IEnumerable<double?> data, int index)
 		{
 			var value = data.ElementAt(index);
-			return (decimal)value;
+			return (decimal?)value;
 		}
 
 		public void CalculateCommasIndicatorsRobHoffman()

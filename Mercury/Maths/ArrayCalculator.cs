@@ -1,8 +1,13 @@
-﻿namespace Mercury.Maths
+﻿using Mercury.Extensions;
+
+using System.Diagnostics;
+
+namespace Mercury.Maths
 {
 	public class ArrayCalculator
 	{
 		public static readonly double NA = 0;
+		public static readonly bool NAb = false;
 
 		public static double Na(double value)
 		{
@@ -20,13 +25,13 @@
 		/// <param name="values"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public static double FixNan(double[] values, int index)
+		public static double FixNan(double?[] values, int index)
 		{
 			for (int i = index; i >= 0; i--)
 			{
-				if (values[i] != 0)
+				if (values[i] != null)
 				{
-					return values[i];
+					return values[i] ?? 0;
 				}
 			}
 			return 0;
@@ -39,19 +44,14 @@
 		/// <param name="count"></param>
 		/// <param name="startIndex"></param>
 		/// <returns></returns>
-		public static double Min(double[] values, int count, int startIndex = 0)
+		public static double Min(double?[] values, int count, int startIndex = 0)
 		{
-			double min = 999999999;
+			double min = double.MaxValue;
 			for (int i = startIndex; i < startIndex + count; i++)
 			{
-				if (values[i] == NA)
+				if (values[i].HasValue && values[i] < min)
 				{
-					continue;
-				}
-
-				if (values[i] < min)
-				{
-					min = values[i];
+					min = values[i] ?? min;
 				}
 			}
 			return min;
@@ -64,19 +64,14 @@
 		/// <param name="count"></param>
 		/// <param name="startIndex"></param>
 		/// <returns></returns>
-		public static double Max(double[] values, int count, int startIndex = 0)
+		public static double Max(double?[] values, int count, int startIndex = 0)
 		{
-			var max = values[startIndex];
-			for (int i = startIndex + 1; i < startIndex + count; i++)
+			double max = double.MinValue;
+			for (int i = startIndex; i < startIndex + count; i++)
 			{
-				if (values[i] == NA)
+				if (values[i].HasValue && values[i] > max)
 				{
-					continue;
-				}
-
-				if (values[i] > max)
-				{
-					max = values[i];
+					max = values[i] ?? max;
 				}
 			}
 			return max;
@@ -87,20 +82,71 @@
 		/// </summary>
 		/// <param name="values"></param>
 		/// <returns></returns>
-		public static double[] Change(double[] values)
+		public static double?[] Change(double?[] values)
 		{
-			var result = new double[values.Length];
+			var result = new double?[values.Length];
 
-			for (int i = 0; i < values.Length; i++)
+			result[0] = null;
+			for (int i = 1; i < values.Length; i++)
 			{
-				if (i == 0)
-				{
-					result[i] = NA;
-					continue;
-				}
-
 				result[i] = values[i] - values[i - 1];
 			}
+			return result;
+		}
+
+		/// <summary>
+		/// Whether value1 cross over value2
+		/// </summary>
+		/// <param name="value1"></param>
+		/// <param name="value2"></param>
+		/// <returns></returns>
+		public static bool?[] Crossover(double?[] value1, double?[] value2)
+		{
+			int length = Math.Min(value1.Length, value2.Length);
+			if (length < 2)
+			{
+				return [];
+			}
+
+			var result = new bool?[length];
+
+			result[0] = null;
+			for (int i = 1; i < length; i++)
+			{
+				result[i] =
+					value1[i - 1] != null && value1[i] != null &&
+					value2[i - 1] != null && value2[i] != null &&
+					(value1[i - 1] <= value2[i - 1]) && (value1[i] > value2[i]);
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Whether value1 cross under value2
+		/// </summary>
+		/// <param name="value1"></param>
+		/// <param name="value2"></param>
+		/// <returns></returns>
+		public static bool?[] Crossunder(double?[] value1, double?[] value2)
+		{
+			int length = Math.Min(value1.Length, value2.Length);
+			if (length < 2)
+			{
+				return [];
+			}
+
+			var result = new bool?[length];
+
+			result[0] = null;
+			for (int i = 1; i < length; i++)
+			{
+				result[i] =
+					value1[i - 1] != null && value1[i] != null &&
+					value2[i - 1] != null && value2[i] != null &&
+					(value1[i - 1] >= value2[i - 1]) && (value1[i] < value2[i]);
+			}
+
 			return result;
 		}
 
@@ -110,12 +156,12 @@
 		/// <param name="values"></param>
 		/// <param name="count"></param>
 		/// <returns></returns>
-		public static double SAverage(double[] values, int count, int startIndex = 0)
+		public static double SAverage(double?[] values, int count, int startIndex = 0)
 		{
 			double sum = 0;
 			for (int i = startIndex; i < startIndex + count; i++)
 			{
-				sum += values[i];
+				sum += values[i] ?? 0;
 			}
 			return sum / count;
 		}
@@ -152,21 +198,21 @@
 		/// <param name="values"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Sma(double[] values, int period)
+		public static double?[] Sma(double?[] values, int period)
 		{
-			var result = new double[values.Length];
+			var result = new double?[values.Length];
 			for (int i = 0; i < values.Length; i++)
 			{
 				if (i < period - 1)
 				{
-					result[i] = NA;
+					result[i] = null;
 					continue;
 				}
 
 				double sum = 0;
 				for (int j = i - period + 1; j <= i; j++)
 				{
-					sum += values[j];
+					sum += values[j] ?? 0;
 				}
 				result[i] = sum / period;
 			}
@@ -180,15 +226,15 @@
 		/// <param name="values"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Ema(double[] values, int period, int startIndex = 0)
+		public static double?[] Ema(double?[] values, int period, int startIndex = 0)
 		{
-			var result = new double[values.Length];
+			var result = new double?[values.Length];
 			double alpha = 2.0 / (period + 1);
 			for (int i = startIndex; i < values.Length; i++)
 			{
 				if (i < startIndex + period - 1)
 				{
-					result[i] = NA;
+					result[i] = null;
 					continue;
 				}
 
@@ -204,37 +250,40 @@
 			return result;
 		}
 
-		public static double[] Wma(double[] values, int period)
+		/// <summary>
+		/// Recommend values is Quote.Close
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="period"></param>
+		/// <returns></returns>
+		public static double?[] Wma(double?[] values, int period)
 		{
-			var result = new double[values.Length];
-
-			/*
-             * pine_wma(values, period) =>
-    norm = 0.0
-    sum = 0.0
-    for i = 0 to period - 1
-        weight = (period - i) * period
-        norm := norm + weight
-        sum := sum + values[i] * weight
-    sum / norm
-            */
+			var result = new double?[values.Length];
 			for (int i = 0; i < values.Length; i++)
 			{
 				if (i < period - 1)
 				{
-					result[i] = NA;
+					result[i] = null;
 					continue;
 				}
 
 				double norm = 0;
 				double sum = 0;
+				bool isNull = false;
 				for (int j = 0; j < period; j++)
 				{
+					var value = values[i - j];
+					if (value == null)
+					{
+						isNull = true;
+						break;
+					}
+
 					var weight = (period - j) * period;
 					norm += weight;
-					sum += values[i] * weight;
+					sum += (value ?? 0) * weight;
 				}
-				result[i] = sum / norm;
+				result[i] = isNull ? null : sum / norm;
 			}
 
 			return result;
@@ -246,15 +295,15 @@
 		/// <param name="values"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Rma(double[] values, int period, int startIndex = 0)
+		public static double?[] Rma(double?[] values, int period, int startIndex = 0)
 		{
-			var result = new double[values.Length];
+			var result = new double?[values.Length];
 			double alpha = 1.0 / period;
 			for (int i = 0; i < values.Length; i++)
 			{
 				if (i < period - 1 + startIndex)
 				{
-					result[i] = NA;
+					result[i] = null;
 					continue;
 				}
 
@@ -276,14 +325,14 @@
 		/// <param name="values"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Stdev(double[] values, int period)
+		public static double?[] Stdev(double?[] values, int period)
 		{
-			var result = new double[values.Length];
+			var result = new double?[values.Length];
 			for (int i = 0; i < values.Length; i++)
 			{
 				if (i < period - 1)
 				{
-					result[i] = NA;
+					result[i] = null;
 					continue;
 				}
 
@@ -291,7 +340,7 @@
 				var avg = SAverage(values, period, i - period + 1);
 				for (int j = i - period + 1; j < i + 1; j++)
 				{
-					sum += (values[j] - avg) * (values[j] - avg);
+					sum += ((values[j] ?? 0) - avg) * ((values[j] ?? 0) - avg);
 				}
 
 				result[i] = Math.Sqrt(sum / period);
@@ -300,40 +349,43 @@
 			return result;
 		}
 
-		public static (double[], double[], double[], double[], double[]) IchimokuCloud(double[] high, double[] low, double[] close, int conversionPeriod, int basePeriod, int leadingSpanPeriod)
+		public static (double?[], double?[], double?[], double?[], double?[]) IchimokuCloud(double[] high, double[] low, double[] close, int conversionPeriod, int basePeriod, int leadingSpanPeriod)
 		{
+			var nHigh = high.ToNullable();
+			var nLow = low.ToNullable();
+
 			var displacementOffset = basePeriod - 1;
-			var conversion = new double[high.Length];
-			var _base = new double[high.Length];
-			var trailingSpan = new double[high.Length];
-			var leadingSpan1 = new double[high.Length];
-			var leadingSpan2 = new double[high.Length];
+			var conversion = new double?[high.Length];
+			var _base = new double?[high.Length];
+			var trailingSpan = new double?[high.Length];
+			var leadingSpan1 = new double?[high.Length];
+			var leadingSpan2 = new double?[high.Length];
 
 			for (int i = 0; i < high.Length; i++)
 			{
 				if (i < conversionPeriod - 1)
 				{
-					conversion[i] = NA;
+					conversion[i] = null;
 				}
 				else
 				{
-					conversion[i] = (Max(high, conversionPeriod, i + 1 - conversionPeriod) + Min(low, conversionPeriod, i + 1 - conversionPeriod)) / 2;
+					conversion[i] = (Max(nHigh, conversionPeriod, i + 1 - conversionPeriod) + Min(nLow, conversionPeriod, i + 1 - conversionPeriod)) / 2;
 				}
 
 				if (i < basePeriod - 1)
 				{
-					_base[i] = NA;
+					_base[i] = null;
 				}
 				else
 				{
-					_base[i] = (Max(high, basePeriod, i + 1 - basePeriod) + Min(low, basePeriod, i + 1 - basePeriod)) / 2;
+					_base[i] = (Max(nHigh, basePeriod, i + 1 - basePeriod) + Min(nLow, basePeriod, i + 1 - basePeriod)) / 2;
 				}
 
 				trailingSpan[i] = close[i];
 
 				if (i < basePeriod - 1)
 				{
-					leadingSpan1[i] = NA;
+					leadingSpan1[i] = null;
 				}
 				else
 				{
@@ -342,24 +394,24 @@
 
 				if (i < leadingSpanPeriod - 1)
 				{
-					leadingSpan2[i] = NA;
+					leadingSpan2[i] = null;
 				}
 				else
 				{
-					leadingSpan2[i] = (Max(high, leadingSpanPeriod, i + 1 - leadingSpanPeriod) + Min(low, leadingSpanPeriod, i + 1 - leadingSpanPeriod)) / 2;
+					leadingSpan2[i] = (Max(nHigh, leadingSpanPeriod, i + 1 - leadingSpanPeriod) + Min(nLow, leadingSpanPeriod, i + 1 - leadingSpanPeriod)) / 2;
 				}
 			}
 
 			// Trailing span : shift left
-			var displacementTrailingSpan = new double[high.Length];
+			var displacementTrailingSpan = new double?[high.Length];
 			Array.Copy(trailingSpan, displacementOffset, displacementTrailingSpan, 0, high.Length - displacementOffset);
 			// Fill rest with last value
 			Array.Fill(displacementTrailingSpan, displacementTrailingSpan[high.Length - displacementOffset - 1], high.Length - displacementOffset, displacementOffset);
 
 			// Leading span 1,2 : shift right
-			var displacementLeadingSpan1 = new double[high.Length + displacementOffset];
+			var displacementLeadingSpan1 = new double?[high.Length + displacementOffset];
 			Array.Copy(leadingSpan1, 0, displacementLeadingSpan1, displacementOffset, high.Length);
-			var displacementLeadingSpan2 = new double[high.Length + displacementOffset];
+			var displacementLeadingSpan2 = new double?[high.Length + displacementOffset];
 			Array.Copy(leadingSpan2, 0, displacementLeadingSpan2, displacementOffset, high.Length);
 
 			return (conversion, _base, displacementTrailingSpan, displacementLeadingSpan1, displacementLeadingSpan2);
@@ -372,11 +424,11 @@
 		/// <param name="period"></param>
 		/// <param name="deviation"></param>
 		/// <returns></returns>
-		public static (double[], double[], double[]) BollingerBands(double[] values, int period, double deviation)
+		public static (double?[], double?[], double?[]) BollingerBands(double?[] values, int period, double deviation)
 		{
 			var sma = Sma(values, period);
-			var upper = new double[values.Length];
-			var lower = new double[values.Length];
+			var upper = new double?[values.Length];
+			var lower = new double?[values.Length];
 			var stdev = Stdev(values, period);
 			for (int i = 0; i < values.Length; i++)
 			{
@@ -395,28 +447,28 @@
 		/// <param name="slowPeriod"></param>
 		/// <param name="signalPeriod"></param>
 		/// <returns></returns>
-		public static (double[], double[], double[]) Macd(double[] values, int fastPeriod, int slowPeriod, int signalPeriod)
+		public static (double?[], double?[], double?[]) Macd(double?[] values, int fastPeriod, int slowPeriod, int signalPeriod)
 		{
 			var fast = Ema(values, fastPeriod);
 			var slow = Ema(values, slowPeriod);
-			var macd = new double[values.Length];
+			var macd = new double?[values.Length];
 			for (int i = 0; i < values.Length; i++)
 			{
 				if (i < slowPeriod - 1)
 				{
-					macd[i] = NA;
+					macd[i] = null;
 					continue;
 				}
 
 				macd[i] = fast[i] - slow[i];
 			}
 			var signal = Ema(macd, signalPeriod, slowPeriod - 1);
-			var hist = new double[values.Length];
+			var hist = new double?[values.Length];
 			for (int i = 0; i < values.Length; i++)
 			{
 				if (i < slowPeriod + signalPeriod - 2)
 				{
-					hist[i] = NA;
+					hist[i] = null;
 					continue;
 				}
 
@@ -463,10 +515,10 @@
 		/// <param name="close"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Atr(double[] high, double[] low, double[] close, int period, int startIndex = 0)
+		public static double?[] Atr(double[] high, double[] low, double[] close, int period, int startIndex = 0)
 		{
 			var tr = Tr(high, low, close);
-			return Rma(tr, period, startIndex);
+			return Rma(tr.ToNullable(), period, startIndex);
 		}
 
 		/// <summary>
@@ -475,18 +527,18 @@
 		/// <param name="values"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Rsi(double[] values, int period)
+		public static double?[] Rsi(double[] values, int period)
 		{
-			var rsi = new double[values.Length];
-			var u = new double[values.Length];
-			var d = new double[values.Length];
+			var rsi = new double?[values.Length];
+			var u = new double?[values.Length];
+			var d = new double?[values.Length];
 
 			for (int i = 0; i < values.Length; i++)
 			{
 				if (i == 0)
 				{
-					u[i] = NA;
-					d[i] = NA;
+					u[i] = null;
+					d[i] = null;
 					continue;
 				}
 
@@ -511,15 +563,15 @@
 		/// <param name="values"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Stoch(double[] high, double[] low, double[] close, int period, int startIndex = 0)
+		public static double?[] Stoch(double?[] high, double?[] low, double?[] close, int period, int startIndex = 0)
 		{
-			var stoch = new double[high.Length];
+			var stoch = new double?[high.Length];
 
 			for (int i = 0; i < high.Length; i++)
 			{
 				if (i < period - 1 + startIndex)
 				{
-					stoch[i] = NA;
+					stoch[i] = null;
 					continue;
 				}
 
@@ -544,12 +596,12 @@
 		/// <param name="factor"></param>
 		/// <param name="atrPeriod"></param>
 		/// <returns></returns>
-		public static (double[], double[]) Supertrend(double[] high, double[] low, double[] close, double factor, int atrPeriod)
+		public static (double?[], double?[]) Supertrend(double[] high, double[] low, double[] close, double factor, int atrPeriod)
 		{
-			var upperBand = new double[high.Length];
-			var lowerBand = new double[high.Length];
-			var supertrend = new double[high.Length];
-			var direction = new double[high.Length];
+			var upperBand = new double?[high.Length];
+			var lowerBand = new double?[high.Length];
+			var supertrend = new double?[high.Length];
+			var direction = new double?[high.Length];
 
 			var atr = Atr(high, low, close, atrPeriod);
 			for (int i = 0; i < high.Length; i++)
@@ -576,12 +628,12 @@
 			return (supertrend, direction);
 		}
 
-		public static (double[], double[]) ReverseSupertrend(double[] high, double[] low, double[] close, double factor, int atrPeriod)
+		public static (double?[], double?[]) ReverseSupertrend(double[] high, double[] low, double[] close, double factor, int atrPeriod)
 		{
-			var upperBand = new double[high.Length];
-			var lowerBand = new double[high.Length];
-			var supertrend = new double[high.Length];
-			var direction = new double[high.Length];
+			var upperBand = new double?[high.Length];
+			var lowerBand = new double?[high.Length];
+			var supertrend = new double?[high.Length];
+			var direction = new double?[high.Length];
 
 			var atr = Atr(high, low, close, atrPeriod);
 			for (int i = 0; i < high.Length; i++)
@@ -608,7 +660,7 @@
 			return (supertrend, direction);
 		}
 
-		public static (double[], double[], double[], double[], double[], double[]) TripleSupertrend(double[] high, double[] low, double[] close, int atrPeriod1, double factor1, int atrPeriod2, double factor2, int atrPeriod3, double factor3)
+		public static (double?[], double?[], double?[], double?[], double?[], double?[]) TripleSupertrend(double[] high, double[] low, double[] close, int atrPeriod1, double factor1, int atrPeriod2, double factor2, int atrPeriod3, double factor3)
 		{
 			(var supertrend1, var direction1) = Supertrend(high, low, close, factor1, atrPeriod1);
 			(var supertrend2, var direction2) = Supertrend(high, low, close, factor2, atrPeriod2);
@@ -617,7 +669,7 @@
 			return (supertrend1, direction1, supertrend2, direction2, supertrend3, direction3);
 		}
 
-		public static (double[], double[]) StochasticRsi(double[] close, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
+		public static (double?[], double?[]) StochasticRsi(double[] close, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
 		{
 			var rsi = Rsi(close, rsiPeriod);
 			var stoch = Stoch(rsi, rsi, rsi, stochasticPeriod, 2);
@@ -627,26 +679,29 @@
 			return (k, d);
 		}
 
-		public static double[] Adx(double[] high, double[] low, double[] close, int adxPeriod, int diPeriod)
+		public static double?[] Adx(double[] high, double[] low, double[] close, int adxPeriod, int diPeriod)
 		{
-			var adx = new double[high.Length];
-			var up = new double[high.Length];
-			var down = new double[high.Length];
-			var plusDm = new double[high.Length];
-			var minusDm = new double[high.Length];
-			var trueRange = new double[high.Length];
-			var _plus = new double[high.Length];
-			var _minus = new double[high.Length];
-			var diff2 = new double[high.Length];
+			var nHigh = high.ToNullable();
+			var nLow = low.ToNullable();
 
-			up = Change(high);
-			down = Change(low).Select(x => -x).ToArray();
+			var adx = new double?[high.Length];
+			var up = new double?[high.Length];
+			var down = new double?[high.Length];
+			var plusDm = new double?[high.Length];
+			var minusDm = new double?[high.Length];
+			var trueRange = new double?[high.Length];
+			var _plus = new double?[high.Length];
+			var _minus = new double?[high.Length];
+			var diff2 = new double?[high.Length];
+
+			up = Change(nHigh);
+			down = [.. Change(nLow).Select(x => -x)];
 			for (int i = 0; i < high.Length; i++)
 			{
 				if (i == 0)
 				{
-					plusDm[i] = NA;
-					minusDm[i] = NA;
+					plusDm[i] = null;
+					minusDm[i] = null;
 					continue;
 				}
 
@@ -700,9 +755,9 @@
 			return smma;
 		}
 
-		public static double[] Zlema(double[] values, int period)
+		public static double?[] Zlema(double?[] values, int period)
 		{
-			var zlema = new double[values.Length];
+			var zlema = new double?[values.Length];
 
 			var ema1 = Ema(values, period);
 			var ema2 = Ema(ema1, period);
@@ -723,10 +778,10 @@
 		/// <param name="close"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static double[] Imacd(double[] high, double[] low, double[] close, int period)
+		public static double?[] Imacd(double[] high, double[] low, double[] close, int period)
 		{
-			var result = new double[high.Length];
-			var hlc = new double[high.Length];
+			var result = new double?[high.Length];
+			var hlc = new double?[high.Length];
 
 			for (int i = 0; i < high.Length; i++)
 			{
@@ -784,21 +839,21 @@
 			return tsv;
 		}
 
-		public static (double[], double[], double[], double[]) Custom(double[] open, double[] high, double[] low, double[] close, double[] volume, int period)
+		public static (double?[], double?[], double?[], double?[]) Custom(double[] open, double[] high, double[] low, double[] close, double[] volume, int period)
 		{
 			double alpha = 2.0 / (period + 1);
-			var upper = new double[open.Length];
-			var lower = new double[open.Length];
-			var pioneer = new double[open.Length];
-			var player = new double[open.Length];
+			var upper = new double?[open.Length];
+			var lower = new double?[open.Length];
+			var pioneer = new double?[open.Length];
+			var player = new double?[open.Length];
 			for (int i = 0; i < open.Length; i++)
 			{
 				if (i < period - 1)
 				{
-					upper[i] = NA;
-					lower[i] = NA;
-					pioneer[i] = NA;
-					player[i] = NA;
+					upper[i] = null;
+					lower[i] = null;
+					pioneer[i] = null;
+					player[i] = null;
 					continue;
 				}
 
@@ -832,29 +887,31 @@
 			return (upper, lower, pioneer, player);
 		}
 
-		public static (double[], double[], double[]) TrendRider(double[] high, double[] low, double[] close, int atrPeriod, double atrMultiplier, int rsiPeriod, int macdFastPeriod, int macdSlowPeriod, int macdSignalPeriod)
+		public static (double?[], double?[], double?[]) TrendRider(double[] high, double[] low, double[] close, int atrPeriod, double atrMultiplier, int rsiPeriod, int macdFastPeriod, int macdSlowPeriod, int macdSignalPeriod)
 		{
-			var up = new double[high.Length];
-			var dn = new double[high.Length];
-			var di = new double[high.Length];
-			var trend = new double[high.Length];
-			var supertrend = new double[high.Length];
-			var supertrendDirection = new double[high.Length];
+			var nClose = close.ToNullable();
+
+			var up = new double?[high.Length];
+			var dn = new double?[high.Length];
+			var di = new double?[high.Length];
+			var trend = new double?[high.Length];
+			var supertrend = new double?[high.Length];
+			var supertrendDirection = new double?[high.Length];
 
 			var atr = Atr(high, low, close, atrPeriod);
 			var rsi = Rsi(close, rsiPeriod);
-			var macd = Macd(close, macdFastPeriod, macdSlowPeriod, macdSignalPeriod).Item1;
+			var macd = Macd(nClose, macdFastPeriod, macdSlowPeriod, macdSignalPeriod).Item1;
 
 			for (int i = 0; i < high.Length; i++)
 			{
 				if (i < 1)
 				{
-					up[i] = NA;
-					dn[i] = NA;
-					di[i] = NA;
-					trend[i] = NA;
-					supertrend[i] = NA;
-					supertrendDirection[i] = NA;
+					up[i] = null;
+					dn[i] = null;
+					di[i] = null;
+					trend[i] = null;
+					supertrend[i] = null;
+					supertrendDirection[i] = null;
 					continue;
 				}
 
@@ -866,13 +923,13 @@
 				if (di[i] > 0) // up trend
 				{
 					trend[i] = (rsi[i] > 50 && macd[i] > 0) ? -1 : 0;
-					supertrend[i] = dn[i] = Math.Max(dn[i], dn[i - 1]);
+					supertrend[i] = dn[i] = Math.Max(dn[i] ?? 0, dn[i - 1] ?? 0);
 					supertrendDirection[i] = -1;
 				}
 				else if (di[i] < 0) // down trend
 				{
 					trend[i] = (rsi[i] < 50 && macd[i] < 0) ? 1 : 0;
-					supertrend[i] = up[i] = Math.Min(up[i], up[i - 1]);
+					supertrend[i] = up[i] = Math.Min(up[i] ?? 0, up[i - 1] ?? 0);
 					supertrendDirection[i] = 1;
 				}
 			}
@@ -880,15 +937,15 @@
 			return (trend, supertrend, supertrendDirection);
 		}
 
-		public static (double[], double[], double[], double[], double[]) PredictiveRanges(double[] high, double[] low, double[] close, int period, double factor)
+		public static (double?[], double?[], double?[], double?[], double?[]) PredictiveRanges(double[] high, double[] low, double[] close, int period, double factor)
 		{
 			var atr = Atr(high, low, close, period).Select(x => x * factor).ToArray();
-			var avg = new double[high.Length];
-			var holdAtr = new double[high.Length];
-			var u2 = new double[high.Length];
-			var u = new double[high.Length];
-			var l = new double[high.Length];
-			var l2 = new double[high.Length];
+			var avg = new double?[high.Length];
+			var holdAtr = new double?[high.Length];
+			var u2 = new double?[high.Length];
+			var u = new double?[high.Length];
+			var l = new double?[high.Length];
+			var l2 = new double?[high.Length];
 
 			avg[0] = close[0];
 			holdAtr[0] = 0;
@@ -911,6 +968,106 @@
 			}
 
 			return (u2, u, avg, l, l2);
+		}
+
+		public class KnnPredictionData(List<double?> parameter1, List<double?> parameter2, List<double?> priceArray, List<double?> resultArray)
+		{
+			public List<double?> Parameter1 { get; set; } = parameter1;
+			public List<double?> Parameter2 { get; set; } = parameter2;
+			public List<double?> PriceArray { get; set; } = priceArray;
+			public List<double?> ResultArray { get; set; } = resultArray;
+		}
+
+		/// <summary>
+		/// Machine Learning of Momentum Index
+		/// </summary>
+		/// <param name="predictionDataPeriod"></param>
+		/// <param name="trendLength"></param>
+		/// <returns></returns>
+		public static (double?[], double?[]) Mlmi(double[] close, int predictionDataPeriod, int trendLength)
+		{
+			var nClose = close.ToNullable();
+			var quickMa = Wma(nClose, 5);
+			var slowMa = Wma(nClose, 20);
+			var quickRsi = Wma(Rsi(close, 5), trendLength);
+			var slowRsi = Wma(Rsi(close, 20), trendLength);
+
+			var positive = Crossover(quickMa, slowMa);
+			var negative = Crossunder(quickMa, slowMa);
+
+			var data = new KnnPredictionData([0], [0], [0], [0]);
+			var prediction = new double?[close.Length];
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				if ((positive[i] ?? false) || (negative[i] ?? false))
+				{
+					StorePreviousTrade(data, close[i], slowRsi[i], quickRsi[i]);
+				}
+
+				prediction[i] = KnnPredict(data, slowRsi[i], quickRsi[i], predictionDataPeriod);
+			}
+
+			var predictionMa = Wma(prediction, 20);
+
+			return (prediction, predictionMa);
+		}
+
+		public static void StorePreviousTrade(KnnPredictionData d, double close, double? p1, double? p2)
+		{
+			//if (d.Parameter1.Count == 0)
+			//{
+			//	return;
+			//}
+
+			//d.Parameter1.Add(d.Parameter1[^1]);
+			//d.Parameter2.Add(d.Parameter2[^1]);
+			//d.PriceArray.Add(d.PriceArray[^1]);
+			d.ResultArray.Add(close >= d.PriceArray[^1] ? 1 : -1);
+			d.Parameter1.Add(p1);
+			d.Parameter2.Add(p2);
+			d.PriceArray.Add(close);
+		}
+
+		public static double? KnnPredict(KnnPredictionData d, double? p1, double? p2, int k)
+		{
+			if (p1 == null || p2 == null)
+			{
+				return null;
+			}
+
+			var distances = new List<double?>();
+			int n = d.Parameter1.Count;
+
+			for (int i = 0; i < n; i++)
+			{
+				if (d.Parameter1[i] == null || d.Parameter2[i] == null)
+				{
+					distances.Add(null);
+					continue;
+				}
+				double distance = Math.Sqrt(Math.Pow(p1 ?? 0 - d.Parameter1[i] ?? 0, 2) + Math.Pow(p2 ?? 0 - d.Parameter2[i] ?? 0, 2));
+				distances.Add(distance);
+			}
+
+			var sortedDistances = distances.OrderBy(x => x).Take(k).ToList();
+			double maxDist = sortedDistances.Max() ?? 0;
+
+			var neighbors = new List<double>();
+			for (int i = 0; i < distances.Count; i++)
+			{
+				if (d.ResultArray[i] == null)
+				{
+					continue;
+				}
+
+				if (distances[i] <= maxDist)
+				{
+					neighbors.Add(d.ResultArray[i] ?? 0);
+				}
+			}
+
+			return neighbors.Sum();
 		}
 	}
 }

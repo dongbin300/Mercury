@@ -139,6 +139,8 @@ namespace Mercury.Backtests
 				{
 					if (IsLiquidation())
 					{
+						File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), $"LIQ" + Environment.NewLine + Environment.NewLine);
+						WritePositionHistory();
 						return (string.Empty, 0m);
 					}
 
@@ -211,17 +213,7 @@ namespace Mercury.Backtests
 
 		bool IsLiquidation()
 		{
-			if (EstimatedMoney < 0)
-			{
-				File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), $"LIQ" + Environment.NewLine + Environment.NewLine);
-				WritePositionHistory();
-
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			return EstimatedMoney < 0;
 		}
 
 		void ProcessDailyRisk(DateTime time)
