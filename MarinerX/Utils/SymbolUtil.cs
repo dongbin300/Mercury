@@ -1,5 +1,6 @@
 ﻿using Binance.Net.Enums;
 
+using Mercury;
 using Mercury.Extensions;
 
 using System;
@@ -30,7 +31,7 @@ namespace MarinerX.Utils
 		{
 			try
 			{
-				var lastLine = File.ReadAllLines(PathUtil.BinanceFuturesData.Down(interval.ToStandardString(), $"{symbol}.csv")).Last();
+				var lastLine = File.ReadAllLines(MercuryPath.BinanceFuturesData.Down(interval.ToStandardString(), $"{symbol}.csv")).Last();
 				return lastLine.Split(',')[0].ToDateTime();
 			}
 			catch
@@ -42,7 +43,7 @@ namespace MarinerX.Utils
 
 		public static DateTime GetEndDateOf1D(string symbol)
 		{
-			var data = File.ReadAllLines(PathUtil.BinanceFuturesData.Down("1D", $"{symbol}.csv"));
+			var data = File.ReadAllLines(MercuryPath.BinanceFuturesData.Down("1D", $"{symbol}.csv"));
 			return DateTime.Parse(data[^1].Split(',')[0].Split(' ')[0]);
 		}
 
@@ -53,7 +54,7 @@ namespace MarinerX.Utils
 
 		public static string GetStartDateFileName(string symbol)
 		{
-			return new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol))
+			return new DirectoryInfo(MercuryPath.BinanceFuturesData.Down("1m", symbol))
 				.GetFiles("*.csv")
 				.OrderBy(x => x.Name)
 				.First().Name;
@@ -61,7 +62,7 @@ namespace MarinerX.Utils
 
 		public static string GetEndDateFileName(string symbol)
 		{
-			return new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol))
+			return new DirectoryInfo(MercuryPath.BinanceFuturesData.Down("1m", symbol))
 				.GetFiles("*.csv")
 				.OrderByDescending(x => x.Name)
 				.First().Name;

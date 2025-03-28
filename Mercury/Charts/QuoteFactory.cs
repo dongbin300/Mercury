@@ -2,7 +2,8 @@
 {
 	public class QuoteFactory
 	{
-		public static List<RealtimeQuote> Quotes = new();
+		public static List<RealtimeQuote> Quotes = [];
+		public static List<CurrentPrice> CurrentPrices = [];
 
 		public static void Init()
 		{

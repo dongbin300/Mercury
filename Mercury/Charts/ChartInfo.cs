@@ -51,6 +51,7 @@ namespace Mercury.Charts
 		public double? MacdHist2 { get; set; }
 		public double? Adx { get; set; }
 		public double? Atr { get; set; }
+		public double? Atrma { get; set; }
 		public double? Bb1Upper { get; set; }
 		public double? Bb1Lower { get; set; }
 		public double? Bb2Upper { get; set; }
@@ -77,6 +78,13 @@ namespace Mercury.Charts
 		public double? PredictiveRangesLower { get; set; }
 		public double? PredictiveRangesLower2 { get; set; }
 		public double? PredictiveRangesMaxLeverage { get; set; }
+
+		public double? Prediction { get; set; }
+		public double? PredictionMa { get; set; }
+
+		public double? DcBasis { get; set; }
+		public double? DcUpper { get; set; }
+		public double? DcLower { get; set; }
 
 		public decimal LiquidationPriceLong { get; set; } = 0m;
 		public decimal LiquidationPriceShort { get; set; } = 0m;

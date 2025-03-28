@@ -52,7 +52,7 @@ namespace MarinerX.Charts
 					case KlineInterval.SixHour:
 					case KlineInterval.EightHour:
 					case KlineInterval.TwelveHour:
-						var files = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("1m", symbol)).GetFiles("*.csv");
+						var files = new DirectoryInfo(MercuryPath.BinanceFuturesData.Down("1m", symbol)).GetFiles("*.csv");
 
 						worker.For(0, files.Length, 1, (i) =>
 						{
@@ -81,7 +81,7 @@ namespace MarinerX.Charts
 					case KlineInterval.ThreeDay:
 					case KlineInterval.OneWeek:
 					case KlineInterval.OneMonth:
-						var path = PathUtil.BinanceFuturesData.Down("1D", $"{symbol}.csv");
+						var path = MercuryPath.BinanceFuturesData.Down("1D", $"{symbol}.csv");
 						var data = File.ReadAllLines(path);
 
 						foreach (var d in data)
@@ -146,7 +146,7 @@ namespace MarinerX.Charts
 						worker.For(0, dayCount, 1, (i) =>
 						{
 							var _currentDate = startDate.AddDays(i);
-							var fileName = PathUtil.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{_currentDate:yyyy-MM-dd}.csv");
+							var fileName = MercuryPath.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{_currentDate:yyyy-MM-dd}.csv");
 							var data = File.ReadAllLines(fileName);
 
 							foreach (var d in data)
@@ -170,7 +170,7 @@ namespace MarinerX.Charts
 					case KlineInterval.ThreeDay:
 					case KlineInterval.OneWeek:
 					case KlineInterval.OneMonth:
-						var path = PathUtil.BinanceFuturesData.Down("1D", $"{symbol}.csv");
+						var path = MercuryPath.BinanceFuturesData.Down("1D", $"{symbol}.csv");
 						var data = File.ReadAllLines(path);
 
 						foreach (var d in data)
@@ -265,7 +265,7 @@ namespace MarinerX.Charts
 							}
 						}, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
 
-						File.WriteAllText(PathUtil.BinanceFuturesData.Down("price", symbol, $"{symbol}-prices-{currentDateString}"), builder.ToString());
+						File.WriteAllText(MercuryPath.BinanceFuturesData.Down("price", symbol, $"{symbol}-prices-{currentDateString}"), builder.ToString());
 					}
 				}
 				else
@@ -302,7 +302,7 @@ namespace MarinerX.Charts
 
 						}, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
 
-						File.WriteAllText(PathUtil.BinanceFuturesData.Down("price", symbol, $"{symbol}-prices-{currentDateString}"), builder.ToString());
+						File.WriteAllText(MercuryPath.BinanceFuturesData.Down("price", symbol, $"{symbol}-prices-{currentDateString}"), builder.ToString());
 					}
 				}
 			}
@@ -408,7 +408,7 @@ namespace MarinerX.Charts
 						var price = tradePack.Trades[i].Price;
 						if (!(time.Year == currentDate.Year && time.Month == currentDate.Month && time.Day == currentDate.Day))
 						{
-							File.WriteAllText(PathUtil.BinanceFuturesData.Down("price", tradePack.Symbol, $"{tradePack.Symbol}-prices-{currentDate:yyyy-MM-dd}.csv"), data);
+							File.WriteAllText(MercuryPath.BinanceFuturesData.Down("price", tradePack.Symbol, $"{tradePack.Symbol}-prices-{currentDate:yyyy-MM-dd}.csv"), data);
 
 							currentDate = currentDate.AddDays(1);
 							data = string.Empty;
@@ -423,7 +423,7 @@ namespace MarinerX.Charts
 						data += $"{time:yyyy-MM-dd HH:mm:ss.fff},{price}" + Environment.NewLine;
 					}, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
 
-					File.WriteAllText(PathUtil.BinanceFuturesData.Down("price", tradePack.Symbol, $"{tradePack.Symbol}-prices-{currentDate:yyyy-MM-dd}.csv"), data);
+					File.WriteAllText(MercuryPath.BinanceFuturesData.Down("price", tradePack.Symbol, $"{tradePack.Symbol}-prices-{currentDate:yyyy-MM-dd}.csv"), data);
 				}
 			}
 			catch
@@ -438,7 +438,7 @@ namespace MarinerX.Charts
 			{
 				var pricePack = new PricePack(symbol);
 
-				var files = new DirectoryInfo(PathUtil.BinanceFuturesData.Down("price", symbol)).GetFiles("*.csv");
+				var files = new DirectoryInfo(MercuryPath.BinanceFuturesData.Down("price", symbol)).GetFiles("*.csv");
 
 				worker.For(0, files.Length, 1, (i) =>
 				{
@@ -466,7 +466,7 @@ namespace MarinerX.Charts
 		{
 			try
 			{
-				var startTimeTemp = File.Exists(PathUtil.BinanceFuturesData.Down("1D", "BTCUSDT.csv")) ? SymbolUtil.GetEndDateOf1D("BTCUSDT") : SymbolUtil.GetStartDate("BTCUSDT");
+				var startTimeTemp = File.Exists(MercuryPath.BinanceFuturesData.Down("1D", "BTCUSDT.csv")) ? SymbolUtil.GetEndDateOf1D("BTCUSDT") : SymbolUtil.GetStartDate("BTCUSDT");
 				//var startTimeTemp = new DateTime(2019, 9, 8);
 				var symbols = LocalApi.SymbolNames;
 				var dayCountTemp = (DateTime.Today - startTimeTemp).Days + 1;
@@ -476,15 +476,15 @@ namespace MarinerX.Charts
 				int s = 0;
 				foreach (var symbol in symbols)
 				{
-					var startTime = File.Exists(PathUtil.BinanceFuturesData.Down("1D", $"{symbol}.csv")) ? SymbolUtil.GetEndDateOf1D(symbol) : SymbolUtil.GetStartDate(symbol);
+					var startTime = File.Exists(MercuryPath.BinanceFuturesData.Down("1D", $"{symbol}.csv")) ? SymbolUtil.GetEndDateOf1D(symbol) : SymbolUtil.GetStartDate(symbol);
 					var dayCount = (DateTime.Today - startTime).Days + 1;
 					var chartPack = new ChartPack(KlineInterval.OneDay);
-					var path = PathUtil.BinanceFuturesData.Down("1D", $"{symbol}.csv");
+					var path = MercuryPath.BinanceFuturesData.Down("1D", $"{symbol}.csv");
 
 					for (int i = 0; i < dayCount; i++)
 					{
 						var date = startTime.AddDays(i);
-						var inputFileName = PathUtil.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{date:yyyy-MM-dd}.csv");
+						var inputFileName = MercuryPath.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{date:yyyy-MM-dd}.csv");
 
 						if (!File.Exists(inputFileName))
 						{
@@ -560,7 +560,7 @@ namespace MarinerX.Charts
 				{
 					var symbol = symbols[j];
 					var startTime = manualStartTime;
-					var fileName = PathUtil.BinanceFuturesData.Down(interval.ToIntervalString(), $"{symbol}.csv");
+					var fileName = MercuryPath.BinanceFuturesData.Down(interval.ToIntervalString(), $"{symbol}.csv");
 
 					// 파일이 존재하면 가장 마지막 줄의 시간을 가져옴
 					if (File.Exists(fileName))
@@ -579,7 +579,7 @@ namespace MarinerX.Charts
 							worker.ProgressText($"{symbol}, {i} / {dayCount}");
 
 							var date = startTime.AddDays(i);
-							var inputFileName = PathUtil.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{date:yyyy-MM-dd}.csv");
+							var inputFileName = MercuryPath.BinanceFuturesData.Down("1m", symbol, $"{symbol}_{date:yyyy-MM-dd}.csv");
 							var data = File.ReadAllLines(inputFileName);
 
 							foreach (var d in data)
@@ -639,7 +639,7 @@ namespace MarinerX.Charts
 			try
 			{
 				var startTime = SymbolUtil.GetEndDate("ZRXUSDT");
-				var EndTime = new DateTime(2024, 12, 31);
+				var EndTime = DateTime.Today;
 				var symbols = LocalApi.SymbolNames;
 				var csvFileCount = ((EndTime - startTime).Days + 1) * symbols.Count;
 				worker.SetProgressBar(0, csvFileCount);
@@ -656,7 +656,7 @@ namespace MarinerX.Charts
 
 					foreach (var symbol in symbols)
 					{
-						var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
+						var symbolPath = MercuryPath.BinanceFuturesData.Down("1m", symbol);
 
 						if (!Directory.Exists(symbolPath))
 						{
@@ -722,7 +722,7 @@ namespace MarinerX.Charts
 				foreach (var symbol in symbols)
 				{
 					var startTime = getStartTime;
-					var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
+					var symbolPath = MercuryPath.BinanceFuturesData.Down("1m", symbol);
 
 					if (!Directory.Exists(symbolPath))
 					{
@@ -766,7 +766,7 @@ namespace MarinerX.Charts
 				var symbols = LocalApi.SymbolNames;
 				foreach (var symbol in symbols)
 				{
-					var symbolPath = PathUtil.BinanceFuturesData.Down("1m", symbol);
+					var symbolPath = MercuryPath.BinanceFuturesData.Down("1m", symbol);
 					var files = new DirectoryInfo(symbolPath).GetFiles("*.csv");
 					var exceptedFiles = files.Except(new List<FileInfo> { files.OrderBy(f => f.Name).First(), files.OrderByDescending(f => f.Name).First() }); // Except start date & end date
 					var fileSizeAverage = exceptedFiles.Average(f => f.Length);

@@ -3,6 +3,7 @@
 using MarinerX.Charts;
 using MarinerX.Utils;
 
+using Mercury;
 using Mercury.Apis;
 using Mercury.Assets;
 using Mercury.Enums;
@@ -184,7 +185,7 @@ namespace MarinerX.Views
             }, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
 
 
-            var path = PathUtil.Base.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
+            var path = MercuryPath.Base.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
             trades.SaveCsvFile(path);
 
             DispatcherService.Invoke(() =>

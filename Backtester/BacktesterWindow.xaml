@@ -66,6 +66,7 @@
                     <ComboBoxItem>DownCandle3</ComboBoxItem>
                     <ComboBoxItem>CandleSma</ComboBoxItem>
                     <ComboBoxItem>Custom</ComboBoxItem>
+                    <ComboBoxItem>Mlmip</ComboBoxItem>
                 </ComboBox>
                 <TextBlock Style="{StaticResource Description}">Backtest Type</TextBlock>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

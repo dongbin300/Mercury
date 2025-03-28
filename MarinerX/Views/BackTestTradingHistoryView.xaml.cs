@@ -28,7 +28,7 @@ namespace MarinerX.Views
         {
             Title = fileName.GetOnlyFileName();
 
-            var csv = PathUtil.ReadCsv(fileName);
+            var csv = FileUtil.ReadCsv(fileName);
             HistoryDataGrid.ItemsSource = null;
             HistoryDataGrid.ItemsSource = csv.DefaultView;
         }

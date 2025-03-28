@@ -178,8 +178,8 @@ namespace Backtester.Views
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
 
-            var yMax = Math.Max(charts.Max(x => Math.Abs(x.Ema1)), (double)charts.Max(x => x.Quote.High));
-            var yMin = Math.Min(charts.Min(x => Math.Abs(x.Ema1)), (double)charts.Min(x => x.Quote.Low));
+            var yMax = Math.Max(charts.Max(x => Math.Abs(x.Ema1 ?? 0)), (double)charts.Max(x => x.Quote.High));
+            var yMin = Math.Min(charts.Min(x => Math.Abs(x.Ema1 ?? 0)), (double)charts.Min(x => x.Quote.Low));
 
             //var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), (double)charts.Max(x => x.Quote.High))));
             //var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), Math.Max(charts.Max(x => x.Ema1), (double)charts.Max(x => x.Quote.High)))));

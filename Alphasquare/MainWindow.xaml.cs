@@ -18,7 +18,7 @@ namespace Alphasquare
     /// </summary>
     public partial class MainWindow : Window
     {
-        string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Gaten", "StockData", "Quotes");
+        string basePath = MercuryPath.Base.Down("StockData", "Quotes");
 
         private readonly SKPaint LongPaint = new() { Color = new(59, 207, 134) };
         private readonly SKPaint ShortPaint = new() { Color = new(237, 49, 97) };

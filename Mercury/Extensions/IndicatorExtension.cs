@@ -432,5 +432,56 @@ namespace Mercury.Extensions
 
             return result;
         }
+
+        public static IEnumerable<MlmipResult> GetMlmip(this IEnumerable<Quote> quotes, int pivotBars = 20, int momentumWindow = 25, int maxData = 500, int numNeighbors = 100, int predictionSmoothing = 20)
+        {
+            var result = new List<MlmipResult>();
+
+            var high = quotes.Select(x => (double)x.High).ToArray();
+            var low = quotes.Select(x => (double)x.Low).ToArray();
+            var close = quotes.Select(x => (double)x.Close).ToArray();
+            (var prediction, var predictionMa) = ArrayCalculator.Mlmip(high, low, close, pivotBars, momentumWindow, maxData, numNeighbors, predictionSmoothing);
+
+            for (int i = 0; i < prediction.Length; i++)
+            {
+                var mlmip = new MlmipResult(quotes.ElementAt(i).Date, prediction[i], predictionMa[i]);
+                result.Add(mlmip);
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<AtrmaResult> GetAtrma(this IEnumerable<Quote> quotes, int atrPeriod = 14, int maPeriod = 20)
+        {
+            var result = new List<AtrmaResult>();
+
+            var high = quotes.Select(x => (double)x.High).ToArray();
+            var low = quotes.Select(x => (double)x.Low).ToArray();
+            var close = quotes.Select(x => (double)x.Close).ToArray();
+            var atrma = ArrayCalculator.Atrma(high, low, close, atrPeriod, maPeriod);
+
+            for (int i = 0; i < atrma.Length; i++)
+            {
+                result.Add(new AtrmaResult(quotes.ElementAt(i).Date, atrma[i]));
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<DonchianChannelResult> GetDonchianChannel(this IEnumerable<Quote> quotes, int period = 20)
+        {
+			var result = new List<DonchianChannelResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			(var basis, var upper, var lower) = ArrayCalculator.DonchianChannel(high, low, period);
+
+			for (int i = 0; i < basis.Length; i++)
+			{
+				result.Add(new DonchianChannelResult(quotes.ElementAt(i).Date, basis[i], upper[i], lower[i]));
+			}
+
+			return result;
+		}
     }
 }

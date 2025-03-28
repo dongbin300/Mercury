@@ -347,5 +347,40 @@ namespace Mercury.Charts
 				Charts[i].Stoch = stoch.ElementAt(i);
 			}
 		}
+
+		public void UseMlmip(int pivotBars = 20, int momentumWindow = 25, int maxData = 500, int numNeighbors = 100, int predictionSmoothing = 20)
+		{
+			var mlmip = Charts.Select(x => x.Quote).GetMlmip(pivotBars, momentumWindow, maxData, numNeighbors, predictionSmoothing);
+			var prediction = mlmip.Select(x => x.Prediction);
+			var predictionMa = mlmip.Select(x => x.PredictionMa);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Prediction = prediction.ElementAt(i);
+				Charts[i].PredictionMa = predictionMa.ElementAt(i);
+			}
+		}
+
+		public void UseAtrma(int atrPeriod = 14, int maPeriod = 20)
+		{
+			var atrma = Charts.Select(x => x.Quote).GetAtrma(atrPeriod, maPeriod).Select(x => x.Atrma);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Atrma = atrma.ElementAt(i);
+			}
+		}
+
+		public void UseDonchianChannel(int period = 20)
+		{
+			var donchianChannel = Charts.Select(x => x.Quote).GetDonchianChannel(period);
+			var basis = donchianChannel.Select(x => x.Basis);
+			var upper = donchianChannel.Select(x => x.Upper);
+			var lower = donchianChannel.Select(x => x.Lower);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].DcBasis = basis.ElementAt(i);
+				Charts[i].DcUpper = upper.ElementAt(i);
+				Charts[i].DcLower = lower.ElementAt(i);
+			}
+		}
 	}
 }

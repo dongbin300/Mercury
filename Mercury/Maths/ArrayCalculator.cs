@@ -1,9 +1,19 @@
 ﻿using Mercury.Extensions;
 
-using System.Diagnostics;
+using System.Data;
 
 namespace Mercury.Maths
 {
+	/// <summary>
+	/// TODO
+	/// Momentum
+	/// Adaptive Momentum Oscillator
+	/// 
+	/// Mean Reversion
+	/// Z-score
+	/// QQE MOD
+	/// 
+	/// </summary>
 	public class ArrayCalculator
 	{
 		public static readonly double NA = 0;
@@ -75,6 +85,87 @@ namespace Mercury.Maths
 				}
 			}
 			return max;
+		}
+
+		/// <summary>
+		/// Get Lowest values
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="period"></param>
+		/// <returns></returns>
+		public static double?[] Lowest(double[] values, int period)
+		{
+			var result = new double?[values.Length];
+			for (int i = 0; i < values.Length; i++)
+			{
+				if (i < period - 1)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				double min = double.MaxValue;
+				for (int j = i; j > i - period; j--)
+				{
+					if (values[j] < min)
+					{
+						min = values[j];
+					}
+				}
+				result[i] = min;
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// Get Highest Values
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="period"></param>
+		/// <returns></returns>
+		public static double?[] Highest(double[] values, int period)
+		{
+			var result = new double?[values.Length];
+			for (int i = 0; i < values.Length; i++)
+			{
+				if (i < period - 1)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				double max = double.MinValue;
+				for (int j = i; j > i - period; j--)
+				{
+					if (values[j] > max)
+					{
+						max = values[j];
+					}
+				}
+				result[i] = max;
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// Get Average of values
+		/// </summary>
+		/// <param name="values1"></param>
+		/// <param name="values2"></param>
+		/// <returns></returns>
+		public static double?[] Average(double?[] values1, double?[] values2)
+		{
+			var result = new double?[values1.Length];
+			for (int i = 0; i < values1.Length; i++)
+			{
+				if (values1[i] == null || values2[i] == null)
+				{
+					result[i] = null;
+					continue;
+				}
+				result[i] = (values1[i] + values2[i]) / 2;
+			}
+			return result;
 		}
 
 		/// <summary>
@@ -349,6 +440,56 @@ namespace Mercury.Maths
 			return result;
 		}
 
+		/// <summary>
+		/// Price of the pivot high point
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="leftBars"></param>
+		/// <param name="rightBars"></param>
+		/// <returns></returns>
+		public static double?[] PivotHigh(double[] high, int leftBars, int rightBars)
+		{
+			int length = high.Length;
+			var pivots = new double?[length];
+
+			for (int pivotIndex = leftBars; pivotIndex < length - rightBars; pivotIndex++)
+			{
+				double pivotValue = high[pivotIndex];
+
+				bool isPivot = high.Skip(pivotIndex - leftBars).Take(leftBars).All(x => x < pivotValue) &&
+							   high.Skip(pivotIndex + 1).Take(rightBars).All(x => x < pivotValue);
+
+				pivots[pivotIndex] = isPivot ? pivotValue : null;
+			}
+
+			return pivots;
+		}
+
+		/// <summary>
+		/// Price of the pivot low point
+		/// </summary>
+		/// <param name="low"></param>
+		/// <param name="leftBars"></param>
+		/// <param name="rightBars"></param>
+		/// <returns></returns>
+		public static double?[] PivotLow(double[] low, int leftBars, int rightBars)
+		{
+			int length = low.Length;
+			var pivots = new double?[length];
+
+			for (int pivotIndex = leftBars; pivotIndex < length - rightBars; pivotIndex++)
+			{
+				double pivotValue = low[pivotIndex];
+
+				bool isPivot = low.Skip(pivotIndex - leftBars).Take(leftBars).All(x => x > pivotValue) &&
+							   low.Skip(pivotIndex + 1).Take(rightBars).All(x => x > pivotValue);
+
+				pivots[pivotIndex] = isPivot ? pivotValue : null;
+			}
+
+			return pivots;
+		}
+
 		public static (double?[], double?[], double?[], double?[], double?[]) IchimokuCloud(double[] high, double[] low, double[] close, int conversionPeriod, int basePeriod, int leadingSpanPeriod)
 		{
 			var nHigh = high.ToNullable();
@@ -519,6 +660,22 @@ namespace Mercury.Maths
 		{
 			var tr = Tr(high, low, close);
 			return Rma(tr.ToNullable(), period, startIndex);
+		}
+
+		/// <summary>
+		/// Average True Range Moving Average
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <param name="atrPeriod"></param>
+		/// <param name="maPeriod"></param>
+		/// <param name="startIndex"></param>
+		/// <returns></returns>
+		public static double?[] Atrma(double[] high, double[] low, double[] close, int atrPeriod, int maPeriod, int startIndex = 0)
+		{
+			var atr = Atr(high, low, close, atrPeriod, startIndex);
+			return Wma(atr, maPeriod);
 		}
 
 		/// <summary>
@@ -970,14 +1127,6 @@ namespace Mercury.Maths
 			return (u2, u, avg, l, l2);
 		}
 
-		public class KnnPredictionData(List<double?> parameter1, List<double?> parameter2, List<double?> priceArray, List<double?> resultArray)
-		{
-			public List<double?> Parameter1 { get; set; } = parameter1;
-			public List<double?> Parameter2 { get; set; } = parameter2;
-			public List<double?> PriceArray { get; set; } = priceArray;
-			public List<double?> ResultArray { get; set; } = resultArray;
-		}
-
 		/// <summary>
 		/// Machine Learning of Momentum Index
 		/// </summary>
@@ -995,17 +1144,17 @@ namespace Mercury.Maths
 			var positive = Crossover(quickMa, slowMa);
 			var negative = Crossunder(quickMa, slowMa);
 
-			var data = new KnnPredictionData([0], [0], [0], [0]);
+			var data = new KnnPredictionData2() { Parameter1 = [0], Parameter2 = [0], PriceArray = [0], ResultArray = [0] };
 			var prediction = new double?[close.Length];
 
 			for (int i = 0; i < close.Length; i++)
 			{
 				if ((positive[i] ?? false) || (negative[i] ?? false))
 				{
-					StorePreviousTrade(data, close[i], slowRsi[i], quickRsi[i]);
+					data.StorePreviousTrade(slowRsi[i], quickRsi[i], close[i]);
 				}
 
-				prediction[i] = KnnPredict(data, slowRsi[i], quickRsi[i], predictionDataPeriod);
+				prediction[i] = data.KnnPredict(slowRsi[i], quickRsi[i], predictionDataPeriod);
 			}
 
 			var predictionMa = Wma(prediction, 20);
@@ -1013,61 +1162,75 @@ namespace Mercury.Maths
 			return (prediction, predictionMa);
 		}
 
-		public static void StorePreviousTrade(KnnPredictionData d, double close, double? p1, double? p2)
+		/// <summary>
+		/// Machine Learning of Momentum Index with Pivot
+		/// </summary>
+		/// <param name="close"></param>
+		/// <param name="pivotBars"></param>
+		/// <param name="momentumWindow"></param>
+		/// <param name="maxData"></param>
+		/// <param name="numNeighbors"></param>
+		/// <param name="predictionSmoothing"></param>
+		/// <returns></returns>
+		public static (double?[], double?[]) Mlmip(double[] high, double[] low, double[] close, int pivotBars, int momentumWindow, int maxData, int numNeighbors, int predictionSmoothing)
 		{
-			//if (d.Parameter1.Count == 0)
+			//var nClose = close.ToNullable();
+			var parameter1 = Wma(Rsi(close, 12), momentumWindow);
+			var parameter2 = Wma(Rsi(close, 25), momentumWindow);
+			var parameter3 = Wma(Rsi(close, 50), momentumWindow);
+			var parameter4 = Wma(Rsi(close, 100), momentumWindow);
+
+			var data = new KnnPredictionData4()
+			{
+				Parameter1 = [.. Enumerable.Repeat<double?>(null, numNeighbors)],
+				Parameter2 = [.. Enumerable.Repeat<double?>(null, numNeighbors)],
+				Parameter3 = [.. Enumerable.Repeat<double?>(null, numNeighbors)],
+				Parameter4 = [.. Enumerable.Repeat<double?>(null, numNeighbors)],
+				PriceArray = [.. Enumerable.Repeat<double?>(null, numNeighbors)],
+				ResultArray = [.. Enumerable.Repeat<double?>(null, numNeighbors)]
+			};
+			(var phDetected, var plDetected) = data.DetectPivots(high, low, pivotBars);
+			var prediction = new double?[close.Length];
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				if (phDetected[i] || plDetected[i])
+				{
+					data.StorePreviousTrade(parameter1[i], parameter2[i], parameter3[i], parameter4[i], close[i], maxData);
+				}
+				prediction[i] = data.KnnPredict(parameter1[i], parameter2[i], parameter3[i], parameter4[i], numNeighbors);
+			}
+
+			prediction = data.Rescale(prediction, prediction.Min(), prediction.Max(), -100, 100);
+			//var predictionStdevMa = Ema(Stdev(prediction, 20), 20);
+
+			//double?[] lowline = new double?[predictionStdevMa.Length];
+			//double?[] highline = new double?[predictionStdevMa.Length];
+			//for (int i = 0; i < predictionStdevMa.Length; i++)
 			//{
-			//	return;
+			//	lowline[i] = predictionStdevMa[i] == null ? null : predictionStdevMa[i] - 100;
+			//	highline[i] = predictionStdevMa[i] == null ? null : 100 - predictionStdevMa[i];
 			//}
 
-			//d.Parameter1.Add(d.Parameter1[^1]);
-			//d.Parameter2.Add(d.Parameter2[^1]);
-			//d.PriceArray.Add(d.PriceArray[^1]);
-			d.ResultArray.Add(close >= d.PriceArray[^1] ? 1 : -1);
-			d.Parameter1.Add(p1);
-			d.Parameter2.Add(p2);
-			d.PriceArray.Add(close);
+			var predictionMa = Wma(prediction, predictionSmoothing);
+
+			return (prediction, predictionMa);
 		}
 
-		public static double? KnnPredict(KnnPredictionData d, double? p1, double? p2, int k)
+		/// <summary>
+		/// Donchian Channel
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="period"></param>
+		/// <returns></returns>
+		public static (double?[], double?[], double?[]) DonchianChannel(double[] high, double[] low, int period)
 		{
-			if (p1 == null || p2 == null)
-			{
-				return null;
-			}
+			var upper = Highest(high, period);
+			var lower = Lowest(low, period);
+			var basis = Average(upper, lower);
 
-			var distances = new List<double?>();
-			int n = d.Parameter1.Count;
-
-			for (int i = 0; i < n; i++)
-			{
-				if (d.Parameter1[i] == null || d.Parameter2[i] == null)
-				{
-					distances.Add(null);
-					continue;
-				}
-				double distance = Math.Sqrt(Math.Pow(p1 ?? 0 - d.Parameter1[i] ?? 0, 2) + Math.Pow(p2 ?? 0 - d.Parameter2[i] ?? 0, 2));
-				distances.Add(distance);
-			}
-
-			var sortedDistances = distances.OrderBy(x => x).Take(k).ToList();
-			double maxDist = sortedDistances.Max() ?? 0;
-
-			var neighbors = new List<double>();
-			for (int i = 0; i < distances.Count; i++)
-			{
-				if (d.ResultArray[i] == null)
-				{
-					continue;
-				}
-
-				if (distances[i] <= maxDist)
-				{
-					neighbors.Add(d.ResultArray[i] ?? 0);
-				}
-			}
-
-			return neighbors.Sum();
+			return (basis, upper, lower);
 		}
 	}
 }

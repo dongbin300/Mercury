@@ -110,7 +110,7 @@ namespace Backtester
 				endDate = EndDateTextBox.Text.ToDateTime();
 				backtestType = BacktestSymbolRadioButton.IsChecked ?? false ? BacktestType.BySymbol : BacktestType.All;
 				reportFileName = FileNameTextBox.Text;
-				maxActiveDealsType = (MaxActiveDealsType)Enum.Parse(typeof(MaxActiveDealsType), (MaxActiveDealsTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Each");
+				maxActiveDealsType = Enum.Parse<MaxActiveDealsType>((MaxActiveDealsTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "Each");
 				maxActiveDeals = MaxActiveDealsTextBox.Text.ToInt();
 				money = MoneyTextBox.Text.ToDecimal();
 				leverage = LeverageTextBox.Text.ToInt();
@@ -430,49 +430,79 @@ namespace Backtester
 
 				var leverage = 5;
 				var maxActiveDeals = 7;
-				for (var emaPeriod = 60; emaPeriod <= 60; emaPeriod += 5)
+				//for (var emaPeriod = 60; emaPeriod <= 60; emaPeriod += 5)
+				//{
+				//	for (var s0c = 25; s0c <= 25; s0c += 5)
+				//	{
+				//		for (var s2c = 12; s2c <= 12; s2c += 2)
+				//		{
+				//			for (var sl = 25; sl <= 25; sl += 5)
+				//			{
+				//				for (var tp = 65; tp <= 65; tp += 5)
+				//				{
+				//					//maxActiveDealsType = MaxActiveDealsType.Total;
+				//					//var backtester = new TS1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+				//					//{
+				//					//	IsGeneratePositionHistory = false,
+				//					//	FeeRate = 0.0004m
+				//					//};
+				//					//backtester.Init(chartPacks, 20, 2, 60, 3, 120, 6);
+				//					//backtester.Run(startDate.AddDays(8));
+
+				//					//File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+				//					//$"TS1,{interval.ToIntervalString()},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)},{backtester.mMPer.Round(4):P},{backtester.ResultPerRisk.Round(4)}" + Environment.NewLine);
+
+				//					maxActiveDealsType = MaxActiveDealsType.Each;
+				//					var backtester1 = new Ema1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+				//					{
+				//						IsGeneratePositionHistory = false,
+				//						FeeRate = 0.0004m,
+				//						EmaPeriod = emaPeriod,
+				//						Stage0Count = s0c,
+				//						Stage2Count = s2c,
+				//						SlCount = sl,
+				//						TpCount = tp
+				//					};
+				//					backtester1.Init(chartPacks);
+				//					backtester1.Run(startDate.AddDays(8));
+
+				//					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+				//					$"EMA1,{interval.ToIntervalString()},{emaPeriod},{s0c},{s2c},{sl},{tp},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
+				//				}
+				//			}
+				//		}
+				//	}
+				//}
+
+				for (var pb = 20; pb <= 20; pb += 5)
 				{
-					for (var s0c = 25; s0c <= 25; s0c += 5)
+					for (var mw = 25; mw <= 25; mw += 5)
 					{
-						for (var s2c = 12; s2c <= 12; s2c += 2)
+						for (var md = 500; md <= 500; md += 2)
 						{
-							for (var sl = 25; sl <= 25; sl += 5)
+							for (var nn = 100; nn <= 100; nn += 5)
 							{
-								for (var tp = 65; tp <= 65; tp += 5)
+								for (var ps = 20; ps <= 20; ps += 5)
 								{
-									//maxActiveDealsType = MaxActiveDealsType.Total;
-									//var backtester = new TS1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
-									//{
-									//	IsGeneratePositionHistory = false,
-									//	FeeRate = 0.0004m
-									//};
-									//backtester.Init(chartPacks, 20, 2, 60, 3, 120, 6);
-									//backtester.Run(startDate.AddDays(8));
-
-									//File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-									//$"TS1,{interval.ToIntervalString()},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)},{backtester.mMPer.Round(4):P},{backtester.ResultPerRisk.Round(4)}" + Environment.NewLine);
-
 									maxActiveDealsType = MaxActiveDealsType.Each;
-									var backtester1 = new Ema1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+									var backtester1 = new MLMIP1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
 									{
 										IsGeneratePositionHistory = false,
 										FeeRate = 0.0004m,
-										EmaPeriod = emaPeriod,
-										Stage0Count = s0c,
-										Stage2Count = s2c,
-										SlCount = sl,
-										TpCount = tp
+										ProfitRatio = 1.0m,
 									};
-									backtester1.Init(chartPacks);
+									backtester1.Init(chartPacks, pb, mw, md, nn, ps);
 									backtester1.Run(startDate.AddDays(8));
 
 									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-									$"EMA1,{interval.ToIntervalString()},{emaPeriod},{s0c},{s2c},{sl},{tp},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
+									$"MLMIP1,{interval.ToIntervalString()},{pb},{mw},{md},{nn},{ps},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
 								}
 							}
 						}
 					}
 				}
+
+
 
 				//var maxActiveDeals = 35;
 				//int[] leverages = [leverage, leverage, leverage, leverage, leverage, leverage, leverage];
@@ -585,7 +615,7 @@ namespace Backtester
 					var totalDays = (maxStartDate - minStartDate).Days;
 					var rStartDate = minStartDate.AddDays(random.Next(totalDays + 1));
 					var rEndDate = rStartDate.AddDays(periodDays);
-					
+
 					var backtester = new TS1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
 					{
 						IsGeneratePositionHistory = false,

@@ -11,6 +11,7 @@ using MarinerX.Markets;
 using MarinerX.Utils;
 using MarinerX.Views;
 
+using Mercury;
 using Mercury.Apis;
 using Mercury.Enums;
 using Mercury.Extensions;
@@ -99,7 +100,7 @@ namespace MarinerX
 			tmBackTestFiles = Directory.GetFiles(TradingModelPath.InspectedBackTestDirectory).Select(x => new MtmBacktestTmFile(x)).ToList();
 			tmMockTradeFileNames = [.. Directory.GetFiles(TradingModelPath.InspectedMockTradeDirectory)];
 			tmRealTradeFileNames = [.. Directory.GetFiles(TradingModelPath.InspectedRealTradeDirectory)];
-			backTestResultFileNames = [.. Directory.GetFiles(PathUtil.Base.Down("MarinerX"), "*.csv")];
+			backTestResultFileNames = [.. Directory.GetFiles(MercuryPath.Base.Down("MarinerX"), "*.csv")];
 		}
 
 		public void RefreshMenu()
@@ -281,14 +282,14 @@ namespace MarinerX
 			try
 			{
 				var symbolNames = BinanceRestApi.GetFuturesSymbolNames();
-				File.WriteAllLines(PathUtil.BinanceFuturesData.Down($"symbol_{DateTime.Now:yyyy-MM-dd}.txt"), symbolNames);
+				File.WriteAllLines(MercuryPath.BinanceFuturesData.Down($"symbol_{DateTime.Now:yyyy-MM-dd}.txt"), symbolNames);
 
 				var symbolData = BinanceRestApi.GetFuturesSymbols();
-				symbolData.SaveCsvFile(PathUtil.BinanceFuturesData.Down($"symbol_detail_{DateTime.Now:yyyy-MM-dd}.csv"));
+				symbolData.SaveCsvFile(MercuryPath.BinanceFuturesData.Down($"symbol_detail_{DateTime.Now:yyyy-MM-dd}.csv"));
 
 				MessageBox.Show("바이낸스 심볼 데이터 수집 완료");
 
-				ProcessUtil.Start(PathUtil.BinanceFuturesData);
+				ProcessUtil.Start(MercuryPath.BinanceFuturesData);
 				LocalApi.Init();
 			}
 			catch (Exception ex)
@@ -693,7 +694,7 @@ namespace MarinerX
 					throw new Exception("No Trading!!");
 				}
 
-				var path = PathUtil.Base.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
+				var path = MercuryPath.Base.Down("MarinerX", $"BackTest_{DateTime.Now.ToStandardFileName()}.csv");
 				result.SaveCsvFile(path);
 
 				DispatcherService.Invoke(() =>
@@ -929,7 +930,7 @@ namespace MarinerX
 					throw new Exception("Back Test No Trading!!!");
 				}
 
-				var path = PathUtil.Base.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}.csv");
+				var path = MercuryPath.Base.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}.csv");
 				result.SaveCsvFile(path);
 
 				DispatcherService.Invoke(() =>
@@ -996,7 +997,7 @@ namespace MarinerX
 					throw new Exception("Back Test No Trading!!!");
 				}
 
-				var path = PathUtil.Base.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}_b{bandwidth}_r{profitRoe}.csv");
+				var path = MercuryPath.Base.Down("MarinerX", $"BackTestFlask_{DateTime.Now.ToStandardFileName()}_b{bandwidth}_r{profitRoe}.csv");
 				result.SaveCsvFile(path);
 
 				//DispatcherService.Invoke(() =>
@@ -1315,7 +1316,7 @@ namespace MarinerX
 				for (int i = 0; i < 100; i++)
 				{
 					var symbol = random.Next(symbols);
-					var fileName = random.Next(Directory.GetFiles(PathUtil.BinanceFuturesData.Down("1m", symbol), "*.csv"));
+					var fileName = random.Next(Directory.GetFiles(MercuryPath.BinanceFuturesData.Down("1m", symbol), "*.csv"));
 					var startDate = SymbolUtil.GetDate(fileName);
 					var symbolEndDate = SymbolUtil.GetEndDate(symbol);
 					if ((symbolEndDate - startDate).TotalDays < dayCount)
@@ -1375,7 +1376,7 @@ namespace MarinerX
 						volumeScale.Adjust(_noise);
 					}
 
-					File.AppendAllText(PathUtil.BinanceFuturesData.Down("RSI_AI.txt"),
+					File.AppendAllText(MercuryPath.BinanceFuturesData.Down("RSI_AI.txt"),
 						$"{DateTime.Now:yyyy-MM-dd HH:mm:ss}, {symbol}, {startDate:yyyy-MM-dd}~{endDate:yyyy-MM-dd}, ETI: {dealManager.EstimatedTotalIncome:F4}, Noise: {_noise:F4}, TargetROE: {targetRoe.Value:F4}, SafetyOrderSize: {safetyOrderSize.Value:F4}, MaxSafetyOrderCount: {(int)maxSafetyOrderCount.Value}, Deviation: {deviation.Value:F4}, StepScale: {stepScale.Value:F4}, VolumeScale: {volumeScale.Value:F4}" + Environment.NewLine);
 				}
 			}
@@ -1405,12 +1406,15 @@ namespace MarinerX
 
 					while (currentTime <= endTime)
 					{
-						var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/{symbol}/{symbol}-aggTrades-{currentTime:yyyy-MM-dd}.zip";
+						//var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/{symbol}/{symbol}-aggTrades-{currentTime:yyyy-MM-dd}.zip";
+
+						var url = $"https://data.binance.vision/data/futures/um/daily/klines/{symbol}/1h/{symbol}-1h-{currentTime:yyyy-MM-dd}.zip";
+
 						var response = client.GetAsync(url).Result;
 						if (response.IsSuccessStatusCode)
 						{
 							using Stream responseStream = response.Content.ReadAsStreamAsync().Result;
-							using FileStream fileStream = File.Create(PathUtil.BinanceFuturesData.Down("trade", symbol, $"{currentTime:yyyy-MM-dd}.zip"));
+							using FileStream fileStream = File.Create(MercuryPath.BinanceFuturesData.Down("crosscheck", symbol, $"{currentTime:yyyy-MM-dd}.zip"));
 							responseStream.CopyTo(fileStream);
 						}
 						currentTime = currentTime.AddDays(1);

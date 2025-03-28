@@ -1,5 +1,4 @@
-﻿using Mercury.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -7,13 +6,8 @@ using System.Reflection;
 
 namespace MarinerX.Utils
 {
-    public class PathUtil
+    public class FileUtil
     {
-        public static string Desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        public static string Base = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).Down("Gaten");
-        public static string BinanceApiKey = Base.Down("binance_api.txt");
-        public static string BinanceFuturesData = Base.Down("BinanceFuturesData");
-
         public static DataTable ReadCsv(string path)
         {
             var result = new DataTable();
@@ -33,7 +27,7 @@ namespace MarinerX.Utils
 
         public static IList<T> ReadCsv<T>(string path)
         {
-            IList<T> result = new List<T>();
+            IList<T> result = [];
             var items = System.IO.File.ReadAllLines(path);
             var columns = items[0].Split(',', StringSplitOptions.RemoveEmptyEntries);
 

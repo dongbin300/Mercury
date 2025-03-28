@@ -21,6 +21,9 @@ using OxyPlot.Series;
 
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -114,20 +117,24 @@ namespace Lab
 		{
 			InitializeComponent();
 
-			var startTime = new DateTime(2022, 5, 15);
+			var startTime = new DateTime(2025, 1, 1);
 			var endTime = new DateTime(2024, 5, 15);
 			var symbol = "BTCUSDT";
-			var interval = KlineInterval.OneDay;
+			var interval = KlineInterval.OneMonth;
 
 			//LocalApi.Init();
 			//var quotes = LocalApi.GetOneDayQuotes(symbol);
 			ChartLoader.InitCharts(symbol, interval);
 			var quotes = ChartLoader.GetChartPack(symbol, interval).Charts;
 			var close = quotes.Select(x => (double)x.Quote.Close).ToArray();
+			var high = quotes.Select(x => (double)x.Quote.High).ToArray();
+			var low = quotes.Select(x => (double)x.Quote.Low).ToArray();
 
 			//var wma = ArrayCalculator.Wma(close, 14);
 
-			(var predict, var predictMa) = ArrayCalculator.Mlmi(close, 200, 20);
+			//(var predict, var predictMa) = ArrayCalculator.Mlmip(high, low, close, 20, 25, 500, 100, 20);
+			(var basis, var upper, var lower) = ArrayCalculator.DonchianChannel(high, low, 20);
+			//(var predict, var predictMa) = ArrayCalculator.Mlmi(close, 200, 20);
 
 			//BinanceRestApi.Init();
 			//var result = BinanceRestApi.BinanceClient.UsdFuturesApi.Account.GetAccountInfoV3Async().Result;

@@ -1,7 +1,6 @@
-﻿using MarinerX.Utils;
-
-using Mercury;
+﻿using Mercury;
 using Mercury.Extensions;
+
 using OfficeOpenXml;
 
 using System;
@@ -12,7 +11,7 @@ namespace MarinerX.Excels
 {
     public class TradeHistoryParser
     {
-        private static readonly string DefaultTargetPath = PathUtil.Base.Down("Export Trade History.xlsx");
+        private static readonly string DefaultTargetPath = MercuryPath.Base.Down("Export Trade History.xlsx");
         private const string TargetSheetName = "sheet1";
         private const int MaxLoopCount = 10000; // Dummy Value just in case
 

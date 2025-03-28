@@ -78,6 +78,7 @@ namespace Mercury.Apis
 		private static void AllMarketMiniTickersOnMessage(DataEvent<IEnumerable<IBinanceMiniTick>> obj)
 		{
 			var data = obj.Data;
+			QuoteFactory.CurrentPrices = [.. data.Select(x => new CurrentPrice(x.Symbol, x.LastPrice))];
 		}
 
 		/// <summary>
