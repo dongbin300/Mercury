@@ -474,35 +474,63 @@ namespace Backtester
 				//	}
 				//}
 
-				for (var pb = 20; pb <= 20; pb += 5)
-				{
-					for (var mw = 25; mw <= 25; mw += 5)
-					{
-						for (var md = 500; md <= 500; md += 2)
-						{
-							for (var nn = 100; nn <= 100; nn += 5)
-							{
-								for (var ps = 20; ps <= 20; ps += 5)
-								{
-									maxActiveDealsType = MaxActiveDealsType.Each;
-									var backtester1 = new MLMIP1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
-									{
-										IsGeneratePositionHistory = false,
-										FeeRate = 0.0004m,
-										ProfitRatio = 1.0m,
-									};
-									backtester1.Init(chartPacks, pb, mw, md, nn, ps);
-									backtester1.Run(startDate.AddDays(8));
+				//for (var pb = 20; pb <= 20; pb += 5)
+				//{
+				//	for (var mw = 25; mw <= 25; mw += 5)
+				//	{
+				//		for (var md = 500; md <= 500; md += 2)
+				//		{
+				//			for (var nn = 100; nn <= 100; nn += 5)
+				//			{
+				//				for (var ps = 20; ps <= 20; ps += 5)
+				//				{
+				//					maxActiveDealsType = MaxActiveDealsType.Each;
+				//					var backtester1 = new MLMIP1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+				//					{
+				//						IsGeneratePositionHistory = false,
+				//						FeeRate = 0.0004m,
+				//						ProfitRatio = 1.0m,
+				//					};
+				//					backtester1.Init(chartPacks, pb, mw, md, nn, ps);
+				//					backtester1.Run(startDate.AddDays(8));
 
-									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-									$"MLMIP1,{interval.ToIntervalString()},{pb},{mw},{md},{nn},{ps},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
+				//					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+				//					$"MLMIP1,{interval.ToIntervalString()},{pb},{mw},{md},{nn},{ps},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
+				//				}
+				//			}
+				//		}
+				//	}
+				//}
+
+				for (var ap = 5; ap <= 30; ap += 5)
+				{
+					for (var am = 1.0m; am <= 5.0m; am += 0.5m)
+					{
+						for (var rp = 5; rp <= 30; rp += 5)
+						{
+							for (var mfp = 12; mfp <= 12; mfp += 12)
+							{
+								for (var msp = 26; msp <= 26; msp += 26)
+								{
+									for (var msip = 9; msip <= 9; msip += 9)
+									{
+										maxActiveDealsType = MaxActiveDealsType.Each;
+										var backtester1 = new TrendRiderTest(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+										{
+											IsGeneratePositionHistory = false,
+											FeeRate = 0.0004m,
+										};
+										backtester1.Init(chartPacks, ap, am, rp, mfp, msp, msip);
+										backtester1.Run(startDate.AddDays(8));
+
+										File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+										$"TrendRiderTest,{interval.ToIntervalString()},{ap},{am},{rp},{mfp},{msp},{msip},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
+									}
 								}
 							}
 						}
 					}
 				}
-
-
 
 				//var maxActiveDeals = 35;
 				//int[] leverages = [leverage, leverage, leverage, leverage, leverage, leverage, leverage];

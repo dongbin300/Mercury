@@ -255,7 +255,7 @@ namespace ChartViewer
 			}
 			if (TrendRiderCheckBox.IsChecked ?? true)
 			{
-				var trendRider = quotes.GetTrendRider();
+				var trendRider = quotes.GetTrendRider(25, 2.5, 25, 12, 26, 9);
 				for (int i = 0; i < Charts.Count; i++)
 				{
 					Charts[i].TrendRiderTrend = trendRider.ElementAt(i).Trend;
@@ -286,7 +286,7 @@ namespace ChartViewer
 		void FillTrendLineValue()
 		{
 			int startIndex = -1;
-			double startValue = -1;
+			double? startValue = -1;
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				if (Charts[i].TrendLineUpper != ERROR_VALUE)
@@ -299,7 +299,7 @@ namespace ChartViewer
 					else
 					{
 						int endIndex = i;
-						double endValue = Charts[i].TrendLineUpper;
+						double? endValue = Charts[i].TrendLineUpper;
 						var distance = endIndex - startIndex + 1;
 						var diff = endValue - startValue;
 						for (int j = startIndex + 1; j < endIndex; j++)
@@ -326,7 +326,7 @@ namespace ChartViewer
 					else
 					{
 						int endIndex = i;
-						double endValue = Charts[i].TrendLineLower;
+						double? endValue = Charts[i].TrendLineLower;
 						var distance = endIndex - startIndex + 1;
 						var diff = endValue - startValue;
 						for (int j = startIndex + 1; j < endIndex; j++)
@@ -342,7 +342,7 @@ namespace ChartViewer
 			}
 		}
 
-		private void DrawIndicator(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color, float strokeWidth = 1)
+		private void DrawIndicator(SKCanvas canvas, int viewIndex, double? preValue, double? value, double max, double min, SKColor color, float strokeWidth = 1)
 		{
 			if (preValue == ERROR_VALUE || value == ERROR_VALUE)
 			{
@@ -360,7 +360,7 @@ namespace ChartViewer
 					);
 		}
 
-		private void DrawSupertrend(SKCanvas canvas, int viewIndex, double preValue, double value, double max, double min, SKColor color)
+		private void DrawSupertrend(SKCanvas canvas, int viewIndex, double? preValue, double? value, double max, double min, SKColor color)
 		{
 			if (preValue == ERROR_VALUE || value == ERROR_VALUE || (preValue < 0 && value >= 0) || (preValue >= 0 && value < 0))
 			{
@@ -370,10 +370,10 @@ namespace ChartViewer
 			canvas.DrawLine(
 					new SKPoint(
 						LiveActualItemFullWidth * (viewIndex - 0.5f),
-						LiveActualHeight * (float)(1.0 - (Math.Abs(preValue) - min) / (max - min)) + CandleTopBottomMargin),
+						LiveActualHeight * (float)(1.0 - (Math.Abs(preValue ?? 0) - min) / (max - min)) + CandleTopBottomMargin),
 					new SKPoint(
 						LiveActualItemFullWidth * (viewIndex + 0.5f),
-						LiveActualHeight * (float)(1.0 - (Math.Abs(value) - min) / (max - min)) + CandleTopBottomMargin),
+						LiveActualHeight * (float)(1.0 - (Math.Abs(value ?? 0) - min) / (max - min)) + CandleTopBottomMargin),
 					new SKPaint() { Color = color }
 					);
 		}
@@ -399,37 +399,37 @@ namespace ChartViewer
 			if (Ema1CheckBox.IsChecked ?? true)
 			{
 				yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema1));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema1 != ERROR_VALUE).Min(x => x.Ema1));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema1 != null).Min(x => x.Ema1));
 			}
 			if (Ema2CheckBox.IsChecked ?? true)
 			{
 				yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema2));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema2 != ERROR_VALUE).Min(x => x.Ema2));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema2 != null).Min(x => x.Ema2));
 			}
 			if (Ema3CheckBox.IsChecked ?? true)
 			{
 				yMax = Math.Max(yMax, (double)Charts.Max(x => x.Ema3));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema3 != ERROR_VALUE).Min(x => x.Ema3));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Ema3 != null).Min(x => x.Ema3));
 			}
 			if (Supertrend1CheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend1 != ERROR_VALUE).Max(x => Math.Abs(x.Supertrend1)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend1 != ERROR_VALUE).Min(x => Math.Abs(x.Supertrend1)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend1 != null).Max(x => Math.Abs(x.Supertrend1 ?? 0)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend1 != null).Min(x => Math.Abs(x.Supertrend1 ?? 0)));
 			}
 			if (Supertrend2CheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend2 != ERROR_VALUE).Max(x => Math.Abs(x.Supertrend2)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend2 != ERROR_VALUE).Min(x => Math.Abs(x.Supertrend2)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend2 != null).Max(x => Math.Abs(x.Supertrend2 ?? 0)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend2 != null).Min(x => Math.Abs(x.Supertrend2 ?? 0)));
 			}
 			if (Supertrend3CheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend3 != ERROR_VALUE).Max(x => Math.Abs(x.Supertrend3)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend3 != ERROR_VALUE).Min(x => Math.Abs(x.Supertrend3)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.Supertrend3 != null).Max(x => Math.Abs(x.Supertrend3 ?? 0)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.Supertrend3 != null).Min(x => Math.Abs(x.Supertrend3 ?? 0)));
 			}
 			if (RSupertrend1CheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.ReverseSupertrend1 != ERROR_VALUE).Max(x => Math.Abs(x.ReverseSupertrend1)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.ReverseSupertrend1 != ERROR_VALUE).Min(x => Math.Abs(x.ReverseSupertrend1)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.ReverseSupertrend1 != null).Max(x => Math.Abs(x.ReverseSupertrend1 ?? 0)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.ReverseSupertrend1 != null).Min(x => Math.Abs(x.ReverseSupertrend1 ?? 0)));
 			}
 			if (CustomCheckBox.IsChecked ?? true)
 			{
@@ -437,13 +437,13 @@ namespace ChartViewer
 			}
 			if (TrendRiderCheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.TrendRiderSupertrend != ERROR_VALUE).Max(x => Math.Abs(x.TrendRiderSupertrend)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.TrendRiderSupertrend != ERROR_VALUE).Min(x => Math.Abs(x.TrendRiderSupertrend)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.TrendRiderSupertrend != null).Max(x => Math.Abs(x.TrendRiderSupertrend ?? 0)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.TrendRiderSupertrend != null).Min(x => Math.Abs(x.TrendRiderSupertrend ?? 0)));
 			}
 			if (EmaAtrCheckBox.IsChecked ?? true)
 			{
-				yMax = Math.Max(yMax, (double)Charts.Where(x => x.EmaAtrUpper != ERROR_VALUE).Max(x => Math.Abs(x.EmaAtrUpper)));
-				yMin = Math.Min(yMin, (double)Charts.Where(x => x.EmaAtrLower != ERROR_VALUE).Min(x => Math.Abs(x.EmaAtrLower)));
+				yMax = Math.Max(yMax, (double)Charts.Where(x => x.EmaAtrUpper != null).Max(x => Math.Abs(x.EmaAtrUpper ?? 0)));
+				yMin = Math.Min(yMin, (double)Charts.Where(x => x.EmaAtrLower != null).Min(x => Math.Abs(x.EmaAtrLower ?? 0)));
 			}
 
 			// Draw Quote and Indicator

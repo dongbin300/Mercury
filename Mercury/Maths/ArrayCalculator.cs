@@ -1,6 +1,7 @@
 ﻿using Mercury.Extensions;
 
 using System.Data;
+using System.Drawing;
 
 namespace Mercury.Maths
 {
@@ -45,6 +46,202 @@ namespace Mercury.Maths
 				}
 			}
 			return 0;
+		}
+
+		public static double?[] Add(double?[] values, double addend)
+		{
+			var result = new double?[values.Length];
+			for (int i = 0; i < values.Length; i++)
+			{
+				result[i] = values[i].HasValue ? values[i] + addend : null;
+			}
+			return result;
+		}
+
+		public static double?[] Add(double?[] values1, double?[] values2)
+		{
+			int length = Math.Min(values1.Length, values2.Length);
+			var result = new double?[length];
+
+			for (int i = 0; i < length; i++)
+			{
+				if (values1[i].HasValue && values2[i].HasValue)
+				{
+					result[i] = values1[i] + values2[i];
+				}
+				else
+				{
+					result[i] = null;
+				}
+			}
+
+			return result;
+		}
+
+		public static double?[] Subtract(double?[] values, double subtrahend)
+		{
+			var result = new double?[values.Length];
+			for (int i = 0; i < values.Length; i++)
+			{
+				result[i] = values[i].HasValue ? values[i] - subtrahend : null;
+			}
+			return result;
+		}
+
+		public static double?[] Subtract(double?[] values1, double?[] values2)
+		{
+			int length = Math.Min(values1.Length, values2.Length);
+			var result = new double?[length];
+
+			for (int i = 0; i < length; i++)
+			{
+				result[i] = (values1[i].HasValue && values2[i].HasValue) ? values1[i] - values2[i] : null;
+			}
+
+			return result;
+		}
+
+		public static double?[] Multiply(double?[] values, double multiplier)
+		{
+			var result = new double?[values.Length];
+			for (int i = 0; i < values.Length; i++)
+			{
+				result[i] = values[i].HasValue ? values[i] * multiplier : null;
+			}
+			return result;
+		}
+
+		public static double?[] Multiply(double?[] values1, double?[] values2)
+		{
+			int length = Math.Min(values1.Length, values2.Length);
+			var result = new double?[length];
+
+			for (int i = 0; i < length; i++)
+			{
+				result[i] = (values1[i].HasValue && values2[i].HasValue) ? values1[i] * values2[i] : null;
+			}
+
+			return result;
+		}
+
+		public static double?[] Divide(double?[] values, double divisor)
+		{
+			var result = new double?[values.Length];
+			for (int i = 0; i < values.Length; i++)
+			{
+				if (values[i].HasValue)
+				{
+					result[i] = divisor != 0 ? values[i] / divisor : null;
+				}
+				else
+				{
+					result[i] = null;
+				}
+			}
+			return result;
+		}
+
+		public static double?[] Divide(double?[] values1, double?[] values2)
+		{
+			int length = Math.Min(values1.Length, values2.Length);
+			var result = new double?[length];
+
+			for (int i = 0; i < length; i++)
+			{
+				if (values1[i].HasValue && values2[i].HasValue)
+				{
+					result[i] = (values2[i] != 0) ? values1[i] / values2[i] : null;
+				}
+				else
+				{
+					result[i] = null;
+				}
+			}
+
+			return result;
+		}
+
+		public static bool?[] GreaterThan(double?[] a, double?[] b)
+		{
+			var result = new bool?[a.Length];
+			for (int i = 0; i < result.Length; i++)
+			{
+				if (!a[i].HasValue || !b[i].HasValue)
+				{
+					result[i] = null;
+				}
+				else
+				{
+					result[i] = a[i] > b[i];
+				}
+			}
+
+			return result;
+		}
+
+		public static bool?[] LessThan(double?[] a, double?[] b)
+		{
+			var result = new bool?[a.Length];
+			for (int i = 0; i < result.Length; i++)
+			{
+				if (!a[i].HasValue || !b[i].HasValue)
+				{
+					result[i] = null;
+				}
+				else
+				{
+					result[i] = a[i] < b[i];
+				}
+			}
+
+			return result;
+		}
+
+		public static bool?[] And(bool?[] a, bool?[] b)
+		{
+			var result = new bool?[a.Length];
+			for (int i = 0; i < result.Length; i++)
+			{
+				if (!a[i].HasValue || !b[i].HasValue)
+				{
+					result[i] = null;
+				}
+				else
+				{
+					result[i] = a[i] == true && b[i] == true;
+				}
+			}
+
+			return result;
+		}
+
+		public static bool?[] Or(bool?[] a, bool?[] b)
+		{
+			var result = new bool?[a.Length];
+			for (int i = 0; i < result.Length; i++)
+			{
+				if (!a[i].HasValue || !b[i].HasValue)
+				{
+					result[i] = null;
+				}
+				else
+				{
+					result[i] = a[i] == true || b[i] == true;
+				}
+			}
+
+			return result;
+		}
+
+		public static bool?[] Not(bool?[] value)
+		{
+			var result = new bool?[value.Length];
+			for (int i = 0; i < result.Length; i++)
+			{
+				result[i] = !value[i];
+			}
+
+			return result;
 		}
 
 		/// <summary>
@@ -301,11 +498,17 @@ namespace Mercury.Maths
 				}
 
 				double sum = 0;
+				bool isNull = false;
 				for (int j = i - period + 1; j <= i; j++)
 				{
+					if (values[j] == null)
+					{
+						isNull = true;
+						break;
+					}
 					sum += values[j] ?? 0;
 				}
-				result[i] = sum / period;
+				result[i] = isNull ? null : sum / period;
 			}
 
 			return result;
@@ -489,6 +692,64 @@ namespace Mercury.Maths
 
 			return pivots;
 		}
+
+		/// <summary>
+		/// Linear Regression
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="length"></param>
+		/// <returns></returns>
+		public static double? LinearRegression(double?[] src, int len, int startIndex, int offset = 0)
+		{
+			if (src == null || src.Length < startIndex + 1 || startIndex + 1 < len)
+			{
+				return null;
+			}
+
+			// x_sum과 xx_sum은 1번만 계산하면 되므로, 루프 밖에서 계산
+			double x_sum = 0.0;
+			double xx_sum = 0.0;
+			for (int i = 0; i < len; i++)
+			{
+				x_sum += i;
+				xx_sum += i * i;
+			}
+
+			// y_sum 계산 (src 배열에서 값들의 합)
+			double y_sum = 0.0;
+			double xy_sum = 0.0;
+			for (int i = 0; i < len; i++)
+			{
+				int idx = startIndex - (len - 1) + i;
+				if (src[idx].HasValue)
+				{
+					double y = src[idx].Value;
+					y_sum += y;
+					xy_sum += i * y; // x 값은 0부터 len-1
+				}
+				else
+				{
+					return null; // 하나라도 null이면 계산을 중단하고 null 반환
+				}
+			}
+
+			// slope 계산
+			double denominator = (len * xx_sum - x_sum * x_sum);
+			if (denominator == 0)
+			{
+				return null; // 분모가 0이면 선형 회귀 값을 계산할 수 없으므로 null 반환
+			}
+			double slope = (len * xy_sum - x_sum * y_sum) / denominator;
+
+			// intercept 계산
+			double intercept = (y_sum - slope * x_sum) / len;
+
+			// 선형 회귀 값 계산 (offset을 고려하여 계산)
+			double linreg = intercept + slope * (len - 1 - offset);
+
+			return linreg;
+		}
+
 
 		public static (double?[], double?[], double?[], double?[], double?[]) IchimokuCloud(double[] high, double[] low, double[] close, int conversionPeriod, int basePeriod, int leadingSpanPeriod)
 		{
@@ -1231,6 +1492,153 @@ namespace Mercury.Maths
 			var basis = Average(upper, lower);
 
 			return (basis, upper, lower);
+		}
+
+		/// <summary>
+		/// on test
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <returns></returns>
+		public static double?[] MarketScore(double[] high, double[] low, double[] close)
+		{
+			var result = new double?[high.Length];
+			var nHigh = high.ToNullable();
+			var nLow = low.ToNullable();
+			var nClose = close.ToNullable();
+
+			var adx = Adx(high, low, close, 14, 14);
+			var shortEma = Ema(nClose, 20);
+			var longEma = Ema(nClose, 60);
+
+			var rsi = Rsi(close, 14);
+			var stoch = Stoch(nHigh, nLow, nClose, 14);
+
+			int crossCount = 0;
+
+			result[0] = null;
+			for (int i = 1; i < high.Length; i++)
+			{
+				if (shortEma[i] == null || longEma[i] == null || adx[i] == null || rsi[i] == null || stoch[i] == null)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				bool isTrend = adx[i] >= 25;
+				bool isBull = shortEma[i] > longEma[i];
+				bool isBear = shortEma[i] < longEma[i];
+
+				if ((isBull && shortEma[i - 1] <= longEma[i - 1]) || (isBear && shortEma[i - 1] >= longEma[i - 1]))
+				{
+					crossCount++;
+				}
+
+				if (i >= 20)
+				{
+					crossCount = 0;
+					for (int j = i - 20; j < i; j++)
+					{
+						if ((shortEma[j] > longEma[j] && shortEma[j - 1] <= longEma[j - 1]) ||
+							(shortEma[j] < longEma[j] && shortEma[j - 1] >= longEma[j - 1]))
+						{
+							crossCount++;
+						}
+					}
+				}
+
+				bool isOverbought = rsi[i] > 70;
+				bool isOversold = rsi[i] < 30;
+				bool isStochasticOverbought = stoch[i] > 80;
+				bool isStochasticOversold = stoch[i] < 20;
+
+				if (adx[i] < 25 && crossCount > 3)
+				{
+					result[i] = 0.0;
+				}
+				else
+				{
+					result[i] =
+						isBull && isTrend && !isOverbought && !isStochasticOverbought ? 1.0 :
+						isBear && isTrend && !isOversold && !isStochasticOversold ? -1.0 :
+						0.0;
+				}
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Squeeze Momentum Indicator
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <param name="bbPeriod"></param>
+		/// <param name="bbFactor"></param>
+		/// <param name="kcPeriod"></param>
+		/// <param name="kcFactor"></param>
+		/// <param name="useTrueRange"></param>
+		/// <returns></returns>
+		public static (double?[], int?[], int?[]) SqueezeMomentum(double[] high, double[] low, double[] close, int bbPeriod, double bbFactor, int kcPeriod, double kcFactor, bool useTrueRange)
+		{
+			var nHigh = high.ToNullable();
+			var nLow = low.ToNullable();
+			var nClose = close.ToNullable();
+			var basis = Sma(nClose, bbPeriod);
+			var dev = Multiply(Stdev(nClose, kcPeriod), kcFactor);
+			var upperBb = Add(basis, dev);
+			var lowerBb = Subtract(basis, dev);
+
+			var ma = Sma(nClose, kcPeriod);
+			var range = useTrueRange ? Tr(high, low, close).ToNullable() : Subtract(nHigh, nLow);
+			range[0] = null; // 예외
+			var rangeMa = Sma(range, kcPeriod);
+			var upperKc = Add(ma, Multiply(rangeMa, kcFactor));
+			var lowerKc = Subtract(ma, Multiply(rangeMa, kcFactor));
+
+			var sqzOn = And(GreaterThan(lowerBb, lowerKc), LessThan(upperBb, upperKc));
+			var sqzOff = And(LessThan(lowerBb, lowerKc), GreaterThan(upperBb, upperKc));
+			var noSqz = Not(Or(sqzOn, sqzOff));
+
+			var avg = Subtract(nClose, Average(Average(Highest(high, kcPeriod), Lowest(low, kcPeriod)), Sma(nClose, kcPeriod)));
+
+			var value = new double?[high.Length];
+
+			for (int i = 0; i < high.Length; i++)
+			{
+				if (i < kcPeriod - 1)
+				{
+					value[i] = null;
+					continue;
+				}
+				value[i] = LinearRegression(avg, kcPeriod, i);
+			}
+
+			var bColor = new int?[high.Length];
+			var sColor = new int?[high.Length];
+
+			for (int i = 0; i < high.Length; i++)
+			{
+				if (i == 0 || value[i] == null || value[i - 1] == null)
+				{
+					bColor[i] = null;
+				}
+				else
+				{
+					var value0 = value[i] ?? 0;
+					var value1 = value[i - 1] ?? 0;
+
+					bColor[i] = value0 > 0
+					? (value0 > value1 ? 1 : 2)
+					: (value0 < value1 ? -1 : -2);
+				}
+
+				sColor[i] = sqzOn[i] == null ? null : (noSqz[i] ?? false ? 0 : (sqzOn[i] ?? false ? 1 : 2));
+			}
+
+			return (value, bColor, sColor);
 		}
 	}
 }

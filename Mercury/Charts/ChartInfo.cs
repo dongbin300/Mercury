@@ -86,6 +86,8 @@ namespace Mercury.Charts
 		public double? DcUpper { get; set; }
 		public double? DcLower { get; set; }
 
+		public double? MarketScore { get; set; }
+
 		public decimal LiquidationPriceLong { get; set; } = 0m;
 		public decimal LiquidationPriceShort { get; set; } = 0m;
 

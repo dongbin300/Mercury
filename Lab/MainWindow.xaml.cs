@@ -130,10 +130,23 @@ namespace Lab
 			var high = quotes.Select(x => (double)x.Quote.High).ToArray();
 			var low = quotes.Select(x => (double)x.Quote.Low).ToArray();
 
+			(var a1, var a2, var a3) = ArrayCalculator.SqueezeMomentum(high, low, close, 20, 2.0, 20, 1.5, true);
+			//var result = new double?[close.Length];
+			//for (int i = 0; i < close.Length; i++)
+			//{
+			//	result[i] = ArrayCalculator.LinearRegression(close.ToNullable(), 20, i);
+			//}
+
 			//var wma = ArrayCalculator.Wma(close, 14);
 
 			//(var predict, var predictMa) = ArrayCalculator.Mlmip(high, low, close, 20, 25, 500, 100, 20);
-			(var basis, var upper, var lower) = ArrayCalculator.DonchianChannel(high, low, 20);
+			//(var basis, var upper, var lower) = ArrayCalculator.DonchianChannel(high, low, 20);
+			//var score = ArrayCalculator.MarketScore(high, low, close);
+			//for(int i = 0; i < score.Length; i++)
+			//{
+			//	quotes[i].MarketScore = score[i];
+			//}
+
 			//(var predict, var predictMa) = ArrayCalculator.Mlmi(close, 200, 20);
 
 			//BinanceRestApi.Init();
