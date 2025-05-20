@@ -418,18 +418,19 @@ namespace Backtester
 				{
 					ChartLoader.InitCharts(symbols[i], interval, startDate, endDate);
 				}
+				ChartLoader.InitCharts("BTCUSDT", KlineInterval.OneDay, startDate, endDate);
 
 				List<ChartPack> chartPacks = [];
+				List<ChartPack> chartPacks2 = [];
 				for (int i = 0; i < symbols.Length; i++)
 				{
 					chartPacks.Add(ChartLoader.GetChartPack(symbols[i], interval));
 				}
+				chartPacks2.Add(ChartLoader.GetChartPack("BTCUSDT", KlineInterval.OneDay));
 
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
 					$"{symbols[0]} +{symbols.Length - 1},{interval},{strategyId},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd},{DateTime.Now:yyyy-MM-dd HH:mm:ss}" + Environment.NewLine);
 
-				var leverage = 5;
-				var maxActiveDeals = 7;
 				//for (var emaPeriod = 60; emaPeriod <= 60; emaPeriod += 5)
 				//{
 				//	for (var s0c = 25; s0c <= 25; s0c += 5)
@@ -502,31 +503,100 @@ namespace Backtester
 				//	}
 				//}
 
-				for (var ap = 5; ap <= 30; ap += 5)
-				{
-					for (var am = 1.0m; am <= 5.0m; am += 0.5m)
-					{
-						for (var rp = 5; rp <= 30; rp += 5)
-						{
-							for (var mfp = 12; mfp <= 12; mfp += 12)
-							{
-								for (var msp = 26; msp <= 26; msp += 26)
-								{
-									for (var msip = 9; msip <= 9; msip += 9)
-									{
-										maxActiveDealsType = MaxActiveDealsType.Each;
-										var backtester1 = new TrendRiderTest(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
-										{
-											IsGeneratePositionHistory = false,
-											FeeRate = 0.0004m,
-										};
-										backtester1.Init(chartPacks, ap, am, rp, mfp, msp, msip);
-										backtester1.Run(startDate.AddDays(8));
+				//for (var ap = 5; ap <= 30; ap += 5)
+				//{
+				//	for (var am = 1.0m; am <= 5.0m; am += 0.5m)
+				//	{
+				//		for (var rp = 5; rp <= 30; rp += 5)
+				//		{
+				//			for (var mfp = 12; mfp <= 12; mfp += 12)
+				//			{
+				//				for (var msp = 26; msp <= 26; msp += 26)
+				//				{
+				//					for (var msip = 9; msip <= 9; msip += 9)
+				//					{
+				//						maxActiveDealsType = MaxActiveDealsType.Each;
+				//						var backtester1 = new TrendRiderTest(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+				//						{
+				//							IsGeneratePositionHistory = false,
+				//							FeeRate = 0.0004m,
+				//						};
+				//						backtester1.Init(chartPacks, ap, am, rp, mfp, msp, msip);
+				//						backtester1.Run(startDate.AddDays(8));
 
-										File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-										$"TrendRiderTest,{interval.ToIntervalString()},{ap},{am},{rp},{mfp},{msp},{msip},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
-									}
-								}
+				//						File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+				//						$"TrendRiderTest,{interval.ToIntervalString()},{ap},{am},{rp},{mfp},{msp},{msip},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester1.Win},{backtester1.Lose},{backtester1.WinRate.Round(2)},{backtester1.EstimatedMoney.Round(0)},{backtester1.mMPer.Round(4):P},{backtester1.ResultPerRisk.Round(4)}" + Environment.NewLine);
+				//					}
+				//				}
+				//			}
+				//		}
+				//	}
+				//}
+
+				//maxActiveDealsType = MaxActiveDealsType.Total;
+				//var backtester = new SM1(reportFileName, money, 5, maxActiveDealsType, 1)
+				//{
+				//	IsGeneratePositionHistory = false,
+				//	FeeRate = 0.0004m,
+				//};
+				//backtester.Init(chartPacks, 20, 2.0m, 20, 1.5m);
+				//backtester.InitIndicator2(chartPacks2);
+				//backtester.Run(startDate.AddDays(8));
+
+				//File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+				//	$"SM1,{interval.ToIntervalString()},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)},{backtester.mMPer.Round(4):P},{backtester.ResultPerRisk.Round(4)}" + Environment.NewLine);
+
+				// RsiH 값이 73~77일때 높아지는 경향이 있음
+				// BTCUSDT;ETHUSDT;BNBUSDT;XRPUSDT;ADAUSDT;SOLUSDT;DOGEUSDT;DOTUSDT;AVAXUSDT;LTCUSDT
+				//BTCUSDT;XRPUSDT;LTCUSDT;TRXUSDT;ETCUSDT;XLMUSDT;XMRUSDT;BNBUSDT;VETUSDT;NEOUSDT;IOSTUSDT;THETAUSDT;DOGEUSDT;BANDUSDT;MKRUSDT;YFIUSDT;RUNEUSDT;SUSHIUSDT;SOLUSDT;UNIUSDT;AVAXUSDT;FTMUSDT;KSMUSDT;AAVEUSDT;LRCUSDT;AXSUSDT;ALPHAUSDT;ZENUSDT;GRTUSDT;CHZUSDT;COTIUSDT;HBARUSDT;MASKUSDT;ARUSDT;LPTUSDT;ENSUSDT
+
+				//for (double l = 35; l <= 45; l += 3)
+				//for (double h = 42; h <= 64; h += 3)
+				// 35, 65, 55, 50
+
+				//maxActiveDealsType = MaxActiveDealsType.Total;
+				//var leverage = 5;
+				//var maxActiveDeals = 10;
+				//var backtester = new CGTrend1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+				//{
+				//	IsGeneratePositionHistory = false,
+				//	FeeRate = 0.0002m,
+				//	RsiL = 35,
+				//	RsiH = 60,
+				//	RsiL2 = 50,
+				//	RsiH2 = 50
+				//};
+
+				//backtester.Init(chartPacks);
+				//backtester.InitIndicator2(chartPacks2);
+				//backtester.Run(startDate.AddDays(8));
+
+				//File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+				//	$"CGTrend1,{interval.ToIntervalString()},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)},{backtester.Mdd.Round(4):P},{backtester.ResultPerRisk.Round(4)}" + Environment.NewLine);
+
+				for (int l = 0; l < 25; l++)
+				{
+					//for (double h = 20; h <= 80; h += 5)
+					{
+						//for (double l2 = 30; l2 <= 70; l2 += 10)
+						{
+							//for (double h2 = 30; h2 <= 70; h2 += 10)
+							{
+								maxActiveDealsType = MaxActiveDealsType.Total;
+								var leverage = 5;
+								var maxActiveDeals = 1;
+								var backtester = new CGTrend1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+								{
+									IsGeneratePositionHistory = false,
+									FeeRate = 0.00015m
+								};
+
+								backtester.Init(chartPacks);
+								backtester.InitIndicator2(chartPacks2);
+								backtester.Run(startDate.AddDays(8));
+
+								File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+									$"CGTrend1,{interval.ToIntervalString()},{maxActiveDealsType},{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)},{backtester.Mdd.Round(4):P},{backtester.ResultPerRisk.Round(4)}" + Environment.NewLine);
 							}
 						}
 					}

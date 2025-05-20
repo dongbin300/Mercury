@@ -1,20 +1,16 @@
-﻿using Binance.Net.Enums;
-
-using Mercury;
+﻿using Mercury;
 using Mercury.Apis;
 using Mercury.Charts;
 using Mercury.Extensions;
 
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace CryptoMonitor;
 
-/// <summary>
+/// <summary>+
 /// Interaction logic for MainWindow.xaml
 /// </summary>
 public partial class MainWindow : Window
@@ -27,18 +23,26 @@ public partial class MainWindow : Window
 
 		symbols = File.ReadAllLines(MercuryPath.Base.Down("mcdata.txt"));
 
-		foreach (var symbol in symbols)
+		MainGrid.RowDefinitions.Clear();
+		for (int i = 0; i < symbols.Length; i++)
 		{
+			MainGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+
+			var symbol = symbols[i];
 			var textBlock = new TextBlock()
 			{
 				Name = $"{symbol}Price",
 				Foreground = new SolidColorBrush(Color.FromRgb(238, 238, 238)),
+				Background = new SolidColorBrush(Color.FromRgb(33, 33, 33)),
 				HorizontalAlignment = HorizontalAlignment.Center,
 				VerticalAlignment = VerticalAlignment.Center,
 				FontSize = 13.5
 			};
 
+			Grid.SetRow(textBlock, i);
+
 			MainGrid.Children.Add(textBlock);
+			MainGrid.RegisterName(textBlock.Name, textBlock);
 		}
 
 		BinanceSocketApi.Init();
@@ -60,8 +64,7 @@ public partial class MainWindow : Window
 				{
 					return;
 				}
-				var textBlock = MainGrid.FindName($"{symbol}Price") as TextBlock;
-				if (textBlock == null)
+				if (MainGrid.FindName($"{symbol}Price") is not TextBlock textBlock)
 				{
 					return;
 				}

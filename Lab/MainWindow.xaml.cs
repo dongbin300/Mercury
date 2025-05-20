@@ -113,41 +113,80 @@ namespace Lab
 			Collect
 		}
 
+		public static void EvaluateCandleScore(
+	double?[] scores, double[] close, int forward = 5, double scoreThreshold = 1.0)
+		{
+			int totalLong = 0, totalShort = 0;
+			int correctLong = 0, correctShort = 0;
+
+			for (int i = 0; i < close.Length - forward; i++)
+			{
+				if (scores[i] == null) continue;
+
+				double score = scores[i].Value;
+				double futureReturn = (close[i + forward] - close[i]) / close[i];
+
+				if (score >= scoreThreshold)
+				{
+					totalLong++;
+					if (futureReturn > 0) correctLong++;
+				}
+				else if (score <= -scoreThreshold)
+				{
+					totalShort++;
+					if (futureReturn < 0) correctShort++;
+				}
+			}
+
+			double accLong = totalLong > 0 ? (double)correctLong / totalLong * 100 : 0;
+			double accShort = totalShort > 0 ? (double)correctShort / totalShort * 100 : 0;
+
+			Debug.WriteLine($"📊 롱 조건 (Score ≥ {scoreThreshold})");
+			Debug.WriteLine($"  → 총: {totalLong}개, 적중: {correctLong}개, 정확도: {accLong:0.00}%");
+
+			Debug.WriteLine($"📉 숏 조건 (Score ≤ -{scoreThreshold})");
+			Debug.WriteLine($"  → 총: {totalShort}개, 적중: {correctShort}개, 정확도: {accShort:0.00}%");
+		}
+
 		public MainWindow()
 		{
 			InitializeComponent();
 
-			var startTime = new DateTime(2025, 1, 1);
-			var endTime = new DateTime(2024, 5, 15);
+			var startTime = new DateTime(2022, 1, 1);
+			var endTime = new DateTime(2023, 12, 31);
 			var symbol = "BTCUSDT";
-			var interval = KlineInterval.OneMonth;
+			var interval = KlineInterval.FifteenMinutes;
 
 			//LocalApi.Init();
 			//var quotes = LocalApi.GetOneDayQuotes(symbol);
-			ChartLoader.InitCharts(symbol, interval);
+			ChartLoader.InitCharts(symbol, interval, startTime, endTime);
 			var quotes = ChartLoader.GetChartPack(symbol, interval).Charts;
+			var open = quotes.Select(x => (double)x.Quote.Open).ToArray();
 			var close = quotes.Select(x => (double)x.Quote.Close).ToArray();
 			var high = quotes.Select(x => (double)x.Quote.High).ToArray();
 			var low = quotes.Select(x => (double)x.Quote.Low).ToArray();
+			var volume = quotes.Select(x => (double)x.Quote.Volume).ToArray();
 
-			(var a1, var a2, var a3) = ArrayCalculator.SqueezeMomentum(high, low, close, 20, 2.0, 20, 1.5, true);
-			//var result = new double?[close.Length];
-			//for (int i = 0; i < close.Length; i++)
+			//var cci = ArrayCalculator.Cci(high, low, close, 20);
+			//var ewmac = ArrayCalculator.Ewmac(close.ToNullable(), 20, 60);
+			//var tr = ArrayCalculator.TrendRider(high, low, close, 10, 3.0, 14, 12, 26, 9);
+			//var trend = tr.Item1;
+			//for (int i = 0; i < trend.Length; i++)
 			//{
-			//	result[i] = ArrayCalculator.LinearRegression(close.ToNullable(), 20, i);
+			//	quotes[i].TrendRiderTrend = trend[i];
 			//}
+			var cs = ArrayCalculator.CandleScore(open, high, low, close, volume);
+			EvaluateCandleScore(cs, close, 5, 0.5);
 
-			//var wma = ArrayCalculator.Wma(close, 14);
+			//quotes.Select(x=> x.DateTime + " | " + x.TrendRiderTrend)
+			//(var value, var direction, var signal) = ArrayCalculator.SqueezeMomentum(high, low, close, 20, 2.0, 20, 1.5, true);
 
-			//(var predict, var predictMa) = ArrayCalculator.Mlmip(high, low, close, 20, 25, 500, 100, 20);
-			//(var basis, var upper, var lower) = ArrayCalculator.DonchianChannel(high, low, 20);
+
 			//var score = ArrayCalculator.MarketScore(high, low, close);
 			//for(int i = 0; i < score.Length; i++)
 			//{
 			//	quotes[i].MarketScore = score[i];
 			//}
-
-			//(var predict, var predictMa) = ArrayCalculator.Mlmi(close, 200, 20);
 
 			//BinanceRestApi.Init();
 			//var result = BinanceRestApi.BinanceClient.UsdFuturesApi.Account.GetAccountInfoV3Async().Result;

@@ -1,4 +1,6 @@
-﻿namespace Mercury.Extensions
+﻿using Mercury.Charts;
+
+namespace Mercury.Extensions
 {
 	public static class QuoteExtension
 	{
@@ -36,5 +38,7 @@
 			}
 			return sum / period;
 		}
+
+		public static ChartInfo GetLatestChartBefore(this IList<ChartInfo> charts, DateTime dateTime) => charts.Last(x => x.DateTime < dateTime);
 	}
 }

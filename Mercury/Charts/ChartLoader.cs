@@ -1,5 +1,6 @@
 ﻿using Binance.Net.Enums;
 
+using Mercury.Cryptos;
 using Mercury.Extensions;
 
 namespace Mercury.Charts
@@ -168,6 +169,14 @@ namespace Mercury.Charts
 			}
 		}
 
+		/// <summary>
+		/// 파일에서 통합된 거래 데이터를 불러옵니다.
+		/// </summary>
+		/// <param name="reportProgressCount"></param>
+		/// <param name="symbol"></param>
+		/// <param name="startDate"></param>
+		/// <param name="endDate"></param>
+		/// <returns></returns>
 		public static List<Price> GetAggregatedTrades(Action<int, int> reportProgressCount, string symbol, DateTime? startDate = null, DateTime? endDate = null)
 		{
 			try
@@ -253,6 +262,50 @@ namespace Mercury.Charts
 							catch
 							{
 							}
+						}
+					}
+				}
+
+				return prices;
+			}
+			catch
+			{
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// 파일에서 가격 데이터를 불러옵니다.
+		/// DateTime은 일괄적으로 파일 날짜 0시 0분 0초로 설정한다.
+		/// </summary>
+		/// <param name="reportProgressCount"></param>
+		/// <param name="symbol"></param>
+		/// <param name="startDate"></param>
+		/// <param name="endDate"></param>
+		/// <returns></returns>
+		public static List<Price> GetPrices(Action<int, int> reportProgressCount, string symbol, DateTime? startDate = null, DateTime? endDate = null)
+		{
+			try
+			{
+				var prices = new List<Price>();
+				var files = Directory.GetFiles(MercuryPath.BinanceFuturesData.Down("price", symbol))
+									 .Where(f => f.GetFileName().StartsWith(symbol));
+
+				var filteredFiles = (startDate == null && endDate == null)
+					? files
+					: files.Where(f => IsFileWithinDateRangeAggTrades(f, startDate, endDate));
+
+				foreach (var (file, index) in filteredFiles.Select((file, index) => (file, index)))
+				{
+					reportProgressCount(index, filteredFiles.Count());
+					var date = CryptoSymbol.GetDatePriceCsvFileName(file); // CSV 파일의 날짜
+					var data = File.ReadAllLines(file);
+
+					foreach (var line in data)
+					{
+						if (decimal.TryParse(line, out var _price))
+						{
+							prices.Add(new Price(date, _price));
 						}
 					}
 				}

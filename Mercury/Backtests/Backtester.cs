@@ -50,6 +50,14 @@ namespace Mercury.Backtests
 		/// </summary>
 		public decimal mMPer { get; set; }
 		/// <summary>
+		/// 최대 리스크 시 낙폭률 (Max Draw Down)
+		/// </summary>
+		public decimal Mdd { get; set; }
+		/// <summary>
+		/// 추후 개발 예정
+		/// </summary>
+		public decimal SharpeRatio { get; set; }
+		/// <summary>
 		/// 요일별 자산 변동률 평균
 		/// </summary>
 		public Dictionary<DayOfWeek, decimal> ChangePerAveragesByDayOfTheWeek { get; set; } = [];
@@ -251,6 +259,7 @@ namespace Mercury.Backtests
 			if (MaxPers.Count > 0)
 			{
 				mMPer = MaxPers.Min(x => x.Item2);
+				Mdd = 1 - mMPer;
 				ChangePerAveragesByDayOfTheWeek = ChangePers.GroupBy(cp => cp.Item1.AddDays(-1).DayOfWeek).Select(g => new KeyValuePair<DayOfWeek, decimal>
 				(
 					g.Key,
@@ -258,7 +267,7 @@ namespace Mercury.Backtests
 				)).OrderBy(g => g.Key).ToDictionary(x => x.Key, x => x.Value);
 
 				var builder = new StringBuilder();
-				builder.AppendLine($"mMPer: {mMPer.Round(4):P}");
+				builder.AppendLine($"MDD: {Mdd.Round(4):P}");
 				foreach (var ch in ChangePerAveragesByDayOfTheWeek)
 				{
 					builder.AppendLine($"{ch.Key.ToString()}: {ch.Value.Round(4):P}");
@@ -316,6 +325,32 @@ namespace Mercury.Backtests
 			{
 				newPosition.StopLossPrice = stopLossPrice.Value;
 			}
+
+			Positions.Add(newPosition);
+		}
+
+		protected void EntryPositionSize(PositionSide side, ChartInfo currentChart, decimal entryPrice, double positionSize, decimal? stopLossPrice = null, decimal? takeProfitPrice = null)
+		{
+			var adjustedOrderSize = BaseOrderSize * (decimal)positionSize;
+
+			var quantity = adjustedOrderSize / entryPrice;
+			var amount = entryPrice * quantity;
+
+			Money += GetBorrowSize(currentChart.DateTime);
+			Borrowed += GetBorrowSize(currentChart.DateTime);
+			Money += side == PositionSide.Long ? -amount : amount;
+
+			var newPosition = new Position(currentChart.DateTime, currentChart.Symbol, side, entryPrice)
+			{
+				Quantity = quantity,
+				EntryAmount = entryPrice * quantity
+			};
+
+			if (takeProfitPrice != null)
+				newPosition.TakeProfitPrice = takeProfitPrice.Value;
+
+			if (stopLossPrice != null)
+				newPosition.StopLossPrice = stopLossPrice.Value;
 
 			Positions.Add(newPosition);
 		}
@@ -491,6 +526,126 @@ namespace Mercury.Backtests
 				case PositionResult.Lose: Lose++; break;
 			}
 			Money -= (position.EntryAmount + position.ExitAmount) * FeeRate;
+		}
+
+		/// <summary>
+		/// 포지션 절반 청산 (Stage 0 → 1)
+		/// </summary>
+		protected void GptExitPositionHalf(Position position, decimal exitPrice)
+		{
+			var quantity = position.Quantity / 2;
+			var amount = exitPrice * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			position.Quantity -= quantity;
+			position.ExitAmount += amount;
+			position.Stage = 1;
+		}
+
+		/// <summary>
+		/// 남은 절반 포지션 청산 (Stage 1에서 호출)
+		/// </summary>
+		protected void GptExitPositionHalf2(Position position, ChartInfo currentChart, decimal exitPrice)
+		{
+			var quantity = position.Quantity;
+			var amount = exitPrice * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			Money -= GetBorrowSize(position.Time);
+			Borrowed -= GetBorrowSize(position.Time);
+
+			position.ExitAmount += amount;
+			GptFinalizePosition(position, currentChart);
+		}
+
+		/// <summary>
+		/// 전체 포지션 전량 청산 (손절 or MACD 반전 등)
+		/// </summary>
+		protected void GptExitPositionAll(Position position, decimal exitPrice, ChartInfo currentChart)
+		{
+			var quantity = position.Quantity;
+			var amount = exitPrice * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			Money -= GetBorrowSize(position.Time);
+			Borrowed -= GetBorrowSize(position.Time);
+
+			position.ExitAmount += amount;
+			position.Quantity = 0;
+			GptFinalizePosition(position, currentChart);
+		}
+
+		/// <summary>
+		/// 포지션 최종 정산 및 히스토리 저장
+		/// </summary>
+		private void GptFinalizePosition(Position position, ChartInfo currentChart)
+		{
+			var result = position.Income > 0 ? PositionResult.Win : PositionResult.Lose;
+			Positions.Remove(position);
+
+			PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, result)
+			{
+				EntryAmount = position.EntryAmount,
+				ExitAmount = position.ExitAmount,
+				Fee = (position.EntryAmount + position.ExitAmount) * FeeRate
+			});
+
+			switch (result)
+			{
+				case PositionResult.Win: Win++; break;
+				case PositionResult.Lose: Lose++; break;
+			}
+
+			Money -= (position.EntryAmount + position.ExitAmount) * FeeRate;
+		}
+
+		/// <summary>
+		/// 지정가 주문 체결 여부
+		/// </summary>
+		/// <param name="side"></param>
+		/// <param name="currentChart"></param>
+		/// <param name="orderPrice"></param>
+		/// <returns></returns>
+		protected bool IsOrderFilled(PositionSide side, ChartInfo currentChart, decimal orderPrice, bool isEntry)
+		{
+			if (side == PositionSide.Long)
+			{
+				return isEntry
+					? currentChart.Quote.Low <= orderPrice
+					: currentChart.Quote.High >= orderPrice;
+			}
+			else
+			{
+				return isEntry
+					? currentChart.Quote.High >= orderPrice
+					: currentChart.Quote.Low <= orderPrice;
+			}
+		}
+
+		/// <summary>
+		/// 지정가 주문 시 예상 주문가격
+		/// </summary>
+		/// <param name="side"></param>
+		/// <param name="currentChart"></param>
+		/// <param name="isEntry"></param>
+		/// <returns></returns>
+		protected decimal GetAdjustedPrice(PositionSide side, ChartInfo currentChart, bool isEntry)
+		{
+			var open = currentChart.Quote.Open;
+			var gapRate = 0.0003m; // 0.03%
+
+			if (side == PositionSide.Long)
+			{
+				return isEntry
+					? open * (1 - gapRate)
+					: open * (1 + gapRate);
+			}
+			else
+			{
+				return isEntry
+					? open * (1 + gapRate)
+					: open * (1 - gapRate);
+			}
 		}
 
 		protected decimal GetMinPrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Low);

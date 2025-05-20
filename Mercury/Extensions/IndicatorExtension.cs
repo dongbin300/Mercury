@@ -153,7 +153,7 @@ namespace Mercury.Extensions
             return result;
         }
 
-        public static IEnumerable<StochasticRsiResult> GetStochasticRsi(this IEnumerable<Quote> quotes, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
+        public static IEnumerable<StochasticRsiResult> GetStochasticRsi(this IEnumerable<Quote> quotes, int smoothK = 3, int smoothD = 3, int rsiPeriod = 14, int stochasticPeriod = 14)
         {
             var result = new List<StochasticRsiResult>();
 
@@ -165,13 +165,27 @@ namespace Mercury.Extensions
             }
 
             return result;
-        }
+		}
 
-        public static IEnumerable<SmaResult> GetSma(this IEnumerable<Quote> quotes, int period)
-        {
-            var result = new List<SmaResult>();
+		public static IEnumerable<StdevResult> GetStdev(this IEnumerable<Quote> quotes, int period = 20)
+		{
+			var result = new List<StdevResult>();
 
-            var values = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
+			var values = quotes.Select(x => (double)x.Close).ToArray();
+			var stdev = ArrayCalculator.Stdev(values.ToNullable(), period);
+			for (int i = 0; i < stdev.Length; i++)
+			{
+				result.Add(new StdevResult(quotes.ElementAt(i).Date, stdev.ElementAt(i)));
+			}
+
+			return result;
+		}
+
+		public static IEnumerable<SmaResult> GetSma(this IEnumerable<Quote> quotes, int period)
+		{
+			var result = new List<SmaResult>();
+
+			var values = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
             var sma = ArrayCalculator.Sma(values, period);
             for (int i = 0; i < sma.Length; i++)
             {
@@ -195,7 +209,34 @@ namespace Mercury.Extensions
             return result;
         }
 
-        public static IEnumerable<SmaResult> GetVolumeSma(this IEnumerable<Quote> quotes, int period)
+		public static IEnumerable<EwmacResult> GetEwmac(this IEnumerable<Quote> quotes, int shortPeriod, int longPeriod)
+		{
+			var result = new List<EwmacResult>();
+
+			var values = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
+			var ewmac = ArrayCalculator.Ewmac(values, shortPeriod, longPeriod);
+			for (int i = 0; i < ewmac.Length; i++)
+			{
+				result.Add(new EwmacResult(quotes.ElementAt(i).Date, ewmac[i]));
+			}
+
+			return result;
+		}
+
+        public static IEnumerable<VolatilityRatioResult> GetVolatilityRatio(this IEnumerable<Quote> quotes, int currentPeriod, int longPeriod)
+        {
+			var result = new List<VolatilityRatioResult>();
+
+			var values = quotes.Select(x => (double)x.Close).ToArray().ToNullable();
+			var volatilityRatio = ArrayCalculator.VolatilityRatio(values, currentPeriod, longPeriod);
+			for (int i = 0; i < volatilityRatio.Length; i++)
+			{
+				result.Add(new VolatilityRatioResult(quotes.ElementAt(i).Date, volatilityRatio[i]));
+			}
+			return result;
+		}
+
+		public static IEnumerable<SmaResult> GetVolumeSma(this IEnumerable<Quote> quotes, int period)
         {
             var result = new List<SmaResult>();
 
@@ -268,23 +309,39 @@ namespace Mercury.Extensions
             return result;
         }
 
-        public static IEnumerable<SupertrendResult> GetSupertrend(this IEnumerable<Quote> quotes, int atrPeriod, double factor)
-        {
-            var result = new List<SupertrendResult>();
+		public static IEnumerable<CciResult> GetCci(this IEnumerable<Quote> quotes, int period = 20)
+		{
+			var result = new List<CciResult>();
 
-            var high = quotes.Select(x => (double)x.High).ToArray();
-            var low = quotes.Select(x => (double)x.Low).ToArray();
-            var close = quotes.Select(x => (double)x.Close).ToArray();
-            (var supertrend, var direction) = ArrayCalculator.Supertrend(high, low, close, factor, atrPeriod);
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			var cci = ArrayCalculator.Cci(high, low, close, period);
+			for (int i = 0; i < cci.Length; i++)
+			{
+				result.Add(new CciResult(quotes.ElementAt(i).Date, cci.ElementAt(i)));
+			}
 
-            for (int i = 0; i < supertrend.Length; i++)
-            {
-                var st = i >= atrPeriod - 1 ? -direction[i] * supertrend[i] : 0;
-                var _supertrend = new SupertrendResult(quotes.ElementAt(i).Date, st);
-                result.Add(_supertrend);
-            }
+			return result;
+		}
 
-            return result;
+		public static IEnumerable<SupertrendResult> GetSupertrend(this IEnumerable<Quote> quotes, int atrPeriod, double factor)
+		{
+			var result = new List<SupertrendResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			(var supertrend, var direction) = ArrayCalculator.Supertrend(high, low, close, factor, atrPeriod);
+
+			for (int i = 0; i < supertrend.Length; i++)
+			{
+				var st = i >= atrPeriod - 1 ? -direction[i] * supertrend[i] : 0;
+				var _supertrend = new SupertrendResult(quotes.ElementAt(i).Date, st);
+				result.Add(_supertrend);
+			}
+
+			return result;
         }
 
         public static IEnumerable<SupertrendResult> GetReverseSupertrend(this IEnumerable<Quote> quotes, int atrPeriod, double factor)
@@ -483,5 +540,40 @@ namespace Mercury.Extensions
 
 			return result;
 		}
-    }
+
+		public static IEnumerable<SqueezeMomentumResult> GetSqueezeMomentum(this IEnumerable<Quote> quotes, int bbPeriod = 20, double bbFactor = 2.0, int kcPeriod = 20, double kcFactor = 1.5, bool useTrueRange = true)
+		{
+			var result = new List<SqueezeMomentumResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			(var value, var direction, var signal) = ArrayCalculator.SqueezeMomentum(high, low, close, bbPeriod, bbFactor, kcPeriod, kcFactor, useTrueRange);
+
+			for (int i = 0; i < value.Length; i++)
+			{
+				result.Add(new SqueezeMomentumResult(quotes.ElementAt(i).Date, value[i], direction[i], signal[i]));
+			}
+
+			return result;
+		}
+
+        public static IEnumerable<CandleScoreResult> GetCandleScore(this IEnumerable<Quote> quotes)
+        {
+            var result = new List<CandleScoreResult>();
+
+			var open = quotes.Select(x => (double)x.Open).ToArray();
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			var candleScore = ArrayCalculator.CandleScore(open, high, low, close, null);
+
+			for (int i = 0; i < candleScore.Length; i++)
+			{
+				result.Add(new CandleScoreResult(quotes.ElementAt(i).Date, candleScore[i]));
+			}
+
+			return result;
+		}
+	}
 }

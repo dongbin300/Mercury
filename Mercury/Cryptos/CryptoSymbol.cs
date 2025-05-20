@@ -34,5 +34,19 @@ namespace Mercury.Cryptos
         {
             return GetDate(GetEndDateFileName(symbol));
         }
-    }
+
+		/// <summary>
+		/// BTCUSDT-prices-2020-01-01.csv 에서 2020-01-01 추출
+		/// </summary>
+		/// <param name="fileName"></param>
+		public static DateTime GetDatePriceCsvFileName(string fileName)
+		{
+			var match = System.Text.RegularExpressions.Regex.Match(fileName, @"(\d{4}-\d{2}-\d{2})");
+			if (match.Success)
+			{
+				return DateTime.ParseExact(match.Groups[1].Value, "yyyy-MM-dd", null);
+			}
+			throw new ArgumentException($"날짜를 찾을 수 없습니다: {fileName}");
+		}
+	}
 }

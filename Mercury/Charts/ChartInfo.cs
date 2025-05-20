@@ -21,12 +21,14 @@ namespace Mercury.Charts
 		public IList<ChartElementResult> ChartElements { get; set; } = [];
 		public IList<NamedElementResult> NamedElements { get; set; } = [];
 
+		public double? Stdev1 { get; set; }
 		public double? Sma1 { get; set; }
 		public double? Sma2 { get; set; }
 		public double? Sma3 { get; set; }
 		public double? Ema1 { get; set; }
 		public double? Ema2 { get; set; }
 		public double? Ema3 { get; set; }
+		public double? Ewmac { get; set; }
 		public double? Lsma1 { get; set; }
 		public double? Lsma2 { get; set; }
 		public double? Lsma3 { get; set; }
@@ -37,6 +39,9 @@ namespace Mercury.Charts
 		public double? K { get; set; }
 		public double? D { get; set; }
 		public double? Stoch { get; set; }
+		public double? StochK { get; set; }
+		public double? StochD { get; set; }
+		public double? Cci { get; set; }
 		public double? Supertrend1 { get; set; }
 		public double? Supertrend2 { get; set; }
 		public double? Supertrend3 { get; set; }
@@ -52,8 +57,10 @@ namespace Mercury.Charts
 		public double? Adx { get; set; }
 		public double? Atr { get; set; }
 		public double? Atrma { get; set; }
+		public double? Bb1Sma { get; set; }
 		public double? Bb1Upper { get; set; }
 		public double? Bb1Lower { get; set; }
+		public double? Bb2Sma { get; set; }
 		public double? Bb2Upper { get; set; }
 		public double? Bb2Lower { get; set; }
 
@@ -87,6 +94,14 @@ namespace Mercury.Charts
 		public double? DcLower { get; set; }
 
 		public double? MarketScore { get; set; }
+
+		public double? SmValue { get; set; }
+		public int? SmDirection { get; set; }
+		public int? SmSignal { get; set; }
+
+		public double? VolatilityRatio { get; set; }
+
+		public double? CandleScore { get; set; }
 
 		public decimal LiquidationPriceLong { get; set; } = 0m;
 		public decimal LiquidationPriceShort { get; set; } = 0m;

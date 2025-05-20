@@ -342,7 +342,7 @@ namespace Backtester
 			}
 		}
 
-		private void BactestRiskButton_Click(object sender, RoutedEventArgs e)
+		private void BacktestRiskButton_Click(object sender, RoutedEventArgs e)
 		{
 			try
 			{
@@ -409,7 +409,7 @@ namespace Backtester
 			}
 		}
 
-		private void BactestRisk2Button_Click(object sender, RoutedEventArgs e)
+		private void BacktestRisk2Button_Click(object sender, RoutedEventArgs e)
 		{
 			try
 			{
@@ -440,7 +440,7 @@ namespace Backtester
 				aggregatedTrades = ChartLoader.GetAggregatedTrades(Common.ReportProgressCount, symbol, startDate, endDate);
 
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd},{DateTime.Now:yyyy-MM-dd HH:mm:ss}" + Environment.NewLine);
-				
+
 				//var periodSeq = new int[] { 30, 32, 34, 36, 38, 40, 64, 66, 68, 70, 72, 74, 76 };
 				for (var gridCount = 10; gridCount <= 50; gridCount += 10)
 				{
@@ -449,16 +449,17 @@ namespace Backtester
 						//for (var _period = 0; _period < periodSeq.Length; _period += 1)
 						for (var period = 20; period <= 200; period += 20)
 						{
-							for(var leverage = 1; leverage <= 1; leverage += 1)
+							for (var leverage = 1; leverage <= 1; leverage += 1)
 							{
 								//var period = periodSeq[_period];
 								chartPack.UsePredictiveRanges(period, (double)factor);
+								chartPack.UseAtr(14);
 
 								var riskCalculator = new PredictiveRangesRiskCalculator2(symbol, [.. chartPack.Charts], gridCount, 0.1m);
 								//var startIndex = chartPack.Charts.IndexOf(chartPack.Charts.First(x => x.DateTime.Year == startDate.Year && x.DateTime.Month == startDate.Month && x.DateTime.Day == startDate.Day));
 								chartPack.Charts = riskCalculator.Run(300, leverage);
 
-								var backtester = new GridPredictiveRangesBacktester2(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName, gridCount, 0.1m, leverage)
+								var backtester = new GridPredictiveRangesBacktester2(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName)
 								{
 									IsGeneratePositionHistory = false
 								};
@@ -476,6 +477,72 @@ namespace Backtester
 										$"{period},{factor.Round(3)},{gridCount},{leverage},-,-" + Environment.NewLine);
 								}
 							}
+						}
+					}
+				}
+
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), "END" + Environment.NewLine + Environment.NewLine);
+
+				Environment.Exit(0);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+			}
+		}
+
+		private void BacktestS2Button_Click(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				Common.ReportProgressCount = (i, m) =>
+				{
+					DispatcherService.Invoke(() =>
+					{
+						BacktestProgressText.Text = $"{i} / {m}";
+					});
+				};
+
+				Settings.Default.Symbol = SymbolTextBox.Text;
+				Settings.Default.StartDate = StartDateTextBox.Text;
+				Settings.Default.EndDate = EndDateTextBox.Text;
+				Settings.Default.FileName = FileNameTextBox.Text;
+				Settings.Default.IntervalIndex = IntervalComboBox.SelectedIndex;
+				Settings.Default.Save();
+
+				symbol = SymbolTextBox.Text;
+				startDate = StartDateTextBox.Text.ToDateTime();
+				endDate = EndDateTextBox.Text.ToDateTime();
+				reportFileName = FileNameTextBox.Text;
+
+				ChartLoader.Charts = [];
+				var interval = KlineInterval.OneDay;
+				ChartLoader.InitCharts(symbol, interval);
+				var chartPack = ChartLoader.GetChartPack(symbol, interval);
+				aggregatedTrades = ChartLoader.GetPrices(Common.ReportProgressCount, symbol, startDate, endDate);
+
+				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd},{DateTime.Now:yyyy-MM-dd HH:mm:ss}" + Environment.NewLine);
+
+				for (var factor = 4.0m; factor <= 6.0m; factor += 0.5m)
+				{
+					for (var period = 140; period <= 240; period += 20)
+					{
+						for (var ar = 0.06m; ar <= 0.06m; ar += 0.02m)
+						{
+							chartPack.UsePredictiveRanges(period, (double)factor);
+							chartPack.UseAtr(14);
+							chartPack.UseTrendRider();
+
+							var backtester = new GridPredictiveRangesBacktester3(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName)
+							{
+								AtrRatio = ar,
+								IsGeneratePositionHistory = false
+							};
+
+							(var tradePerDay, var estimatedMoney) = backtester.Run(0);
+
+							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+							$"{period},{factor.Round(3)},{ar.Round(2)},{tradePerDay},{(tradePerDay == -419 ? "-" : estimatedMoney.Round(0))},{backtester.Mdd.Round(2)},{backtester.SharpeRatio.Round(2)}" + Environment.NewLine);
 						}
 					}
 				}

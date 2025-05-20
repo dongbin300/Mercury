@@ -11,6 +11,7 @@ using Mercury.Charts;
 using Mercury.Extensions;
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -249,7 +250,7 @@ namespace MarinerX.Charts
 							try
 							{
 								var e = data[i].Split(',');
-								var price = decimal.Parse(e[1]).Round(0);
+								var price = decimal.Parse(e[1]);
 								var time = long.Parse(e[5]).TimeStampMillisecondsToDateTime();
 
 								if (prevPrice == price)
@@ -278,12 +279,12 @@ namespace MarinerX.Charts
 						var currentDateString = $"{f[2]}-{f[3]}-{f[4]}";
 						var data = File.ReadAllLines(file);
 
-						var prevPrice = 0m;
-						var builder = new StringBuilder();
+						var raw = new (DateTime time, decimal price)[data.Length];
 
 						worker.For(0, data.Length, 1, (i) =>
 						{
-							if (data[i].StartsWith("agg"))
+							var line = data[i];
+							if (line.StartsWith("agg"))
 							{
 								return;
 							}
@@ -292,15 +293,27 @@ namespace MarinerX.Charts
 							var price = decimal.Parse(e[1]);
 							var time = long.Parse(e[5]).TimeStampMillisecondsToDateTime();
 
-							if (prevPrice == price)
-							{
-								return;
-							}
-
-							prevPrice = price;
-							builder.AppendLine($"{time:yyyy-MM-dd HH:mm:ss.fff},{price}");
-
+							raw[i] = (time, price);
 						}, ProgressBarDisplayOptions.Count | ProgressBarDisplayOptions.Percent | ProgressBarDisplayOptions.TimeRemaining);
+
+						var filtered = raw.Where(x => x.time != default).OrderBy(x => x.time).ToList();
+
+						var timePriceMap = new Dictionary<DateTime, decimal>();
+						foreach (var (time, price) in filtered)
+						{
+							timePriceMap[time] = price;
+						}
+
+						var builder = new StringBuilder();
+						decimal prevPrice = 0;
+						foreach (var (time, price) in timePriceMap.OrderBy(kv => kv.Key))
+						{
+							if (prevPrice != price)
+							{
+								builder.AppendLine(price.ToString());
+								prevPrice = price;
+							}
+						}
 
 						File.WriteAllText(MercuryPath.BinanceFuturesData.Down("price", symbol, $"{symbol}-prices-{currentDateString}"), builder.ToString());
 					}

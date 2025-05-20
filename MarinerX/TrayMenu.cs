@@ -377,8 +377,8 @@ namespace MarinerX
 					try
 					{
 						ChartLoader.ExtractPricesFromAggregatedTrades("BTCUSDT", worker,
-							new DateTime(2023, 1, 1),
-							new DateTime(2023, 1, 31));
+							new DateTime(2020, 1, 1),
+							new DateTime(2020, 1, 1));
 						DispatcherService.Invoke(progressView.Hide);
 
 						MessageBox.Show("바이낸스 가격 데이터 추출 완료");
@@ -1406,15 +1406,15 @@ namespace MarinerX
 
 					while (currentTime <= endTime)
 					{
-						//var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/{symbol}/{symbol}-aggTrades-{currentTime:yyyy-MM-dd}.zip";
+						var url = $"https://data.binance.vision/data/futures/um/daily/aggTrades/{symbol}/{symbol}-aggTrades-{currentTime:yyyy-MM-dd}.zip";
 
-						var url = $"https://data.binance.vision/data/futures/um/daily/klines/{symbol}/1h/{symbol}-1h-{currentTime:yyyy-MM-dd}.zip";
+						//var url = $"https://data.binance.vision/data/futures/um/daily/klines/{symbol}/1h/{symbol}-1h-{currentTime:yyyy-MM-dd}.zip";
 
 						var response = client.GetAsync(url).Result;
 						if (response.IsSuccessStatusCode)
 						{
 							using Stream responseStream = response.Content.ReadAsStreamAsync().Result;
-							using FileStream fileStream = File.Create(MercuryPath.BinanceFuturesData.Down("crosscheck", symbol, $"{currentTime:yyyy-MM-dd}.zip"));
+							using FileStream fileStream = File.Create(MercuryPath.BinanceFuturesData.Down("trade", symbol, $"{currentTime:yyyy-MM-dd}.zip"));
 							responseStream.CopyTo(fileStream);
 						}
 						currentTime = currentTime.AddDays(1);

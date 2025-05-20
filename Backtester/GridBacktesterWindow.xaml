@@ -89,8 +89,9 @@
             <Button Grid.Row="0" x:Name="BacktestButton" Content="BACKTEST" Click="BacktestButton_Click"/>
             <Button Grid.Row="1" x:Name="GridRangeButton" Content="GRID RANGE" Click="GridRangeButton_Click"/>
             <Button Grid.Row="2" x:Name="CalculateRiskButton" Content="CALCULATE RISK" Click="CalculateRiskButton_Click"/>
-            <Button Grid.Row="3" x:Name="BactestRiskButton" Content="BACKTEST + RISK" Click="BactestRiskButton_Click"/>
-            <Button Grid.Row="4" x:Name="BactestRisk2Button" Content="BACKTEST + RISK 2" Click="BactestRisk2Button_Click"/>
+            <Button Grid.Row="3" x:Name="BacktestRiskButton" Content="BACKTEST + RISK" Click="BacktestRiskButton_Click"/>
+            <Button Grid.Row="4" x:Name="BacktestRisk2Button" Content="BACKTEST + RISK 2" Click="BacktestRisk2Button_Click"/>
+            <Button Grid.Row="5" x:Name="BacktestS2Button" Content="BACKTEST S2" Click="BacktestS2Button_Click"/>
         </Grid>
     </Grid>
     

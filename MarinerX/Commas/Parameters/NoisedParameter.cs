@@ -1,6 +1,8 @@
 ﻿using MarinerX.Commas.Noises;
 using MarinerX.Utils;
 
+using Mercury.Maths;
+
 using System;
 
 namespace MarinerX.Commas.Parameters

@@ -117,7 +117,7 @@ namespace Mercury.Charts
 			});
 
 		public ChartInfo GetChart(DateTime dateTime) => Charts.First(x => x.DateTime.Equals(dateTime));
-
+		public ChartInfo GetLatestChartBefore(DateTime dateTime) => Charts.GetLatestChartBefore(dateTime);
 		public List<ChartInfo> GetCharts(DateTime startTime, DateTime endTime)
 		{
 			return Charts.Where(x => x.DateTime >= startTime && x.DateTime <= endTime).ToList();
@@ -178,6 +178,15 @@ namespace Mercury.Charts
 			}
 		}
 
+		public void UseStdev(int period1 = 20)
+		{
+			var stdev = Charts.Select(x => x.Quote).GetStdev(period1).Select(x => x.Stdev);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Stdev1 = stdev.ElementAt(i);
+			}
+		}
+
 		public void UseSma(int period1, int? period2 = null, int? period3 = null)
 		{
 			var sma = Charts.Select(x => x.Quote).GetSma(period1).Select(x => x.Sma);
@@ -225,6 +234,24 @@ namespace Mercury.Charts
 				{
 					Charts[i].Ema3 = ema3.ElementAt(i);
 				}
+			}
+		}
+
+		public void UseEwmac(int shortPeriod, int longPeriod)
+		{
+			var ewmac = Charts.Select(x => x.Quote).GetEwmac(shortPeriod, longPeriod).Select(x => x.Ewmac);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Ewmac = ewmac.ElementAt(i);
+			}
+		}
+
+		public void UseVolatilityRatio(int currentPeriod, int longPeriod)
+		{
+			var volatilityRatio = Charts.Select(x => x.Quote).GetVolatilityRatio(currentPeriod, longPeriod).Select(x => x.VolatilityRatio);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].VolatilityRatio = volatilityRatio.ElementAt(i);
 			}
 		}
 
@@ -299,6 +326,7 @@ namespace Mercury.Charts
 			var sma = bollingerBands.Select(x => x.Sma);
 			for (int i = 0; i < Charts.Count; i++)
 			{
+				Charts[i].Bb1Sma = sma.ElementAt(i);
 				Charts[i].Bb1Upper = upper.ElementAt(i);
 				Charts[i].Bb1Lower = lower.ElementAt(i);
 			}
@@ -348,6 +376,27 @@ namespace Mercury.Charts
 			}
 		}
 
+		public void UseCci(int period)
+		{
+			var cci = Charts.Select(x => x.Quote).GetCci(period).Select(x => x.Cci);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Cci = cci.ElementAt(i);
+			}
+		}
+
+		public void UseStochasticRsi(int smoothK = 3, int smoothD = 3, int rsiPeriod = 14, int stochasticPeriod = 14)
+		{
+			var stochasticRsi = Charts.Select(x => x.Quote).GetStochasticRsi(smoothK, smoothD, rsiPeriod, stochasticPeriod);
+			var k = stochasticRsi.Select(x => x.K);
+			var d = stochasticRsi.Select(x => x.D);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].StochK = k.ElementAt(i);
+				Charts[i].StochD = d.ElementAt(i);
+			}
+		}
+
 		public void UseMlmip(int pivotBars = 20, int momentumWindow = 25, int maxData = 500, int numNeighbors = 100, int predictionSmoothing = 20)
 		{
 			var mlmip = Charts.Select(x => x.Quote).GetMlmip(pivotBars, momentumWindow, maxData, numNeighbors, predictionSmoothing);
@@ -380,6 +429,29 @@ namespace Mercury.Charts
 				Charts[i].DcBasis = basis.ElementAt(i);
 				Charts[i].DcUpper = upper.ElementAt(i);
 				Charts[i].DcLower = lower.ElementAt(i);
+			}
+		}
+
+		public void UseSqueezeMomentum(int bbPeriod = 20, double bbFactor = 2.0, int kcPeriod = 20, double kcFactor = 1.5, bool useTrueRange = true)
+		{
+			var squeezeMomentum = Charts.Select(x => x.Quote).GetSqueezeMomentum(bbPeriod, bbFactor, kcPeriod, kcFactor, useTrueRange);
+			var value = squeezeMomentum.Select(x => x.Value);
+			var direction = squeezeMomentum.Select(x => x.Direction);
+			var signal = squeezeMomentum.Select(x => x.Signal);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].SmValue = value.ElementAt(i);
+				Charts[i].SmDirection = direction.ElementAt(i);
+				Charts[i].SmSignal = signal.ElementAt(i);
+			}
+		}
+
+		public void UseCandleScore()
+		{
+			var candleScore = Charts.Select(x => x.Quote).GetCandleScore().Select(x => x.CandleScore);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].CandleScore = candleScore.ElementAt(i);
 			}
 		}
 	}

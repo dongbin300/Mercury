@@ -135,5 +135,82 @@ namespace Mercury.Maths
 
 			return seed / Math.Abs(loss);
 		}
+
+		/// <summary>
+		/// Calculate Maximum Drawdown(MDD)
+		/// 0.0 ~ 1.0(0 ~ 100%)
+		/// The Higher, The Worse
+		/// </summary>
+		/// <param name="assets"></param>
+		/// <returns></returns>
+		public static decimal Mdd(List<decimal> assets)
+		{
+			if (assets == null || assets.Count == 0)
+            {
+				return 0m;
+			}
+
+			decimal peak = assets[0];
+			decimal mdd = 0m;
+
+			foreach (var asset in assets)
+			{
+				if (asset > peak)
+                {
+					peak = asset;
+				}
+
+				decimal drawdown = (peak - asset) / peak;
+				if (drawdown > mdd)
+                {
+					mdd = drawdown;
+				}
+			}
+
+			return mdd;
+		}
+
+		/// <summary>
+		/// Calculate Sharpe Ratio
+		/// 무위험수익률(annualRiskFreeRate) 기본값은 연 3%
+		/// </summary>
+		/// <param name="assets"></param>
+		/// <param name="annualRiskFreeRate"></param>
+		/// <returns></returns>
+		public static decimal SharpeRatio(List<decimal> assets, double annualRiskFreeRate = 0.03)
+		{
+			if (assets == null || assets.Count < 2)
+				return 0m;
+
+            // 1. 일별 수익률 계산
+            List<double> dailyReturns = [];
+			for (int i = 1; i < assets.Count; i++)
+			{
+				if (assets[i - 1] == 0) continue;
+				double dailyReturn = (double)((assets[i] - assets[i - 1]) / assets[i - 1]);
+				dailyReturns.Add(dailyReturn);
+			}
+
+			if (dailyReturns.Count == 0)
+				return 0m;
+
+            // 2. 무위험수익률(일간) 환산
+            double dailyRiskFreeRate = annualRiskFreeRate / 365;
+
+			// 3. 초과수익률 리스트
+			var excessReturns = dailyReturns.Select(r => r - dailyRiskFreeRate).ToList();
+
+			// 4. 평균, 표준편차
+			double meanExcessReturn = excessReturns.Average();
+			double stdDev = excessReturns.Count > 1
+				? Math.Sqrt(excessReturns.Select(r => Math.Pow(r - meanExcessReturn, 2)).Sum() / (excessReturns.Count - 1))
+				: 0.0001; // 0으로 나누기 방지
+
+			// 5. Sharpe Ratio (연환산)
+			double sharpeRatio = meanExcessReturn / stdDev * Math.Sqrt(365);
+
+			return (decimal)sharpeRatio;
+		}
+
 	}
 }

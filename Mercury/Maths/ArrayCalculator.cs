@@ -6,10 +6,7 @@ using System.Drawing;
 namespace Mercury.Maths
 {
 	/// <summary>
-	/// TODO
-	/// Momentum
-	/// Adaptive Momentum Oscillator
-	/// 
+	/// TODO 
 	/// Mean Reversion
 	/// Z-score
 	/// QQE MOD
@@ -610,6 +607,28 @@ namespace Mercury.Maths
 				result[i] = alpha * values[i] + (1 - alpha) * result[i - 1];
 			}
 
+			return result;
+		}
+
+		public static double?[] Vwap(double?[] high, double?[] low, double?[] close, double?[] volume, int period)
+		{
+			var result = new double?[close.Length];
+			for (int i = 0; i < close.Length; i++)
+			{
+				if (i < period - 1)
+				{
+					result[i] = null;
+					continue;
+				}
+				double sum = 0;
+				double volumeSum = 0;
+				for (int j = i - period + 1; j < i + 1; j++)
+				{
+					sum += (close[j] ?? 0) * (high[j] ?? 0) * (low[j] ?? 0) * (volume[j] ?? 0);
+					volumeSum += volume[j] ?? 0;
+				}
+				result[i] = sum / volumeSum;
+			}
 			return result;
 		}
 
@@ -1338,7 +1357,13 @@ namespace Mercury.Maths
 				dn[i] = mid - atrMultiplier * atr[i];
 				di[i] = (close[i] > up[i - 1]) ? 1 : (close[i] < dn[i - 1]) ? -1 : di[i - 1];
 
-				if (di[i] > 0) // up trend
+				if (di[i] == null)
+				{
+					trend[i] = trend[i - 1];
+					supertrend[i] = dn[i] = Math.Max(dn[i] ?? 0, dn[i - 1] ?? 0);
+					supertrendDirection[i] = supertrendDirection[i - 1];
+				}
+				else if (di[i] > 0) // up trend
 				{
 					trend[i] = (rsi[i] > 50 && macd[i] > 0) ? -1 : 0;
 					supertrend[i] = dn[i] = Math.Max(dn[i] ?? 0, dn[i - 1] ?? 0);
@@ -1495,6 +1520,50 @@ namespace Mercury.Maths
 		}
 
 		/// <summary>
+		/// Commodity Channel Index (TODO)
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <param name="period"></param>
+		/// <returns></returns>
+		public static double?[] Cci(double[] high, double[] low, double[] close, int period)
+		{
+			var result = new double?[close.Length];
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				if (i < period - 1)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				var typicalPrices = new double[period];
+				for (int j = 0; j < period; j++)
+				{
+					var idx = i - period + 1 + j;
+					var h = high[idx];
+					var l = low[idx];
+					var c = close[idx];
+					typicalPrices[j] = (h + l + c) / 3.0;
+				}
+
+				var tp = typicalPrices[period - 1];
+				var sma = typicalPrices.Average();
+				var meanDev = typicalPrices.Average(x => Math.Abs(x - sma));
+
+				if (meanDev == 0)
+					result[i] = 0;
+				else
+					result[i] = (tp - sma) / (0.015 * meanDev);
+			}
+
+			return result;
+		}
+
+
+		/// <summary>
 		/// on test
 		/// </summary>
 		/// <param name="high"></param>
@@ -1640,5 +1709,156 @@ namespace Mercury.Maths
 
 			return (value, bColor, sColor);
 		}
+
+		/// <summary>
+		/// Exponential Weighted Moving Average Crossover
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="shortPeriod"></param>
+		/// <param name="longPeriod"></param>
+		/// <param name="startIndex"></param>
+		/// <returns></returns>
+		public static double?[] Ewmac(double?[] values, int shortPeriod, int longPeriod, int startIndex = 0)
+		{
+			var shortEma = Ema(values, shortPeriod, startIndex);
+			var longEma = Ema(values, longPeriod, startIndex);
+			var result = new double?[values.Length];
+
+			for (int i = 0; i < values.Length; i++)
+			{
+				if (shortEma[i] == null || longEma[i] == null)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				result[i] = shortEma[i] - longEma[i];
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Volatility Ratio
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="currentPeriod"></param>
+		/// <param name="longPeriod"></param>
+		/// <returns></returns>
+		public static double?[] VolatilityRatio(double?[] values, int currentPeriod, int longPeriod)
+		{
+			var currentStdev = Stdev(values, currentPeriod);
+			var longTermStdev = Stdev(values, longPeriod);
+			var result = new double?[values.Length];
+
+			for (int i = 0; i < values.Length; i++)
+			{
+				if (currentStdev[i] == null || longTermStdev[i] == null || longTermStdev[i] == 0)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				result[i] = currentStdev[i] / longTermStdev[i];
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Candle Score
+		/// </summary>
+		/// <param name="open"></param>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <returns></returns>
+		public static double?[] CandleScore(double[] open, double[] high, double[] low, double[] close, double[] volume, int window = 5)
+		{
+			var score = new double?[close.Length];
+			var ma50 = Sma(close.ToNullable(), 50);  // 50-period 이동 평균
+			var rsi = Rsi(close, 14);    // 14-period RSI
+			var macd = Macd(close.ToNullable(), 12, 26, 9);  // 12, 26, 9 MACD
+
+			for (int i = window; i < close.Length; i++)
+			{
+				double s = 0;
+
+				// 캔들 정보
+				double o = open[i];
+				double h = high[i];
+				double l = low[i];
+				double c = close[i];
+				double prevC = close[i - 1];
+				double prevO = open[i - 1];
+
+				double body = Math.Abs(c - o);
+				double candleSize = h - l;
+				double upperTail = h - Math.Max(c, o);
+				double lowerTail = Math.Min(c, o) - l;
+
+				// 1. 몸통 비율
+				if (c > o && body / candleSize > 0.6) s += 1.5;
+				else if (c < o && body / candleSize > 0.6) s -= 1.5;
+
+				// 2. 갭 상승/하락
+				if (o > prevC * 1.002) s += 0.5;
+				else if (o < prevC * 0.998) s -= 0.5;
+
+				// 3. 꼬리 길이로 반전 판단
+				if (c > o && lowerTail > body * 1.5) s += 0.5;
+				else if (c < o && upperTail > body * 1.5) s -= 0.5;
+
+				// 4. 되돌림 캔들
+				bool reversalBull = c > prevO && o < prevC;
+				bool reversalBear = c < prevO && o > prevC;
+				if (reversalBull) s += 1.0;
+				else if (reversalBear) s -= 1.0;
+
+				// 5. 최근 window 내 연속 양봉/음봉
+				int bullCount = 0;
+				int bearCount = 0;
+				for (int j = i - window + 1; j <= i; j++)
+				{
+					if (close[j] > open[j]) bullCount++;
+					else if (close[j] < open[j]) bearCount++;
+				}
+				if (bullCount >= window - 1) s += 1.5;
+				else if (bearCount >= window - 1) s -= 1.5;
+
+				// 6. 스파이크 캔들 (size가 최근 평균보다 크면)
+				double avgSize = 0;
+				for (int j = i - window; j < i; j++)
+				{
+					avgSize += high[j] - low[j];
+				}
+				avgSize /= window;
+
+				if (candleSize > avgSize * 1.8)
+					s += (c > o ? 1.0 : -1.0);
+
+				// 7. 이동평균에 따른 추세 판단 (50-period MA)
+				if (ma50[i] > ma50[i - 1])  // 상승 추세
+					s += 0.5;
+				else if (ma50[i] < ma50[i - 1])  // 하락 추세
+					s -= 0.5;
+
+				// 8. RSI를 통한 진입 필터 (과매도/과매수)
+				if (rsi[i] < 30) s += 0.5;  // 과매도
+				else if (rsi[i] > 70) s -= 0.5;  // 과매수
+
+				// 9. MACD 신호 (MACD 히스토그램이 0 이상일 때 롱, 이하일 때 숏)
+				if (macd.Item3[i] > 0) s += 0.5;  // 롱
+				else if (macd.Item3[i] < 0) s -= 0.5;  // 숏
+
+				// 스코어 계산
+				score[i] = Math.Round(s, 2);
+			}
+
+			return score;
+		}
+
+
+
 	}
 }
