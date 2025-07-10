@@ -34,7 +34,7 @@ namespace Mercury.Elements
 				Name = name;
 				var segments = parameterString.Split(',').Select(x => x.Trim()).ToArray();
 				segments[0] = segments[0].Replace('.', '_');
-				ElementType = (MtmChartElementType)Enum.Parse(typeof(MtmChartElementType), segments[0]);
+				ElementType = Enum.Parse<MtmChartElementType>(segments[0]);
 
 				// base element
 				if (segments.Length == 1)

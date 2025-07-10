@@ -2,15 +2,9 @@
 
 namespace Mercury.Elements
 {
-	public class TradeElementResult
+	public class TradeElementResult(MtmTradeElementType type, decimal? value)
 	{
-		public MtmTradeElementType Type { get; set; }
-		public decimal? Value { get; set; }
-
-		public TradeElementResult(MtmTradeElementType type, decimal? value)
-		{
-			Type = type;
-			Value = value;
-		}
+		public MtmTradeElementType Type { get; set; } = type;
+		public decimal? Value { get; set; } = value;
 	}
 }

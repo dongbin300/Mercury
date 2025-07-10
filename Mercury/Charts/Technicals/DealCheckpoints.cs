@@ -11,7 +11,7 @@ namespace Mercury.Charts.Technicals
 		public decimal EntryPrice { get; set; } = entryPrice;
 		public PositionSide Side { get; set; } = side;
 		public IList<DealCheckpoint> Histories { get; set; } = [];
-		public IList<decimal> Roes => Histories.Select(x => Calculator.Roe(Side, EntryPrice, x.Price)).ToList();
+		public IList<decimal> Roes => [.. Histories.Select(x => Calculator.Roe(Side, EntryPrice, x.Price))];
 		public DealCheckpoint? HighCheckpoint => Histories.Where(x => x.Direction.Equals(Side == PositionSide.Long ? CheckpointDirection.Profit : CheckpointDirection.Loss)).OrderByDescending(x => x.Time).FirstOrDefault();
 		public DealCheckpoint? LowCheckpoint => Histories.Where(x => x.Direction.Equals(Side == PositionSide.Long ? CheckpointDirection.Loss : CheckpointDirection.Profit)).OrderByDescending(x => x.Time).FirstOrDefault();
 		public int Life { get; set; } = 0;
@@ -124,7 +124,7 @@ namespace Mercury.Charts.Technicals
 
 				ranges.Add(roeRange);
 			}
-			return ArrayCalculator.GeometricMean(ranges.ToArray());
+			return ArrayCalculator.GeometricMean([.. ranges]);
 		}
 
 		public override string ToString()

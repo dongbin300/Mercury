@@ -1,15 +1,9 @@
 ﻿namespace Mercury.Elements
 {
-	public class NamedElementResult
+	public class NamedElementResult(string name, decimal? value)
 	{
-		public string Name { get; set; }
-		public decimal? Value { get; set; }
-
-		public NamedElementResult(string name, decimal? value)
-		{
-			Name = name;
-			Value = value;
-		}
+		public string Name { get; set; } = name;
+		public decimal? Value { get; set; } = value;
 
 		public override string ToString()
 		{

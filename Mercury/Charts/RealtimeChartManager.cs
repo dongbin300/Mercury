@@ -6,7 +6,7 @@ namespace Mercury.Charts
 {
 	public class RealtimeChartManager
 	{
-		public static List<RealtimeChart> RealtimeCharts { get; set; } = new();
+		public static List<RealtimeChart> RealtimeCharts { get; set; } = [];
 
 		public static void Init()
 		{
@@ -19,7 +19,7 @@ namespace Mercury.Charts
 					var _realtimeChart = RealtimeCharts.Find(c => c.Symbol.Equals(symbol));
 					if (_realtimeChart == null)
 					{
-						RealtimeCharts.Add(new RealtimeChart(symbol, new List<Quote> { quote }));
+						RealtimeCharts.Add(new RealtimeChart(symbol, [quote]));
 					}
 					else
 					{
@@ -36,7 +36,7 @@ namespace Mercury.Charts
 			var _realtimeChart = RealtimeCharts.Find(c => c.Symbol.Equals(symbol));
 			if (_realtimeChart == null)
 			{
-				RealtimeCharts.Add(new RealtimeChart(symbol, new List<Quote> { quote }));
+				RealtimeCharts.Add(new RealtimeChart(symbol, [quote]));
 			}
 			else
 			{

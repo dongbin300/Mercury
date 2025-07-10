@@ -15,16 +15,16 @@ namespace Mercury.Backtests.Calculators
 		{
 			var isFirst = true;
 			var maxLeverages = new List<decimal>();
-			var prevAverage = (decimal)Charts[startIndex].PredictiveRangesAverage;
+			var prevAverage = Charts[startIndex].PredictiveRangesAverage;
 			for (int i = startIndex; i < Charts.Count; i++)
 			{
 				var date = Charts[i].DateTime;
 				var price = Charts[i].Quote.Close;
-				var upper2 = (decimal)Charts[i].PredictiveRangesUpper2;
-				var upper = (decimal)Charts[i].PredictiveRangesUpper;
-				var average = (decimal)Charts[i].PredictiveRangesAverage;
-				var lower = (decimal)Charts[i].PredictiveRangesLower;
-				var lower2 = (decimal)Charts[i].PredictiveRangesLower2;
+				var upper2 = Charts[i].PredictiveRangesUpper2 ?? 0;
+				var upper = Charts[i].PredictiveRangesUpper ?? 0;
+				var average = Charts[i].PredictiveRangesAverage ?? 0;
+				var lower = Charts[i].PredictiveRangesLower ?? 0;
+				var lower2 = Charts[i].PredictiveRangesLower2 ?? 0;
 
 				if (prevAverage != average || isFirst)
 				{

@@ -2,18 +2,12 @@
 
 namespace Mercury.Charts
 {
-	public class TradePack
+	public class TradePack(string symbol)
 	{
-		public string Symbol { get; set; }
-		public IList<BinanceAggregatedTrade> Trades { get; set; } = new List<BinanceAggregatedTrade>();
-		public int CurrentIndex { get; set; }
+		public string Symbol { get; set; } = symbol;
+		public IList<BinanceAggregatedTrade> Trades { get; set; } = [];
+		public int CurrentIndex { get; set; } = 0;
 		public BinanceAggregatedTrade CurrentTrade => Trades[CurrentIndex];
-
-		public TradePack(string symbol)
-		{
-			Symbol = symbol;
-			CurrentIndex = 0;
-		}
 
 		public void AddTrade(BinanceAggregatedTrade trade)
 		{

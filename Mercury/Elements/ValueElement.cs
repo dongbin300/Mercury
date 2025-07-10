@@ -2,14 +2,9 @@
 
 namespace Mercury.Elements
 {
-	public class ValueElement : IElement
+	public class ValueElement(decimal value) : IElement
 	{
-		public decimal Value { get; set; }
-
-		public ValueElement(decimal value)
-		{
-			Value = value;
-		}
+		public decimal Value { get; set; } = value;
 
 		public override string ToString()
 		{

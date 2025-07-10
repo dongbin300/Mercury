@@ -31,7 +31,7 @@ namespace Mercury.Elements
 			{
 				var segments = elementString.Split(',').Select(x => x.Trim()).ToArray();
 				segments[0] = segments[0].Replace('.', '_');
-				ElementType = (MtmChartElementType)Enum.Parse(typeof(MtmChartElementType), segments[0]);
+				ElementType = Enum.Parse<MtmChartElementType>(segments[0]);
 
 				// base element
 				if (segments.Length == 1)
@@ -83,7 +83,7 @@ namespace Mercury.Elements
 					case MtmChartElementType.bb_sma:
 					case MtmChartElementType.bb_upper:
 					case MtmChartElementType.bb_lower:
-						ElementType = (MtmChartElementType)Enum.Parse(typeof(MtmChartElementType), segments[0]);
+						ElementType = Enum.Parse<MtmChartElementType>(segments[0]);
 						Parameters[0] = decimal.Parse(segments[1]);
 						Parameters[1] = decimal.Parse(segments[2]);
 						return;
@@ -91,7 +91,7 @@ namespace Mercury.Elements
 					case MtmChartElementType.macd_macd:
 					case MtmChartElementType.macd_signal:
 					case MtmChartElementType.macd_hist:
-						ElementType = (MtmChartElementType)Enum.Parse(typeof(MtmChartElementType), segments[0]);
+						ElementType = Enum.Parse<MtmChartElementType>(segments[0]);
 						Parameters[0] = decimal.Parse(segments[1]);
 						Parameters[1] = decimal.Parse(segments[2]);
 						Parameters[2] = decimal.Parse(segments[3]);

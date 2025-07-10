@@ -214,7 +214,7 @@ namespace Mercury.Maths
 
 		public static (decimal Level0, decimal Level236, decimal Level382, decimal Level500, decimal Level618, decimal Level786, decimal Level1000)	FibonacciRetracementLevels(decimal low, decimal high)
 		{
-			decimal[] ratios = { 0m, 0.236m, 0.382m, 0.5m, 0.618m, 0.786m, 1.0m };
+			decimal[] ratios = [0m, 0.236m, 0.382m, 0.5m, 0.618m, 0.786m, 1.0m];
 			decimal range = high - low;
 
 			decimal[] levels = [.. ratios.Select(r => low + range * r)];

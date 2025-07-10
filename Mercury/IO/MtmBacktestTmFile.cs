@@ -1,12 +1,10 @@
 ﻿namespace Mercury.IO
 {
-	public class MtmBacktestTmFile
+	public class MtmBacktestTmFile(string fileName)
 	{
-		public string FileName { get; set; } = string.Empty;
+		public string FileName { get; set; } = fileName;
 		public string Name => FileName.Split('\\')[^1].Replace(FileName[FileName.LastIndexOf('.')..], "");
 		public string MenuString => Name + " 실행";
-
-		public MtmBacktestTmFile(string fileName) => FileName = fileName;
 
 		public override string ToString()
 		{

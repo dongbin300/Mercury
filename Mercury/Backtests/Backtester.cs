@@ -895,7 +895,7 @@ namespace Mercury.Backtests
 		/// <param name="i"></param>
 		/// <param name="condition"></param>
 		/// <returns></returns>
-		bool IsTrueCandle(List<ChartInfo> charts, int i, string condition)
+		protected bool IsTrueCandle(List<ChartInfo> charts, int i, string condition)
 		{
 			// p = 0, charts[i-1], 1봉전, 가장 최근 봉
 			// p = 1, charts[i-2], 2봉전

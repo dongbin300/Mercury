@@ -24,10 +24,10 @@ namespace Mercury.Backtests
 		public DateTime EndDate { get; set; }
 		public int BacktestDays => (int)(EndDate - StartDate).TotalDays;
 
-		public List<string> MonitoringSymbols { get; set; } = new();
-		public Dictionary<string, List<ChartInfo>> Charts { get; set; } = new();
-		public List<Position> Positions { get; set; } = new();
-		public List<PositionHistory> PositionHistories { get; set; } = new();
+		public List<string> MonitoringSymbols { get; set; } = [];
+		public Dictionary<string, List<ChartInfo>> Charts { get; set; } = [];
+		public List<Position> Positions { get; set; } = [];
+		public List<PositionHistory> PositionHistories { get; set; } = [];
 		public int LongPositionCount => Positions.Count(x => x.Side.Equals(PositionSide.Long));
 		public int ShortPositionCount => Positions.Count(x => x.Side.Equals(PositionSide.Short));
 
@@ -67,13 +67,13 @@ namespace Mercury.Backtests
 		{
 			foreach (var chart in charts)
 			{
-				if (Charts.ContainsKey(chart.Key))
+				if (Charts.TryGetValue(chart.Key, out List<ChartInfo>? value))
 				{
-					Charts[chart.Key].Add(chart.Value);
+					value.Add(chart.Value);
 				}
 				else
 				{
-					Charts.Add(chart.Key, new List<ChartInfo> { chart.Value });
+					Charts.Add(chart.Key, [chart.Value]);
 				}
 			}
 		}
@@ -109,8 +109,8 @@ namespace Mercury.Backtests
 		{
 			var chart = Charts[symbol];
 			var quotes = chart.Select(x => x.Quote);
-			var r1 = quotes.TakeLast(12).SkipLast(1).Concat(new[] { lastQuote }).GetLsma(10).Select(x => x.Lsma);
-			var r2 = quotes.TakeLast(32).SkipLast(1).Concat(new[] { lastQuote }).GetLsma(30).Select(x => x.Lsma);
+			var r1 = quotes.TakeLast(12).SkipLast(1).Concat([lastQuote]).GetLsma(10).Select(x => x.Lsma);
+			var r2 = quotes.TakeLast(32).SkipLast(1).Concat([lastQuote]).GetLsma(30).Select(x => x.Lsma);
 
 			int p = 0;
 			var result = new List<ChartInfo>();
@@ -512,9 +512,9 @@ namespace Mercury.Backtests
 		{
 			var chart = Charts[symbol];
 			var quotes = chart.Select(x => x.Quote);
-			var r1 = quotes.TakeLast(202).SkipLast(1).Concat(new[] { lastQuote }).GetEma(200).Select(x => x.Ema);
-			var r2 = quotes.TakeLast(20).SkipLast(1).Concat(new[] { lastQuote }).GetStochasticRsi(3, 3, 14, 14).Select(x => x.K);
-			var ts = quotes.TakeLast(20).SkipLast(1).Concat(new[] { lastQuote }).GetTripleSupertrend(10, 1, 11, 2, 12, 3);
+			var r1 = quotes.TakeLast(202).SkipLast(1).Concat([lastQuote]).GetEma(200).Select(x => x.Ema);
+			var r2 = quotes.TakeLast(20).SkipLast(1).Concat([lastQuote]).GetStochasticRsi(3, 3, 14, 14).Select(x => x.K);
+			var ts = quotes.TakeLast(20).SkipLast(1).Concat([lastQuote]).GetTripleSupertrend(10, 1, 11, 2, 12, 3);
 			var r3 = ts.Select(x => x.Supertrend1);
 			var r4 = ts.Select(x => x.Supertrend2);
 			var r5 = ts.Select(x => x.Supertrend3);

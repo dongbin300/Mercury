@@ -4,7 +4,7 @@ namespace Mercury.Backtests
 {
     public class Deal
     {
-        public List<OpenTransaction> OpenTransactions { get; set; } = new();
+        public List<OpenTransaction> OpenTransactions { get; set; } = [];
         public CloseTransaction CloseTransaction { get; set; } = new();
         public bool IsClosed => CloseTransaction.Time >= new DateTime(2000, 1, 1);
         public TimeSpan TakenTime => CloseTransaction.Time - OpenTransactions[0].Time;

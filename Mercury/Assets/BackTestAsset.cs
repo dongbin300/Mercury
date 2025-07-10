@@ -1,9 +1,6 @@
 ﻿namespace Mercury.Assets
 {
-	public class BackTestAsset : Asset
+	public class BackTestAsset(decimal seed, Position position) : Asset(seed, position)
 	{
-		public BackTestAsset(decimal seed, Position position) : base(seed, position)
-		{
-		}
 	}
 }

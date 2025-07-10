@@ -1,6 +1,7 @@
-﻿using Mercury.Charts;
+﻿using Binance.Net.Enums;
+
+using Mercury.Charts;
 using Mercury.Maths;
-using Binance.Net.Enums;
 
 namespace Mercury.Backtests
 {
@@ -12,15 +13,15 @@ namespace Mercury.Backtests
 
 		public string Run(int startIndex)
 		{
-			var prevAverage = (decimal)Charts[startIndex].PredictiveRangesAverage;
+			var prevAverage = Charts[startIndex].PredictiveRangesAverage ?? 0;
 			for (int i = startIndex; i < Charts.Count; i++)
 			{
 				var price = Charts[i].Quote.Close;
-				var upper2 = (decimal)Charts[i].PredictiveRangesUpper2;
-				var upper = (decimal)Charts[i].PredictiveRangesUpper;
-				var average = (decimal)Charts[i].PredictiveRangesAverage;
-				var lower = (decimal)Charts[i].PredictiveRangesLower;
-				var lower2 = (decimal)Charts[i].PredictiveRangesLower2;
+				var upper2 = Charts[i].PredictiveRangesUpper2 ?? 0;
+				var upper = Charts[i].PredictiveRangesUpper ?? 0;
+				var average = Charts[i].PredictiveRangesAverage ?? 0;
+				var lower = Charts[i].PredictiveRangesLower ?? 0;
+				var lower2 = Charts[i].PredictiveRangesLower2 ?? 0;
 
 				if (prevAverage != average) // Stoploss when different to previous average
 				{

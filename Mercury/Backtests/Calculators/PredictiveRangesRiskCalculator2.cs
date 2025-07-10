@@ -19,16 +19,16 @@ namespace Mercury.Backtests.Calculators
 		public List<ChartInfo> Run(int startIndex, int? leverage = null)
 		{
 			var isFirst = true;
-			var prevAverage = (decimal)Charts[startIndex].PredictiveRangesAverage;
+			var prevAverage = Charts[startIndex].PredictiveRangesAverage;
 			for (int i = startIndex; i < Charts.Count; i++)
 			{
 				var date = Charts[i].DateTime;
 				var price = Charts[i].Quote.Close;
-				var upper2 = (decimal)Charts[i].PredictiveRangesUpper2;
-				var upper = (decimal)Charts[i].PredictiveRangesUpper;
-				var average = (decimal)Charts[i].PredictiveRangesAverage;
-				var lower = (decimal)Charts[i].PredictiveRangesLower;
-				var lower2 = (decimal)Charts[i].PredictiveRangesLower2;
+				var upper2 = Charts[i].PredictiveRangesUpper2 ?? 0;
+				var upper = Charts[i].PredictiveRangesUpper ?? 0;
+				var average = Charts[i].PredictiveRangesAverage ?? 0;
+				var lower = Charts[i].PredictiveRangesLower ?? 0;
+				var lower2 = Charts[i].PredictiveRangesLower2 ?? 0;
 
 				// Predictive Ranges 값이 바뀌면
 				if (prevAverage != average || isFirst)
@@ -45,7 +45,7 @@ namespace Mercury.Backtests.Calculators
 				{
 					Charts[i].PredictiveRangesMaxLeverage = Charts[i - 1].PredictiveRangesMaxLeverage;
 				}
-				var leverageForLiquidationPrice = leverage == null ? (int)Charts[i].PredictiveRangesMaxLeverage : leverage.Value;
+				var leverageForLiquidationPrice = leverage == null ? Charts[i].PredictiveRangesMaxLeverage : leverage.Value;
 				//Charts[i].LiquidationPriceLong = CalculateLiquidationPrices(PositionSide.Long, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
 				//Charts[i].LiquidationPriceShort = CalculateLiquidationPrices(PositionSide.Short, upper2, lower2, price, GridCount, leverageForLiquidationPrice);
 

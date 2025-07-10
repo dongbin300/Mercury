@@ -5,7 +5,7 @@ namespace Mercury.Backtests
 {
     public class DealManager
     {
-        public List<Deal> Deals { get; set; } = new();
+        public List<Deal> Deals { get; set; } = [];
         public Deal? LatestDeal => Deals.Count > 0 ? Deals[^1] : null;
         public decimal CurrentPositionQuantity => GetCurrentPositionQuantity();
         public bool IsPositioning => CurrentPositionQuantity > 0.000001m;
@@ -19,10 +19,10 @@ namespace Mercury.Backtests
         public decimal SafetyOrderSize { get; set; }
         public int MaxSafetyOrderCount { get; set; }
         public decimal Deviation { get; set; }
-        public List<decimal> Deviations { get; private set; } = new();
+        public List<decimal> Deviations { get; private set; } = [];
         public decimal SafetyOrderStepScale { get; set; }
         public decimal SafetyOrderVolumeScale { get; set; }
-        public List<decimal> SafetyOrderVolumes { get; private set; } = new();
+        public List<decimal> SafetyOrderVolumes { get; private set; } = [];
 
         public decimal SltpRatio { get; set; }
         private decimal StopLossRoe = 0;

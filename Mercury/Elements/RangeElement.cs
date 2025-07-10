@@ -2,16 +2,10 @@
 
 namespace Mercury.Elements
 {
-	public class RangeElement : IElement
+	public class RangeElement(decimal startValue, decimal endValue) : IElement
 	{
-		public decimal StartValue { get; set; }
-		public decimal EndValue { get; set; }
-
-		public RangeElement(decimal startValue, decimal endValue)
-		{
-			StartValue = startValue;
-			EndValue = endValue;
-		}
+		public decimal StartValue { get; set; } = startValue;
+		public decimal EndValue { get; set; } = endValue;
 
 		public bool IsValid(decimal num)
 		{

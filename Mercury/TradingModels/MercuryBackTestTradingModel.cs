@@ -13,10 +13,10 @@ namespace Mercury.TradingModels
 		public DateTime StartTime { get; set; }
 		public TimeSpan Period { get; set; }
 		public KlineInterval Interval { get; set; }
-		public IList<string> Targets { get; set; } = new List<string>();
-		public IList<ChartElement> ChartElements { get; set; } = new List<ChartElement>();
-		public IList<NamedElement> NamedElements { get; set; } = new List<NamedElement>();
-		public IList<IScenario> Scenarios { get; set; } = new List<IScenario>();
+		public IList<string> Targets { get; set; } = [];
+		public IList<ChartElement> ChartElements { get; set; } = [];
+		public IList<NamedElement> NamedElements { get; set; } = [];
+		public IList<IScenario> Scenarios { get; set; } = [];
 
 		public MercuryBackTestTradingModel()
 		{

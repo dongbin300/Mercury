@@ -120,7 +120,7 @@ namespace Mercury.Charts
 		public ChartInfo GetLatestChartBefore(DateTime dateTime) => Charts.GetLatestChartBefore(dateTime);
 		public List<ChartInfo> GetCharts(DateTime startTime, DateTime endTime)
 		{
-			return Charts.Where(x => x.DateTime >= startTime && x.DateTime <= endTime).ToList();
+			return [.. Charts.Where(x => x.DateTime >= startTime && x.DateTime <= endTime)];
 		}
 
 		public void CalculateIndicatorsEveryonesCoin()

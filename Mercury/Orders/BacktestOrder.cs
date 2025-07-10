@@ -9,26 +9,17 @@ using Newtonsoft.Json;
 
 namespace Mercury.Orders
 {
-	public class BacktestOrder : IOrder
+	public class BacktestOrder(MtmOrderType type, MtmPositionSide side, OrderAmount amount, decimal? price = null) : IOrder
 	{
-		public MtmOrderType Type { get; set; } = MtmOrderType.None;
-		public MtmPositionSide Side { get; set; } = MtmPositionSide.None;
-		public OrderAmount Amount { get; set; } = new OrderAmount(MtmOrderAmountType.None, 0m);
-		public decimal? Price { get; set; } = null;
+		public MtmOrderType Type { get; set; } = type;
+		public MtmPositionSide Side { get; set; } = side;
+		public OrderAmount Amount { get; set; } = amount;
+		public decimal? Price { get; set; } = price;
 		[JsonIgnore]
 		public decimal MakerFee => 0.00075m; // use BNB(0.075%)
 											 // public decimal MakerFee => 0.0015m; // use Double Fee(0.15%)
 		[JsonIgnore]
 		public decimal TakerFee => 0.00075m; // use BNB(0.075%)
-											 // public decimal TakerFee => 0.0015m; // use Double Fee(0.15%)
-
-		public BacktestOrder(MtmOrderType type, MtmPositionSide side, OrderAmount amount, decimal? price = null)
-		{
-			Type = type;
-			Side = side;
-			Amount = amount;
-			Price = price;
-		}
 
 		public BackTestTradeInfo Run(Asset asset, ChartInfo chart, string tag = "")
 		{

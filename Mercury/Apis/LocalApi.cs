@@ -5,13 +5,12 @@ using Mercury.Cryptos.Binance;
 using Mercury.Extensions;
 
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Mercury.Apis
 {
     public class LocalApi
 	{
-		public static List<string> SymbolNames = new();
+		public static List<string> SymbolNames = [];
 
 		#region Initialize
 		public static void Init()
@@ -24,7 +23,7 @@ namespace Mercury.Apis
 		public static List<string> GetSymbolNames()
 		{
 			var symbolFile = new DirectoryInfo(MercuryPath.BinanceFuturesData).GetFiles("symbol_*.txt").OrderByDescending(x => x.LastAccessTime).FirstOrDefault() ?? default!;
-			return File.ReadAllLines(symbolFile.FullName).ToList();
+			return [.. File.ReadAllLines(symbolFile.FullName)];
 		}
 
 		public static List<BinanceFuturesSymbol> GetSymbols()
@@ -55,7 +54,7 @@ namespace Mercury.Apis
 					Convert.ToDecimal(d[8]),
 					Convert.ToInt32(d[9]),
 					Convert.ToInt32(d[10]),
-					(UnderlyingType)Enum.Parse(typeof(UnderlyingType), d[11])));
+					Enum.Parse<UnderlyingType>(d[11])));
 			}
 
 			return symbols;

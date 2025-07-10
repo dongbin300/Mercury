@@ -6,7 +6,7 @@ using CryptoExchange.Net.Authentication;
 
 using Mercury.Cryptos.Binance;
 using Mercury.Extensions;
-using System.Collections.Generic;
+
 using System.Text;
 
 namespace Mercury.Apis
@@ -68,15 +68,14 @@ namespace Mercury.Apis
 			var usdFuturesSymbolData = BinanceClient.UsdFuturesApi.ExchangeData.GetExchangeInfoAsync();
 			usdFuturesSymbolData.Wait();
 
-			return usdFuturesSymbolData.Result.Data.Symbols
+			return [.. usdFuturesSymbolData.Result.Data.Symbols
 				.Where(s => s.Name.EndsWith("USDT") && !s.Name.Equals("LINKUSDT") && !s.Name.StartsWith('1'))
-				.Select(s => new BinanceFuturesSymbol(s.Name, s.LiquidationFee, s.ListingDate, s.PriceFilter?.MaxPrice, s.PriceFilter?.MinPrice, s.PriceFilter?.TickSize, s.LotSizeFilter?.MaxQuantity, s.LotSizeFilter?.MinQuantity, s.LotSizeFilter?.StepSize, s.PricePrecision, s.QuantityPrecision, s.UnderlyingType))
-				.ToList();
+				.Select(s => new BinanceFuturesSymbol(s.Name, s.LiquidationFee, s.ListingDate, s.PriceFilter?.MaxPrice, s.PriceFilter?.MinPrice, s.PriceFilter?.TickSize, s.LotSizeFilter?.MaxQuantity, s.LotSizeFilter?.MinQuantity, s.LotSizeFilter?.StepSize, s.PricePrecision, s.QuantityPrecision, s.UnderlyingType))];
 		}
 
 		public static List<BinancePrice> GetFuturesPrices()
 		{
-			return BinanceClient.UsdFuturesApi.ExchangeData.GetPricesAsync().Result.Data.Where(s => s.Symbol.EndsWith("USDT") && !s.Symbol.Equals("LINKUSDT") && !s.Symbol.StartsWith('1')).ToList();
+			return [.. BinanceClient.UsdFuturesApi.ExchangeData.GetPricesAsync().Result.Data.Where(s => s.Symbol.EndsWith("USDT") && !s.Symbol.Equals("LINKUSDT") && !s.Symbol.StartsWith('1'))];
 		}
 		#endregion
 
@@ -203,8 +202,8 @@ namespace Mercury.Apis
 			var info = accountInfo.Result.Data;
 
 			return new BinanceFuturesAccount(
-				info.Assets.Where(x => x.WalletBalance > 0).ToList(),
-				info.Positions.Where(x => x.Symbol.EndsWith("USDT") && !x.Symbol.Equals("LINKUSDT")).ToList(),
+				[.. info.Assets.Where(x => x.WalletBalance > 0)],
+				[.. info.Positions.Where(x => x.Symbol.EndsWith("USDT") && !x.Symbol.Equals("LINKUSDT"))],
 				info.AvailableBalance,
 				info.TotalMarginBalance,
 				info.TotalUnrealizedProfit,
@@ -250,7 +249,7 @@ namespace Mercury.Apis
 			var positionInformation = BinanceClient.UsdFuturesApi.Account.GetPositionInformationAsync(symbol);
 			positionInformation.Wait();
 
-			return positionInformation.Result.Data
+			return [.. positionInformation.Result.Data
 				.Where(x => x.Symbol.EndsWith("USDT") && !x.Symbol.Equals("LINKUSDT"))
 				.Select(x => new BinanceFuturesPosition(
 					x.Symbol,
@@ -262,8 +261,7 @@ namespace Mercury.Apis
 					x.MarkPrice,
 					x.UnrealizedPnl,
 					x.LiquidationPrice
-					))
-				.ToList();
+					))];
 		}
 
 		/// <summary>
@@ -276,7 +274,7 @@ namespace Mercury.Apis
 			var positionInformation = BinanceClient.UsdFuturesApi.Account.GetPositionInformationAsync(symbol);
 			positionInformation.Wait();
 
-			return positionInformation.Result.Data
+			return [.. positionInformation.Result.Data
 				.Where(x => x.Symbol.EndsWith("USDT") && !x.Symbol.Equals("LINKUSDT") && x.Quantity != 0)
 				.Select(x => new BinanceFuturesPosition(
 					x.Symbol,
@@ -288,8 +286,7 @@ namespace Mercury.Apis
 					x.MarkPrice,
 					x.UnrealizedPnl,
 					x.LiquidationPrice
-					))
-				.ToList();
+					))];
 		}
 
 		/// <summary>
@@ -301,14 +298,13 @@ namespace Mercury.Apis
 			var balance = BinanceClient.UsdFuturesApi.Account.GetBalancesAsync();
 			balance.Wait();
 
-			return balance.Result.Data.Where(x => x.Asset.Equals("USDT") || x.Asset.Equals("BNB"))
+			return [.. balance.Result.Data.Where(x => x.Asset.Equals("USDT") || x.Asset.Equals("BNB"))
 				.Select(x => new BinanceFuturesBalance(
 					 x.Asset,
 					 x.WalletBalance,
 					 x.AvailableBalance,
 					 x.CrossUnrealizedPnl ?? 0m
-					))
-				.ToList();
+					))];
 		}
 
 		public static decimal GetFuturesBalance()

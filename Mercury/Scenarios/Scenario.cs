@@ -5,7 +5,7 @@ namespace Mercury.Scenarios
 	public class Scenario : IScenario
 	{
 		public string Name { get; set; } = string.Empty;
-		public IList<IStrategy> Strategies { get; set; } = new List<IStrategy>();
+		public IList<IStrategy> Strategies { get; set; } = [];
 
 		public Scenario()
 		{

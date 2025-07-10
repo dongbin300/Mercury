@@ -7,7 +7,7 @@ namespace Mercury.Backtests
 {
     public class SimpleDealManager
     {
-        public List<SimpleDeal> Deals { get; set; } = new();
+        public List<SimpleDeal> Deals { get; set; } = [];
         public SimpleDeal? LatestDeal => Deals.Count > 0 ? Deals[^1] : null;
         public decimal CurrentPositionQuantity => GetCurrentPositionQuantity();
         public bool IsPositioning => CurrentPositionQuantity > 0.000001m;
