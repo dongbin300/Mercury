@@ -50,6 +50,7 @@
 	/// <param name="RollingVwap"></param>
 	public record RollingVwapResult(DateTime Date, decimal? RollingVwap);
 	public record RsiResult(DateTime Date, decimal? Rsi);
+	public record RsimaResult(DateTime Date, decimal? Rsima);
 	public record SmaResult(DateTime Date, decimal? Sma);
 	public record SqueezeMomentumResult(DateTime Date, decimal? Value, int? Direction, int? Signal);
     public record StdevResult(DateTime Date, decimal? Stdev);

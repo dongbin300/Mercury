@@ -543,6 +543,21 @@ namespace Mercury.Extensions
 			return result;
 		}
 
+		public static IEnumerable<RsimaResult> GetRsima(this IEnumerable<Quote> quotes, int rsiPeriod = 14, int maPeriod = 20)
+		{
+			var result = new List<RsimaResult>();
+
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			var rsima = ArrayCalculator.Rsima(close, rsiPeriod, maPeriod);
+
+			for (int i = 0; i < rsima.Length; i++)
+			{
+				result.Add(new RsimaResult(quotes.ElementAt(i).Date, (decimal?)rsima[i]));
+			}
+
+			return result;
+		}
+
 		public static IEnumerable<DonchianChannelResult> GetDonchianChannel(this IEnumerable<Quote> quotes, int period = 20)
 		{
 			var result = new List<DonchianChannelResult>();

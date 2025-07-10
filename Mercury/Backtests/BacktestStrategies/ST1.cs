@@ -2,6 +2,7 @@
 
 using Mercury.Charts;
 using Mercury.Enums;
+using Mercury.Maths;
 
 namespace Mercury.Backtests.BacktestStrategies
 {
@@ -15,14 +16,13 @@ namespace Mercury.Backtests.BacktestStrategies
 	/// <param name="maxActiveDeals"></param>
 	public class ST1(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
+		public int adxth = 30;
+
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
 		{
-			chartPack.UseTripleSupertrend(10, 1.5, 20, 3, 60, 6);
-			chartPack.UseEma(5, 20);
-			chartPack.UseRsi(14);
-			chartPack.UseAtrma(14);
-			chartPack.UseVolumeSma();
-			chartPack.UseMacd();
+			chartPack.UseMacd(12, 26, 9, 9, 20, 7);
+			chartPack.UseAdx();
+			chartPack.UseSupertrend(10, 1.5);
 		}
 
 		protected override void LongEntry(string symbol, List<ChartInfo> charts, int i)
@@ -31,13 +31,16 @@ namespace Mercury.Backtests.BacktestStrategies
 			var c1 = charts[i - 1];
 			var c2 = charts[i - 2];
 
-			if (c1.Supertrend1 > 0 && c1.Supertrend2 > 0 && c2.Quote.Close <= (decimal)c2.Ema2 && c1.Quote.Close > (decimal)c1.Ema2)
-			{
-				var entryPrice = c0.Quote.Open;
-				var stopLoss = (decimal)c1.Ema2 * 0.995m; // 20EMA 0.5% 아래
-				var takeProfit = GetMaxPrice(charts, 30, i) * 0.99m; // 직전 고점 1% 아래
+			var minPrice = GetMinPrice(charts, 14, i);
+			var maxPrice = GetMaxPrice(charts, 14, i);
 
-				EntryPosition(PositionSide.Long, c0, entryPrice, stopLoss, takeProfit);
+			var slPrice = minPrice - (maxPrice - minPrice) * 0.1m;
+			var tpPrice = maxPrice - (maxPrice - minPrice) * 0.1m;
+			var slPer = Calculator.Roe(PositionSide.Long, c0.Quote.Open, slPrice);
+			var tpPer = Calculator.Roe(PositionSide.Long, c0.Quote.Open, tpPrice);
+			if (IsPowerGoldenCross(charts, 14, i, adxth, c1.Macd) && IsPowerGoldenCross2(charts, 14, i, adxth, c1.Macd2) && tpPer > 1.0m)
+			{
+				EntryPosition(PositionSide.Long, c0, c0.Quote.Open, slPrice, tpPrice);
 			}
 		}
 
@@ -59,6 +62,20 @@ namespace Mercury.Backtests.BacktestStrategies
 			{
 				TakeProfitHalf2(longPosition, c0);
 			}
+
+
+			//if (longPosition.Stage == 0 && c1.Quote.Low <= longPosition.StopLossPrice)
+			//{
+			//	StopLoss(longPosition, c1);
+			//}
+			//else if (longPosition.Stage == 0 && c1.Quote.High >= longPosition.TakeProfitPrice)
+			//{
+			//	TakeProfitHalf(longPosition);
+			//}
+			//if (longPosition.Stage == 1 && c1.Supertrend1 < 0)
+			//{
+			//	TakeProfitHalf2(longPosition, c0);
+			//}
 
 
 			//if (c1.Quote.Low <= longPosition.StopLossPrice)

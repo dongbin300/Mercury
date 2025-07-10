@@ -49,6 +49,7 @@ namespace Mercury.Charts
 		public decimal? Rsi1 { get; set; }
 		public decimal? Rsi2 { get; set; }
 		public decimal? Rsi3 { get; set; }
+		public decimal? Rsima { get; set; }
 		public decimal? JmaSlope { get; set; }
 		public decimal? K { get; set; }
 		public decimal? D { get; set; }

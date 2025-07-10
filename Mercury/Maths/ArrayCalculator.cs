@@ -1109,6 +1109,19 @@ namespace Mercury.Maths
 		}
 
 		/// <summary>
+		/// Relative Strength Index Moving Average
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="period"></param>
+		/// <param name="maPeriod"></param>
+		/// <returns></returns>
+		public static double?[] Rsima(double[] values, int period, int maPeriod)
+		{
+			var rsi = Rsi(values, period);
+			return Wma(rsi, maPeriod);
+		}
+
+		/// <summary>
 		/// Stochastic
 		/// </summary>
 		/// <param name="values"></param>

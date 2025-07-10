@@ -1113,7 +1113,7 @@ namespace Mercury.Backtests
 								break;
 
 							case "goldbb":
-								if (c1.Quote.Close > (decimal)c1.Ema1)
+								if (c1.Quote.Close > c1.Ema1)
 								{
 									ExitPosition(shortPosition, c0, c0.Quote.Open);
 								}

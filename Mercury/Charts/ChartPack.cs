@@ -430,6 +430,15 @@ namespace Mercury.Charts
 			}
 		}
 
+		public void UseRsima(int rsiPeriod = 14, int maPeriod = 20)
+		{
+			var rsima = Charts.Select(x => x.Quote).GetRsima(rsiPeriod, maPeriod).Select(x => x.Rsima);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Rsima = rsima.ElementAt(i);
+			}
+		}
+
 		public void UseDonchianChannel(int period = 20)
 		{
 			var donchianChannel = Charts.Select(x => x.Quote).GetDonchianChannel(period);

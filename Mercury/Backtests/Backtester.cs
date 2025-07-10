@@ -783,5 +783,146 @@ namespace Mercury.Backtests
 			}
 			return count;
 		}
+
+		protected bool IsPowerGoldenCross(List<ChartInfo> charts, int lookback, int index, int adxth, decimal? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd < 0 && c0.Macd > c0.MacdSignal && c1.Macd < c1.MacdSignal && c0.Adx > adxth && c0.Supertrend1 > 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd < 0 && c0.Macd > c0.MacdSignal && c1.Macd < c1.MacdSignal && c0.Adx > adxth && c0.Supertrend1 > 0 && c0.Macd < currentMacd)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		protected bool IsPowerGoldenCross2(List<ChartInfo> charts, int lookback, int index, int adxth, decimal? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd2 < 0 && c0.Macd2 > c0.MacdSignal2 && c1.Macd2 < c1.MacdSignal2 && c0.Adx > adxth && c0.Supertrend1 > 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd2 < 0 && c0.Macd2 > c0.MacdSignal2 && c1.Macd2 < c1.MacdSignal && c0.Adx > adxth && c0.Supertrend1 > 0 && c0.Macd2 < currentMacd)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		protected bool IsPowerDeadCross(List<ChartInfo> charts, int lookback, int index, int adxth, decimal? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd > 0 && c0.Macd < c0.MacdSignal && c1.Macd > c1.MacdSignal && c0.Adx > adxth && c0.Supertrend1 < 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd > 0 && c0.Macd < c0.MacdSignal && c1.Macd > c1.MacdSignal && c0.Adx > adxth && c0.Supertrend1 < 0 && c0.Macd > currentMacd)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		protected bool IsPowerDeadCross2(List<ChartInfo> charts, int lookback, int index, int adxth, decimal? currentMacd = null)
+		{
+			// Starts at charts[index - 1]
+			for (int i = 0; i < lookback; i++)
+			{
+				var c0 = charts[index - 1 - i];
+				var c1 = charts[index - 2 - i];
+
+				if (currentMacd == null)
+				{
+					if (c0.Macd2 > 0 && c0.Macd2 < c0.MacdSignal2 && c1.Macd2 > c1.MacdSignal2 && c0.Adx > adxth && c0.Supertrend1 < 0)
+					{
+						return true;
+					}
+				}
+				else
+				{
+					if (c0.Macd2 > 0 && c0.Macd2 < c0.MacdSignal2 && c1.Macd2 > c1.MacdSignal2 && c0.Adx > adxth && c0.Supertrend1 < 0 && c0.Macd > currentMacd)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// 맨 마지막 인덱스가 가장 최근 봉(charts[i-1], 1봉전)
+		/// </summary>
+		/// <param name="charts"></param>
+		/// <param name="i"></param>
+		/// <param name="condition"></param>
+		/// <returns></returns>
+		bool IsTrueCandle(List<ChartInfo> charts, int i, string condition)
+		{
+			// p = 0, charts[i-1], 1봉전, 가장 최근 봉
+			// p = 1, charts[i-2], 2봉전
+			// p = 2, charts[i-3], 3봉전
+			for (int p = condition.Length - 1; p >= 0; p--)
+			{
+				// Length = 6, p = 5 일경우 i - 1, 1봉전
+				var chartIndex = i + p - condition.Length;
+				switch (condition[p])
+				{
+					case 'U':
+						if (charts[chartIndex].CandlestickType == CandlestickType.Bearish)
+						{
+							return false;
+						}
+						break;
+
+					case 'D':
+						if (charts[chartIndex].CandlestickType == CandlestickType.Bullish)
+						{
+							return false;
+						}
+						break;
+				}
+			}
+
+			return true;
+		}
 	}
 }

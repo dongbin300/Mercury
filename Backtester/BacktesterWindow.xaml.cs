@@ -745,56 +745,63 @@ namespace Backtester
 		{
 			try
 			{
-				var randomResults = new List<BacktestR_Result>();
-				var r = new SmartRandom();
-				var symbols = LocalApi.GetSymbolNames();
-				var period = 365;
-
-				for (int count = 0; count < 20; count++)
+				For(40, 40, 5, a1 =>
 				{
-					List<ChartPack> chartPacks = [];
-					ChartLoader.Charts = [];
-
-					var symbol = r.Next(symbols);
-					var symbolListingDate = CryptoSymbol.GetStartDate(symbol).AddDays(1);
-					var startDate = r.Next(symbolListingDate, new DateTime(2024, 2, 28));
-					var endDate = startDate.AddDays(period);
-
-					var chartPack = ChartLoader.InitCharts(symbol, interval, startDate, endDate);
-					if (chartPack.Charts.Count <= 0)
+					For(50, 50, 5, a2 =>
 					{
-						continue;
-					}
-					chartPacks.Add(chartPack);
+						var randomResults = new List<BacktestR_Result>();
+						var r = new SmartRandom();
+						var symbols = LocalApi.GetSymbolNames();
+						var period = 365;
 
-					maxActiveDealsType = MaxActiveDealsType.Total;
-					var leverage = 1;
-					var maxActiveDeals = 1;
-					var backtester = new ST1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
-					{
-						IsGeneratePositionHistory = false,
-						FeeRate = 0.0002m
-					};
+						for (int count = 0; count < 25; count++)
+						{
+							List<ChartPack> chartPacks = [];
+							ChartLoader.Charts = [];
 
-					backtester.Init(chartPacks);
-					backtester.Run(startDate.AddDays(10));
+							var symbol = r.Next(symbols);
+							var symbolListingDate = CryptoSymbol.GetStartDate(symbol).AddDays(1);
+							var startDate = r.Next(symbolListingDate, new DateTime(2024, 2, 28));
+							var endDate = startDate.AddDays(period);
 
-					File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-						$"{symbol},{backtester.GetType().Name},{interval.ToIntervalString()},{maxActiveDealsType}," +
-						$"{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)},{backtester.Mdd.Round(4):P},{backtester.ResultPerRisk.Round(4)}" + Environment.NewLine);
+							var chartPack = ChartLoader.InitCharts(symbol, interval, startDate, endDate);
+							if (chartPack.Charts.Count <= 0)
+							{
+								continue;
+							}
+							chartPacks.Add(chartPack);
 
-					randomResults.Add(new BacktestR_Result(backtester.Win, backtester.Lose, backtester.EstimatedMoney, backtester.Mdd, backtester.ResultPerRisk));
-				}
+							maxActiveDealsType = MaxActiveDealsType.Total;
+							var leverage = 1;
+							var maxActiveDeals = 1;
+							var backtester = new ST1(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
+							{
+								IsGeneratePositionHistory = false,
+								FeeRate = 0.0002m,
+							};
 
-				var totalWin = randomResults.Sum(x => x.Win);
-				var totalLose = randomResults.Sum(x => x.Lose);
-				var averageEstimatedMoney = randomResults.Average(x => x.EstimatedMoney);
-				var maxMdd = randomResults.Max(x => x.Mdd);
-				var averageResultPerRisk = randomResults.Average(x => x.ResultPerRisk);
+							backtester.Init(chartPacks);
+							backtester.Run(startDate.AddDays(10));
 
-				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-									$"{totalWin},{totalLose},{(totalWin + totalLose > 0 ? (decimal)totalWin / (totalWin + totalLose) : 0).Round(4):P}," +
-									$"{averageEstimatedMoney.Round(0)},{maxMdd.Round(4):P},{averageResultPerRisk.Round(4)}" + Environment.NewLine);
+							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+								$"{symbol},{backtester.GetType().Name},{interval.ToIntervalString()},{maxActiveDealsType}," +
+								$"{maxActiveDeals},{leverage},{backtester.Win},{backtester.Lose},{backtester.WinRate.Round(2)},{backtester.EstimatedMoney.Round(0)},{backtester.Mdd.Round(4):P},{backtester.ResultPerRisk.Round(4)}" + Environment.NewLine);
+
+							randomResults.Add(new BacktestR_Result(backtester.Win, backtester.Lose, backtester.EstimatedMoney, backtester.Mdd, backtester.ResultPerRisk));
+						}
+
+						var totalWin = randomResults.Sum(x => x.Win);
+						var totalLose = randomResults.Sum(x => x.Lose);
+						var averageEstimatedMoney = randomResults.Average(x => x.EstimatedMoney);
+						var maxMdd = randomResults.Max(x => x.Mdd);
+						var averageResultPerRisk = randomResults.Average(x => x.ResultPerRisk);
+
+						File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+											$"{a1},{a2},{totalWin},{totalLose},{(totalWin + totalLose > 0 ? (decimal)totalWin / (totalWin + totalLose) : 0).Round(4):P}," +
+											$"{averageEstimatedMoney.Round(0)},{maxMdd.Round(4):P},{averageResultPerRisk.Round(4)}" + Environment.NewLine);
+					});
+				});
+
 
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
 									"END" + Environment.NewLine + Environment.NewLine + Environment.NewLine);
