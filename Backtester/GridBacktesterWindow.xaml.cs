@@ -523,26 +523,33 @@ namespace Backtester
 
 				File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"), $"{symbol},{startDate:yyyy-MM-dd},{endDate:yyyy-MM-dd},{DateTime.Now:yyyy-MM-dd HH:mm:ss}" + Environment.NewLine);
 
-				for (var factor = 4.0m; factor <= 6.0m; factor += 0.5m)
+				for (var period = 90; period <= 180; period += 30)
 				{
-					for (var period = 140; period <= 240; period += 20)
+					for (var factor = 3.0m; factor <= 3.0m; factor += 0.1m)
 					{
-						for (var ar = 0.06m; ar <= 0.06m; ar += 0.02m)
+						for (var stp = 10; stp <= 20; stp += 10)
 						{
-							chartPack.UsePredictiveRanges(period, (double)factor);
-							chartPack.UseAtr(14);
-							chartPack.UseTrendRider();
-
-							var backtester = new GridPredictiveRangesBacktester3(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName)
+							for (var stf = 2.0m; stf <= 2.0m; stf += 0.5m)
 							{
-								AtrRatio = ar,
-								IsGeneratePositionHistory = false
-							};
+								for (var ar = 0.10m; ar <= 0.50m; ar += 0.05m)
+								{
+									chartPack.UseMercuryRanges(period, (double)factor);
+									//chartPack.UsePredictiveRanges(period, (double)factor);
+									chartPack.UseAtr(14);
+									chartPack.UseSupertrend(stp, (double)stf);
 
-							(var tradePerDay, var estimatedMoney) = backtester.Run(0);
+									var backtester = new GridPredictiveRangesBacktester3(symbol, aggregatedTrades, [.. chartPack.Charts], reportFileName)
+									{
+										AtrRatio = ar,
+										IsGeneratePositionHistory = false
+									};
 
-							File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-							$"{period},{factor.Round(3)},{ar.Round(2)},{tradePerDay},{(tradePerDay == -419 ? "-" : estimatedMoney.Round(0))},{backtester.Mdd.Round(2)},{backtester.SharpeRatio.Round(2)}" + Environment.NewLine);
+									(var tradePerDay, var estimatedMoney) = backtester.Run(0);
+
+									File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+									$"{period},{factor.Round(3)},{stp},{stf.Round(1)},{ar.Round(2)},{tradePerDay},{(tradePerDay == -419 ? "-" : estimatedMoney.Round(0))},{backtester.Mdd.Round(2)},{backtester.SharpeRatio.Round(2)}" + Environment.NewLine);
+								}
+							}
 						}
 					}
 				}

@@ -610,9 +610,56 @@ namespace Mercury.Maths
 			return result;
 		}
 
-		public static double?[] Vwap(double?[] high, double?[] low, double?[] close, double?[] volume, int period)
+		/// <summary>
+		/// Volume Weighted Average Price (VWAP)
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <param name="volume"></param>
+		/// <returns></returns>
+		public static double?[] Vwap(double?[] high, double?[] low, double?[] close, double?[] volume)
 		{
 			var result = new double?[close.Length];
+			double cumulativePV = 0;
+			double cumulativeV = 0;
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				double h = high[i] ?? 0;
+				double l = low[i] ?? 0;
+				double c = close[i] ?? 0;
+				double v = volume[i] ?? 0;
+
+				double tp = (h + l + c) / 3.0;
+				cumulativePV += tp * v;
+				cumulativeV += v;
+
+				if (cumulativeV == 0)
+				{
+					result[i] = null;
+				}
+				else
+				{
+					result[i] = cumulativePV / cumulativeV;
+				}
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// Volume Weighted Average Price (VWAP) with rolling period
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <param name="volume"></param>
+		/// <param name="period"></param>
+		/// <returns></returns>
+		public static double?[] RollingVwap(double?[] high, double?[] low, double?[] close, double?[] volume, int period)
+		{
+			var result = new double?[close.Length];
+
 			for (int i = 0; i < close.Length; i++)
 			{
 				if (i < period - 1)
@@ -620,14 +667,51 @@ namespace Mercury.Maths
 					result[i] = null;
 					continue;
 				}
-				double sum = 0;
-				double volumeSum = 0;
-				for (int j = i - period + 1; j < i + 1; j++)
+
+				double pvSum = 0;
+				double volSum = 0;
+
+				for (int j = i - period + 1; j <= i; j++)
 				{
-					sum += (close[j] ?? 0) * (high[j] ?? 0) * (low[j] ?? 0) * (volume[j] ?? 0);
-					volumeSum += volume[j] ?? 0;
+					double h = high[j] ?? 0;
+					double l = low[j] ?? 0;
+					double c = close[j] ?? 0;
+					double v = volume[j] ?? 0;
+
+					double tp = (h + l + c) / 3.0;
+					pvSum += tp * v;
+					volSum += v;
 				}
-				result[i] = sum / volumeSum;
+
+				result[i] = volSum == 0 ? null : pvSum / volSum;
+			}
+
+			return result;
+		}
+
+		public static double?[] Evwap(double?[] high, double?[] low, double?[] close, double?[] volume, int period)
+		{
+			var result = new double?[close.Length];
+			double alpha = 2.0 / (period + 1);
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				double h = high[i] ?? 0;
+				double l = low[i] ?? 0;
+				double c = close[i] ?? 0;
+				double v = volume[i] ?? 0;
+				double tp = (h + l + c) / 3.0;
+
+				if (i == 0)
+				{
+					result[i] = v == 0 ? null : tp;
+				}
+				else
+				{
+					double prevEvwap = result[i - 1] ?? tp;
+					result[i] = ((alpha * tp * v) + ((1 - alpha) * prevEvwap * (volume[i - 1] ?? 0)))
+								/ (v + (volume[i - 1] ?? 0));
+				}
 			}
 			return result;
 		}
@@ -770,7 +854,7 @@ namespace Mercury.Maths
 		}
 
 
-		public static (double?[], double?[], double?[], double?[], double?[]) IchimokuCloud(double[] high, double[] low, double[] close, int conversionPeriod, int basePeriod, int leadingSpanPeriod)
+		public static (double?[] Conversion, double?[] Base, double?[] TrailingSpan, double?[] LeadingSpan1, double?[] LeadingSpan2) IchimokuCloud(double[] high, double[] low, double[] close, int conversionPeriod, int basePeriod, int leadingSpanPeriod)
 		{
 			var nHigh = high.ToNullable();
 			var nLow = low.ToNullable();
@@ -845,7 +929,7 @@ namespace Mercury.Maths
 		/// <param name="period"></param>
 		/// <param name="deviation"></param>
 		/// <returns></returns>
-		public static (double?[], double?[], double?[]) BollingerBands(double?[] values, int period, double deviation)
+		public static (double?[] Sma, double?[] Upper, double?[] Lower) BollingerBands(double?[] values, int period, double deviation)
 		{
 			var sma = Sma(values, period);
 			var upper = new double?[values.Length];
@@ -868,7 +952,7 @@ namespace Mercury.Maths
 		/// <param name="slowPeriod"></param>
 		/// <param name="signalPeriod"></param>
 		/// <returns></returns>
-		public static (double?[], double?[], double?[]) Macd(double?[] values, int fastPeriod, int slowPeriod, int signalPeriod)
+		public static (double?[] Macd, double?[] Signal, double?[] Hist) Macd(double?[] values, int fastPeriod, int slowPeriod, int signalPeriod)
 		{
 			var fast = Ema(values, fastPeriod);
 			var slow = Ema(values, slowPeriod);
@@ -940,6 +1024,36 @@ namespace Mercury.Maths
 		{
 			var tr = Tr(high, low, close);
 			return Rma(tr.ToNullable(), period, startIndex);
+		}
+
+		/// <summary>
+		/// Exponential True Range
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <param name="period"></param>
+		/// <param name="startIndex"></param>
+		/// <returns></returns>
+		public static double?[] Etr(double[] high, double[] low, double[] close, int period, int startIndex = 0)
+		{
+			var tr = Tr(high, low, close);
+			return Ema(tr.ToNullable(), period, startIndex);
+		}
+
+		/// <summary>
+		/// Exponential Average True Range
+		/// </summary>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
+		/// <param name="period"></param>
+		/// <param name="startIndex"></param>
+		/// <returns></returns>
+		public static double?[] Eatr(double[] high, double[] low, double[] close, int atrPeriod, int emaPeriod, int startIndex = 0)
+		{
+			var atr = Atr(high, low, close, atrPeriod, startIndex);
+			return Ema(atr, emaPeriod, startIndex);
 		}
 
 		/// <summary>
@@ -1033,7 +1147,7 @@ namespace Mercury.Maths
 		/// <param name="factor"></param>
 		/// <param name="atrPeriod"></param>
 		/// <returns></returns>
-		public static (double?[], double?[]) Supertrend(double[] high, double[] low, double[] close, double factor, int atrPeriod)
+		public static (double?[] Supertrend, double?[] Direction) Supertrend(double[] high, double[] low, double[] close, int atrPeriod, double factor)
 		{
 			var upperBand = new double?[high.Length];
 			var lowerBand = new double?[high.Length];
@@ -1044,8 +1158,8 @@ namespace Mercury.Maths
 			for (int i = 0; i < high.Length; i++)
 			{
 				var mid = (high[i] + low[i]) / 2;
-				upperBand[i] = mid + factor * atr[i];
-				lowerBand[i] = mid - factor * atr[i];
+				upperBand[i] = mid + factor * (atr[i] ?? 0);
+				lowerBand[i] = mid - factor * (atr[i] ?? 0);
 				var prevUpperBand = i == 0 ? 0 : upperBand[i - 1];
 				var prevLowerBand = i == 0 ? 0 : lowerBand[i - 1];
 				var prevClose = i == 0 ? 0 : close[i - 1];
@@ -1065,7 +1179,7 @@ namespace Mercury.Maths
 			return (supertrend, direction);
 		}
 
-		public static (double?[], double?[]) ReverseSupertrend(double[] high, double[] low, double[] close, double factor, int atrPeriod)
+		public static (double?[] Supertrend, double?[] Direction) ReverseSupertrend(double[] high, double[] low, double[] close, int atrPeriod, double factor)
 		{
 			var upperBand = new double?[high.Length];
 			var lowerBand = new double?[high.Length];
@@ -1097,16 +1211,16 @@ namespace Mercury.Maths
 			return (supertrend, direction);
 		}
 
-		public static (double?[], double?[], double?[], double?[], double?[], double?[]) TripleSupertrend(double[] high, double[] low, double[] close, int atrPeriod1, double factor1, int atrPeriod2, double factor2, int atrPeriod3, double factor3)
+		public static (double?[] Supertrend1, double?[] Direction1, double?[] Supertrend2, double?[] Direction2, double?[] Supertrend3, double?[] Direction3) TripleSupertrend(double[] high, double[] low, double[] close, int atrPeriod1, double factor1, int atrPeriod2, double factor2, int atrPeriod3, double factor3)
 		{
-			(var supertrend1, var direction1) = Supertrend(high, low, close, factor1, atrPeriod1);
-			(var supertrend2, var direction2) = Supertrend(high, low, close, factor2, atrPeriod2);
-			(var supertrend3, var direction3) = Supertrend(high, low, close, factor3, atrPeriod3);
+			(var supertrend1, var direction1) = Supertrend(high, low, close, atrPeriod1, factor1);
+			(var supertrend2, var direction2) = Supertrend(high, low, close, atrPeriod2, factor2);
+			(var supertrend3, var direction3) = Supertrend(high, low, close, atrPeriod3, factor3);
 
 			return (supertrend1, direction1, supertrend2, direction2, supertrend3, direction3);
 		}
 
-		public static (double?[], double?[]) StochasticRsi(double[] close, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
+		public static (double?[] K, double?[] D) StochasticRsi(double[] close, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
 		{
 			var rsi = Rsi(close, rsiPeriod);
 			var stoch = Stoch(rsi, rsi, rsi, stochasticPeriod, 2);
@@ -1324,7 +1438,7 @@ namespace Mercury.Maths
 			return (upper, lower, pioneer, player);
 		}
 
-		public static (double?[], double?[], double?[]) TrendRider(double[] high, double[] low, double[] close, int atrPeriod, double atrMultiplier, int rsiPeriod, int macdFastPeriod, int macdSlowPeriod, int macdSignalPeriod)
+		public static (double?[] Trend, double?[] Supertrend, double?[] SupertrendDirection) TrendRider(double[] high, double[] low, double[] close, int atrPeriod, double atrMultiplier, int rsiPeriod, int macdFastPeriod, int macdSlowPeriod, int macdSignalPeriod)
 		{
 			var nClose = close.ToNullable();
 
@@ -1337,7 +1451,7 @@ namespace Mercury.Maths
 
 			var atr = Atr(high, low, close, atrPeriod);
 			var rsi = Rsi(close, rsiPeriod);
-			var macd = Macd(nClose, macdFastPeriod, macdSlowPeriod, macdSignalPeriod).Item1;
+			var macd = Macd(nClose, macdFastPeriod, macdSlowPeriod, macdSignalPeriod).Macd;
 
 			for (int i = 0; i < high.Length; i++)
 			{
@@ -1380,7 +1494,78 @@ namespace Mercury.Maths
 			return (trend, supertrend, supertrendDirection);
 		}
 
-		public static (double?[], double?[], double?[], double?[], double?[]) PredictiveRanges(double[] high, double[] low, double[] close, int period, double factor)
+		public static (double?[] Trend, double?[] Filter, double?[] SignalScore) TrendRiderV2(double[] high, double[] low, double[] close, int emaPeriod = 20, int smaPeriod = 50, int atrPeriod = 14, double atrMultiplier = 2.0, int rsiPeriod = 14, int macdFast = 12, int macdSlow = 26, int macdSignal = 9, int stochRsiSmoothK = 3, int stochRsiSmoothD = 3, int stochRsiRsiPeriod = 14, int stochRsiStochPeriod = 14, int cciPeriod = 20, int adxPeriod = 14, int adxDiPeriod = 14)
+		{
+			var nClose = close.ToNullable();
+
+			int len = close.Length;
+			var trend = new double?[len];
+			var filter = new double?[len];
+			var signalScore = new double?[len];
+
+			var ema = Ema(nClose, emaPeriod);
+			var sma = Sma(nClose, smaPeriod);
+			var atr = Atr(high, low, close, atrPeriod);
+			var rsi = Rsi(close, rsiPeriod);
+			var macd = Macd(nClose, macdFast, macdSlow, macdSignal).Macd;
+			var cci = Cci(high, low, close, cciPeriod);
+			var adx = Adx(high, low, close, adxPeriod, adxDiPeriod);
+			var bb = BollingerBands(nClose, smaPeriod, 2.0); // (상단, 중단, 하단)
+			var (K, D) = StochasticRsi(close, stochRsiSmoothK, stochRsiSmoothD, stochRsiRsiPeriod, stochRsiStochPeriod);
+			var stochRsiK = K;
+			var stochRsiD = D;
+
+			for (int i = 1; i < len; i++)
+			{
+				// 1. 추세 필터: EMA > SMA & ADX > 20 & 가격이 볼린저밴드 중단선 위
+				bool isUpTrend = ema[i] > sma[i] && adx[i] > 20 && close[i] > bb.Sma[i];
+				bool isDownTrend = ema[i] < sma[i] && adx[i] > 20 && close[i] < bb.Sma[i];
+
+				// 2. 진입 신호: 여러 신호가 동시에 맞아야 함
+				int scoreLong = 0;
+				int scoreShort = 0;
+
+				if (isUpTrend) scoreLong++;
+				if (rsi[i] > 55) scoreLong++;
+				if (macd[i] > 0) scoreLong++;
+				if (stochRsiK[i] > 60 && stochRsiD[i] > 60) scoreLong++;
+				if (cci[i] > 100) scoreLong++;
+
+				if (isDownTrend) scoreShort++;
+				if (rsi[i] < 45) scoreShort++;
+				if (macd[i] < 0) scoreShort++;
+				if (stochRsiK[i] < 40 && stochRsiD[i] < 40) scoreShort++;
+				if (cci[i] < -100) scoreShort++;
+
+				// 3. 변동성 필터: ATR이 일정 이상일 때만 신호 인정
+				bool isVolatile = atr[i] > atrMultiplier * atr.Average();
+
+				// 4. 신호 결정
+				if (scoreLong >= 3 && isVolatile)
+				{
+					trend[i] = -1; // Long
+					signalScore[i] = scoreLong;
+				}
+				else if (scoreShort >= 3 && isVolatile)
+				{
+					trend[i] = 1; // Short
+					signalScore[i] = scoreShort;
+				}
+				else
+				{
+					trend[i] = 0; // Neutral
+					signalScore[i] = 0;
+				}
+
+				// 필터 값 저장(예시)
+				filter[i] = isVolatile ? 1 : 0;
+			}
+
+			return (trend, filter, signalScore);
+		}
+
+
+		public static (double?[] Upper2, double?[] Upper, double?[] Average, double?[] Lower, double?[] Lower2) PredictiveRanges(double[] high, double[] low, double[] close, int period, double factor)
 		{
 			var atr = Atr(high, low, close, period).Select(x => x * factor).ToArray();
 			var avg = new double?[high.Length];
@@ -1413,13 +1598,40 @@ namespace Mercury.Maths
 			return (u2, u, avg, l, l2);
 		}
 
+		public static (double?[] Upper, double?[] Average, double?[] Lower) MercuryRanges(double[] high, double[] low, double[] close, int period, double factor)
+		{
+			var atr = Etr(high, low, close, period, period).Select(x => x * factor).ToArray();
+			var avg = new double?[high.Length];
+			var holdAtr = new double?[high.Length];
+			var u = new double?[high.Length];
+			var l = new double?[high.Length];
+
+			avg[0] = close[0];
+			holdAtr[0] = 0;
+			u[0] = avg[0];
+			l[0] = avg[0];
+			for (int i = 1; i < high.Length; i++)
+			{
+				avg[i] = close[i] - avg[i - 1] > atr[i] ? avg[i - 1] + atr[i] :
+					(avg[i - 1] - close[i] > atr[i] ? avg[i - 1] - atr[i] :
+					avg[i - 1]);
+
+				holdAtr[i] = avg[i] != avg[i - 1] ? atr[i] / 2 : holdAtr[i - 1];
+
+				u[i] = avg[i] + holdAtr[i] * 2;
+				l[i] = avg[i] - holdAtr[i] * 2;
+			}
+
+			return (u, avg, l);
+		}
+
 		/// <summary>
 		/// Machine Learning of Momentum Index
 		/// </summary>
 		/// <param name="predictionDataPeriod"></param>
 		/// <param name="trendLength"></param>
 		/// <returns></returns>
-		public static (double?[], double?[]) Mlmi(double[] close, int predictionDataPeriod, int trendLength)
+		public static (double?[] Prediction, double?[] PredictionMa) Mlmi(double[] close, int predictionDataPeriod, int trendLength)
 		{
 			var nClose = close.ToNullable();
 			var quickMa = Wma(nClose, 5);
@@ -1458,7 +1670,7 @@ namespace Mercury.Maths
 		/// <param name="numNeighbors"></param>
 		/// <param name="predictionSmoothing"></param>
 		/// <returns></returns>
-		public static (double?[], double?[]) Mlmip(double[] high, double[] low, double[] close, int pivotBars, int momentumWindow, int maxData, int numNeighbors, int predictionSmoothing)
+		public static (double?[] Prediction, double?[] PredictionMa) Mlmip(double[] high, double[] low, double[] close, int pivotBars, int momentumWindow, int maxData, int numNeighbors, int predictionSmoothing)
 		{
 			//var nClose = close.ToNullable();
 			var parameter1 = Wma(Rsi(close, 12), momentumWindow);
@@ -1510,7 +1722,7 @@ namespace Mercury.Maths
 		/// <param name="low"></param>
 		/// <param name="period"></param>
 		/// <returns></returns>
-		public static (double?[], double?[], double?[]) DonchianChannel(double[] high, double[] low, int period)
+		public static (double?[] Basis, double?[] Upper, double?[] Lower) DonchianChannel(double[] high, double[] low, int period)
 		{
 			var upper = Highest(high, period);
 			var lower = Lowest(low, period);
@@ -1848,8 +2060,8 @@ namespace Mercury.Maths
 				else if (rsi[i] > 70) s -= 0.5;  // 과매수
 
 				// 9. MACD 신호 (MACD 히스토그램이 0 이상일 때 롱, 이하일 때 숏)
-				if (macd.Item3[i] > 0) s += 0.5;  // 롱
-				else if (macd.Item3[i] < 0) s -= 0.5;  // 숏
+				if (macd.Hist[i] > 0) s += 0.5;  // 롱
+				else if (macd.Hist[i] < 0) s -= 0.5;  // 숏
 
 				// 스코어 계산
 				score[i] = Math.Round(s, 2);
@@ -1858,7 +2070,33 @@ namespace Mercury.Maths
 			return score;
 		}
 
+		public static (double?[] BullPower, double?[] BearPower) ElderRayPower(
+	double?[] high, double?[] low, double?[] close, int emaPeriod)
+		{
+			int length = close.Length;
+			var ema = Ema(close, emaPeriod);
 
+			var bull = new double?[length];
+			var bear = new double?[length];
+
+			for (int i = 0; i < length; i++)
+			{
+				if (ema[i] is double e)
+				{
+					double h = high[i] ?? 0;
+					double l = low[i] ?? 0;
+					bull[i] = h - e;
+					bear[i] = l - e;
+				}
+				else
+				{
+					bull[i] = null;
+					bear[i] = null;
+				}
+			}
+
+			return (bull, bear);
+		}
 
 	}
 }

@@ -11,7 +11,8 @@ namespace Mercury.Backtests
 	/// 만약 다음 날부터 종가가 PRA 크로스한 날이 오면 종가에 Long/Short 종료 후 Neutral로 전환
 	/// PR이 바뀌면 바뀐 PR로 다시 Long/Short 시작
 	/// 
-	/// TrendRider 값에 따라 GridType 설정
+	/// PR이 바뀌는 날에 상향돌파 시 Long Grid, 하향돌파 시 Short Grid 시작
+	/// Long 혹은 Short Grid인 경우 슈퍼트렌드값이 바뀌는 순간 Neutral Grid로 전환
 	/// </summary>
 	/// <param name="symbol"></param>
 	/// <param name="prices"></param>
@@ -32,20 +33,12 @@ namespace Mercury.Backtests
 			var startTime = Prices[startIndex].Date;
 			DateTime displayDate = startTime;
 
-			// 어제 TrendRider Trend에 따라 GridType 설정
-			var _yesterdayChart = Charts.GetLatestChartBefore(startTime);
-			startGridType = _yesterdayChart.TrendRiderTrend switch
-			{
-				0 => GridType.Neutral,
-				1 => GridType.Long,
-				-1 => GridType.Short,
-				_ => startGridType
-			};
+			startGridType = GridType.Neutral; // 초기값 Neutral로 설정
 			ExecuteInitGrid(startIndex, startGridType);
 
 			for (int i = startIndex; i < Prices.Count; i++)
 			{
-				if (Prices[i].Date >= displayDate) // 결과 출력
+				if (Prices[i].Date >= displayDate) // 결과 출력, 1일 1번
 				{
 					var time = Prices[i].Date;
 					var price = Prices[i].Value;
@@ -55,37 +48,25 @@ namespace Mercury.Backtests
 					var yesterdayChart = Charts.GetLatestChartBefore(time); // 어제 캔들
 					var yesterday2Chart = Charts.GetLatestChartBefore(time.AddDays(-1)); // 엊그제 캔들
 
-					// TrendRider 값에 따라 GridType 설정
-					if (yesterdayChart.TrendRiderTrend == 0 && Grid.GridType != GridType.Neutral)
+					// PRA가 바뀌면 그리드 재설정
+					if (yesterdayChart.MercuryRangesAverage != yesterday2Chart.MercuryRangesAverage)
 					{
-						WriteStatus(i, "CHANGE_TO_NEUTRAL");
+						var gridType = yesterdayChart.Quote.Close > (decimal)yesterday2Chart.MercuryRangesAverage ? GridType.Long : GridType.Short;
+
+						WriteStatus(i, "PRA_CHANGED");
 						CloseAllPositions(i);
-						ExecuteInitGrid(i, GridType.Neutral);
+						ExecuteInitGrid(i, gridType);
 					}
-					else if (yesterdayChart.TrendRiderTrend == 1 && Grid.GridType != GridType.Long)
+
+					// Long 혹은 Short Grid인 경우 슈퍼트렌드값이 바뀌는 순간 Neutral Grid로 전환
+					if (Grid.GridType == GridType.Long || Grid.GridType == GridType.Short)
 					{
-						WriteStatus(i, "CHANGE_TO_LONG");
-						CloseAllPositions(i);
-						ExecuteInitGrid(i, GridType.Long);
-					}
-					else if (yesterdayChart.TrendRiderTrend == -1 && Grid.GridType != GridType.Short)
-					{
-						WriteStatus(i, "CHANGE_TO_SHORT");
-						CloseAllPositions(i);
-						ExecuteInitGrid(i, GridType.Short);
-					}
-					// PRA 값이 바뀌어도 재설정
-					else if (yesterdayChart.TrendRiderTrend == 1 && yesterdayChart.PredictiveRangesAverage != yesterday2Chart.PredictiveRangesAverage)
-					{
-						WriteStatus(i, "RESET_LONG");
-						CloseAllPositions(i);
-						ExecuteInitGrid(i, GridType.Long);
-					}
-					else if (yesterdayChart.TrendRiderTrend == -1 && yesterdayChart.PredictiveRangesAverage != yesterday2Chart.PredictiveRangesAverage)
-					{
-						WriteStatus(i, "RESET_SHORT");
-						CloseAllPositions(i);
-						ExecuteInitGrid(i, GridType.Short);
+						if (yesterdayChart.Supertrend1 * yesterday2Chart.Supertrend1 < 0) // 곱했을 때 -면 슈퍼트렌드 방향이 바뀐 것
+						{
+							WriteStatus(i, "SUPERTREND_CHANGED");
+							CloseAllPositions(i);
+							ExecuteInitGrid(i, GridType.Neutral);
+						}
 					}
 
 					// 청산 확인
@@ -136,10 +117,10 @@ namespace Mercury.Backtests
 			var yesterday = Charts.GetLatestChartBefore(currentTime);
 			var yesterday2 = Charts.GetLatestChartBefore(currentTime.AddDays(-1));
 
-			var upperPrice = (decimal)yesterday.PredictiveRangesUpper2;
-			var lowerPrice = (decimal)yesterday.PredictiveRangesLower2;
-			UpperStopLossPrice = (decimal)yesterday.PredictiveRangesUpper2;
-			LowerStopLossPrice = (decimal)yesterday.PredictiveRangesLower2;
+			var upperPrice = (decimal)yesterday.MercuryRangesUpper;
+			var lowerPrice = (decimal)yesterday.MercuryRangesLower;
+			UpperStopLossPrice = (decimal)yesterday.MercuryRangesUpper;
+			LowerStopLossPrice = (decimal)yesterday.MercuryRangesLower;
 
 			// 최근 한달간의 일봉 ATR 평균 계산
 			var monthlyAtrAverage = (decimal)Charts.Where(d => d.DateTime <= currentTime).OrderByDescending(d => d.DateTime).Take(30).Average(x => x.Atr);

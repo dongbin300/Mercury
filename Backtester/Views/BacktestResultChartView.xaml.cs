@@ -178,8 +178,8 @@ namespace Backtester.Views
             var canvas = e.Surface.Canvas;
             canvas.Clear(SKColors.Transparent);
 
-            var yMax = Math.Max(charts.Max(x => Math.Abs(x.Ema1 ?? 0)), (double)charts.Max(x => x.Quote.High));
-            var yMin = Math.Min(charts.Min(x => Math.Abs(x.Ema1 ?? 0)), (double)charts.Min(x => x.Quote.Low));
+            var yMax = Math.Max(charts.Max(x => Math.Abs(x.Ema1 ?? 0)), charts.Max(x => x.Quote.High));
+            var yMin = Math.Min(charts.Min(x => Math.Abs(x.Ema1 ?? 0)), charts.Min(x => x.Quote.Low));
 
             //var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), (double)charts.Max(x => x.Quote.High))));
             //var yMax = Math.Max(charts.Max(x => Math.Abs(x.Supertrend3)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend2)), Math.Max(charts.Max(x => Math.Abs(x.Supertrend1)), Math.Max(charts.Max(x => x.Ema1), (double)charts.Max(x => x.Quote.High)))));
@@ -255,17 +255,17 @@ namespace Backtester.Views
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (quote.High - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - ((double)quote.Low - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (quote.Low - yMin) / (yMax - yMin)) + CandleTopBottomMargin),
                     quote.Open < quote.Close ? LongPaint : ShortPaint);
                 canvas.DrawRect(
                     new SKRect(
                         actualItemFullWidth * viewIndex + actualItemMargin / 2,
-                        actualHeight * (float)(1.0 - ((double)quote.Open - yMin) / (yMax - yMin)) + CandleTopBottomMargin,
+                        actualHeight * (float)(1.0m - (quote.Open - yMin) / (yMax - yMin)) + CandleTopBottomMargin,
                         actualItemFullWidth * (viewIndex + 1) - actualItemMargin / 2,
-                        actualHeight * (float)(1.0 - ((double)quote.Close - yMin) / (yMax - yMin)) + CandleTopBottomMargin
+                        actualHeight * (float)(1.0m - (quote.Close - yMin) / (yMax - yMin)) + CandleTopBottomMargin
                         ),
                     quote.Open < quote.Close ? LongPaint : ShortPaint
                     );

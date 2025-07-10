@@ -329,11 +329,17 @@ namespace Mercury.Backtests
 			Positions.Add(newPosition);
 		}
 
-		protected void EntryPositionSize(PositionSide side, ChartInfo currentChart, decimal entryPrice, double positionSize, decimal? stopLossPrice = null, decimal? takeProfitPrice = null)
+		/// <summary>
+		/// 포지션 진입 with 사이즈 (분할매수는 아님)
+		/// </summary>
+		/// <param name="side"></param>
+		/// <param name="currentChart"></param>
+		/// <param name="entryPrice"></param>
+		/// <param name="stopLossPrice"></param>
+		/// <param name="takeProfitPrice"></param>
+		protected void EntryPositionOnlySize(PositionSide side, ChartInfo currentChart, decimal entryPrice, decimal orderSize, decimal? stopLossPrice = null, decimal? takeProfitPrice = null)
 		{
-			var adjustedOrderSize = BaseOrderSize * (decimal)positionSize;
-
-			var quantity = adjustedOrderSize / entryPrice;
+			var quantity = orderSize / entryPrice;
 			var amount = entryPrice * quantity;
 
 			Money += GetBorrowSize(currentChart.DateTime);
@@ -347,13 +353,80 @@ namespace Mercury.Backtests
 			};
 
 			if (takeProfitPrice != null)
+			{
 				newPosition.TakeProfitPrice = takeProfitPrice.Value;
+			}
 
 			if (stopLossPrice != null)
+			{
 				newPosition.StopLossPrice = stopLossPrice.Value;
+			}
 
 			Positions.Add(newPosition);
 		}
+
+		/// <summary>
+		/// 분할매수용 포지션 진입 (주문량이 아닌 금액으로 계산)
+		/// </summary>
+		/// <param name="side"></param>
+		/// <param name="currentChart"></param>
+		/// <param name="entryPrice"></param>
+		/// <param name="orderSize"></param>
+		/// <param name="stopLossPrice"></param>
+		/// <param name="takeProfitPrice"></param>
+		protected void EntryPositionSize(PositionSide side, ChartInfo currentChart, decimal entryPrice, decimal orderSize, decimal? stopLossPrice = null, decimal? takeProfitPrice = null)
+		{
+			var quantity = orderSize / entryPrice;
+			var amount = entryPrice * quantity;
+
+			// 1. 기존 포지션 확인 (동일 심볼 & 방향)
+			var existingPosition = Positions.FirstOrDefault(p =>
+				p.Symbol == currentChart.Symbol &&
+				p.Side == side &&
+				p.ExitDateTime == null);
+
+			if (existingPosition != null)
+			{
+				// 2. 기존 포지션에 수량 추가 (평균단가 계산)
+				decimal totalQuantity = existingPosition.Quantity + quantity;
+				decimal totalEntryAmount = existingPosition.EntryAmount + amount;
+				decimal avgEntryPrice = totalEntryAmount / totalQuantity;
+
+				existingPosition.Quantity = totalQuantity;
+				existingPosition.EntryAmount = totalEntryAmount;
+				existingPosition.EntryPrice = avgEntryPrice;
+
+				// 3. 손절/익절 가격 업데이트 (원래 설정 유지 or 재계산)
+				existingPosition.StopLossPrice = stopLossPrice ?? existingPosition.StopLossPrice;
+				existingPosition.TakeProfitPrice = takeProfitPrice ?? existingPosition.TakeProfitPrice;
+			}
+			else
+			{
+				// 4. 새 포지션 생성
+				Money += GetBorrowSize(currentChart.DateTime);
+				Borrowed += GetBorrowSize(currentChart.DateTime);
+				Money += side == PositionSide.Long ? -amount : amount;
+
+				var newPosition = new Position(currentChart.DateTime, currentChart.Symbol, side, entryPrice)
+				{
+					Quantity = quantity,
+					EntryAmount = amount
+				};
+
+				if (takeProfitPrice != null)
+				{
+					newPosition.TakeProfitPrice = takeProfitPrice.Value;
+				}
+
+				if (stopLossPrice != null)
+				{
+					newPosition.StopLossPrice = stopLossPrice.Value;
+				}
+
+				Positions.Add(newPosition);
+			}
+		}
+
 
 		/// <summary>
 		/// 전량 손절
@@ -482,6 +555,48 @@ namespace Mercury.Backtests
 			}
 			Money -= (position.EntryAmount + position.ExitAmount) * FeeRate;
 		}
+
+		/// <summary>
+		/// 분할매도/청산 지원 포지션 탈출
+		/// </summary>
+		/// <param name="position">청산할 포지션</param>
+		/// <param name="currentChart">현재 차트 정보</param>
+		/// <param name="exitPrice">청산 가격</param>
+		/// <param name="exitQuantity">청산 수량 (null이면 전량)</param>
+		protected void ExitPositionSize(Position position, ChartInfo currentChart, decimal exitPrice, decimal exitQuantity)
+		{
+			var quantity = exitQuantity;
+			var amount = exitPrice * quantity;
+
+			Money += position.Side == PositionSide.Long ? amount : -amount;
+			Money -= GetBorrowSize(position.Time) * (quantity / position.Quantity);
+			Borrowed -= GetBorrowSize(position.Time) * (quantity / position.Quantity);
+
+			decimal fee = (position.EntryAmount * (quantity / position.Quantity) + amount) * FeeRate;
+			Money -= fee;
+
+			position.ExitAmount += amount;
+			position.EntryAmount -= position.EntryAmount * (quantity / position.Quantity);
+			position.Quantity -= quantity;
+
+			if (position.Quantity <= 0)
+			{
+				var result = position.Income > 0 ? PositionResult.Win : PositionResult.Lose;
+				Positions.Remove(position);
+				PositionHistories.Add(new PositionHistory(currentChart.DateTime, position.Time, position.Symbol, position.Side, result)
+				{
+					EntryAmount = position.EntryAmount + position.ExitAmount,
+					ExitAmount = position.ExitAmount,
+					Fee = fee
+				});
+				switch (result)
+				{
+					case PositionResult.Win: Win++; break;
+					case PositionResult.Lose: Lose++; break;
+				}
+			}
+		}
+
 
 		/// <summary>
 		/// 포지션 반 탈출
@@ -648,9 +763,25 @@ namespace Mercury.Backtests
 			}
 		}
 
-		protected decimal GetMinPrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Low);
-		protected decimal GetMaxPrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Max(x => x.Quote.High);
-		protected decimal GetMinClosePrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Close);
-		protected decimal GetMaxClosePrice(List<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Max(x => x.Quote.Close);
+		protected decimal GetMinPrice(IList<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Low);
+		protected decimal GetMaxPrice(IList<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Max(x => x.Quote.High);
+		protected decimal GetMinClosePrice(IList<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Min(x => x.Quote.Close);
+		protected decimal GetMaxClosePrice(IList<ChartInfo> charts, int period, int i) => charts.Skip(i - period).Take(period).Max(x => x.Quote.Close);
+
+		protected int GetSupertrendSwitchCount(IList<ChartInfo> charts, int period, int i)
+		{
+			if (i < period || charts == null || charts.Count == 0) return 0;
+
+			int count = 0;
+			decimal? prevSignal = null;
+			for (int idx = i - period + 1; idx <= i; idx++)
+			{
+				var signal = charts[idx].Supertrend1;
+				if (prevSignal != null && signal != null && prevSignal * signal < 0)
+					count++;
+				prevSignal = signal;
+			}
+			return count;
+		}
 	}
 }

@@ -1,8 +1,5 @@
 ﻿using Binance.Net.Enums;
 
-using System.Drawing;
-using System.Text;
-
 namespace Mercury.Backtests
 {
     public class Position(DateTime time, string symbol, PositionSide side, decimal entryPrice)
@@ -31,6 +28,11 @@ namespace Mercury.Backtests
 
         public int EntryCount { get; set; } = 0;
 
-        public decimal Income => Side == PositionSide.Long ? ExitAmount - EntryAmount : EntryAmount - ExitAmount;
+		public DateTime? ExitDateTime { get; set; } = null;
+
+        public decimal? HighestPrice { get; set; }
+        public decimal? LowestPrice { get; set; }
+
+		public decimal Income => Side == PositionSide.Long ? ExitAmount - EntryAmount : EntryAmount - ExitAmount;
 	}
 }

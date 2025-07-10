@@ -7,8 +7,8 @@ namespace Mercury.Charts
 		public string Symbol { get; set; } = symbol;
 		public List<Quote> Quotes { get; set; } = quotes;
 		public decimal CurrentPrice => Quotes.Count == 0 ? 0m : Quotes[^1].Close;
-		public double CurrentRsi { get; set; }
-		public double CurrentRi { get; set; }
+		public decimal CurrentRsi { get; set; }
+		public decimal CurrentRi { get; set; }
 		public string RsiColor => CurrentRsi >= 70 ? "3BCF86" : CurrentRsi <= 30 ? "ED3161" : "FFFFFF";
 		public string RiColor => CurrentRi >= 6 ? "3BCF86" : CurrentRi <= -6 ? "ED3161" : "FFFFFF";
 

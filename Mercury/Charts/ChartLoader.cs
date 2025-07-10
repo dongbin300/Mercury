@@ -80,7 +80,7 @@ namespace Mercury.Charts
 		/// <param name="interval"></param>
 		/// <param name="startDate"></param>
 		/// <param name="endDate"></param>
-		public static void InitCharts(string symbol, KlineInterval interval, DateTime? startDate = null, DateTime? endDate = null)
+		public static ChartPack InitCharts(string symbol, KlineInterval interval, DateTime? startDate = null, DateTime? endDate = null)
 		{
 			try
 			{
@@ -162,6 +162,8 @@ namespace Mercury.Charts
 				chartPack.ConvertCandle();
 
 				Charts.Add(chartPack);
+
+				return chartPack;
 			}
 			catch
 			{
@@ -441,12 +443,12 @@ namespace Mercury.Charts
 
 						var chart = new ChartInfo(symbol, quote);
 						var f = indicatorData[i].Split(',');
-						chart.Ema1 = f[1].ToDouble();
-						chart.K = f[2].ToDouble();
-						chart.D = f[3].ToDouble();
-						chart.Supertrend1 = f[4].ToDouble();
-						chart.Supertrend2 = f[5].ToDouble();
-						chart.Supertrend3 = f[6].ToDouble();
+						chart.Ema1 = f[1].ToDecimal();
+						chart.K = f[2].ToDecimal();
+						chart.D = f[3].ToDecimal();
+						chart.Supertrend1 = f[4].ToDecimal();
+						chart.Supertrend2 = f[5].ToDecimal();
+						chart.Supertrend3 = f[6].ToDecimal();
 
 						chartPack.AddChart(chart);
 					}
@@ -499,10 +501,9 @@ namespace Mercury.Charts
 
 						var chart = new ChartInfo(symbol, quote);
 						var f = indicatorData[i].Split(',');
-						chart.Supertrend1 = f[1].ToDouble();
-						chart.Supertrend2 = f[2].ToDouble();
-						chart.Supertrend3 = f[3].ToDouble();
-
+						chart.Supertrend1 = f[1].ToDecimal();
+						chart.Supertrend2 = f[2].ToDecimal();
+						chart.Supertrend3 = f[3].ToDecimal();
 						chartPack.AddChart(chart);
 					}
 
@@ -622,12 +623,12 @@ namespace Mercury.Charts
 						var e = d.Split(',');
 						var time = e[0].ToDateTime();
 						var chart = chartPack.GetChart(time);
-						chart.Ema1 = e[1].ToDouble();
-						chart.K = e[2].ToDouble();
-						chart.D = e[3].ToDouble();
-						chart.Supertrend1 = e[4].ToDouble();
-						chart.Supertrend2 = e[5].ToDouble();
-						chart.Supertrend3 = e[6].ToDouble();
+						chart.Ema1 = e[1].ToDecimal();
+						chart.K = e[2].ToDecimal();
+						chart.D = e[3].ToDecimal();
+						chart.Supertrend1 = e[4].ToDecimal();
+						chart.Supertrend2 = e[5].ToDecimal();
+						chart.Supertrend3 = e[6].ToDecimal();
 
 						if (d.StartsWith($"{endDate:yyyy-MM-dd HH:mm:ss}"))
 						{

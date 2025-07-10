@@ -24,7 +24,7 @@ namespace Mercury.Maths
 		public int Next()
 		{
 			Seed = (Seed + _GetRandomInt()) % long.MaxValue;
-			return (int)(_GetRandomInt() * Seed % int.MaxValue);
+			return (int)((_GetRandomInt() * Seed % int.MaxValue + int.MaxValue) % int.MaxValue);
 		}
 
 		/// <summary>
@@ -66,6 +66,11 @@ namespace Mercury.Maths
 		public T Next<T>(IEnumerable<T> values)
 		{
 			return values.ElementAt(Next(values.Count()));
+		}
+
+		public DateTime Next(DateTime startTime, DateTime endTime)
+		{
+			return startTime.Date.AddDays(Next(0, (endTime.Date - startTime.Date).Days + 1));
 		}
 
 		/// <summary>

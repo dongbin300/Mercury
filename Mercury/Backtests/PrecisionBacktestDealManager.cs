@@ -6,7 +6,7 @@ using Mercury.Maths;
 
 namespace Mercury.Backtests
 {
-    public class PrecisionBacktestDealManager
+	public class PrecisionBacktestDealManager
 	{
 		public int MaxActiveDeals { get; set; }
 		public decimal TakeProfitRoe { get; set; }
@@ -128,7 +128,7 @@ namespace Mercury.Backtests
 			return result;
 		}
 
-		public void EvaluateLsmaLongInstant(double rsiThreshold = 40)
+		public void EvaluateLsmaLongInstant(decimal rsiThreshold = 40m)
 		{
 			var side = PositionSide.Long;
 			foreach (var symbol in MonitoringSymbols)
@@ -217,7 +217,7 @@ namespace Mercury.Backtests
 			}
 		}
 
-		public void EvaluateLsmaShortInstant(double rsiThreshold = 60)
+		public void EvaluateLsmaShortInstant(decimal rsiThreshold = 60m)
 		{
 			var side = PositionSide.Short;
 			foreach (var symbol in MonitoringSymbols)
@@ -306,7 +306,7 @@ namespace Mercury.Backtests
 			}
 		}
 
-		public void EvaluateLsmaLongNextCandle(double rsiThreshold = 40)
+		public void EvaluateLsmaLongNextCandle(decimal rsiThreshold = 40m)
 		{
 			var side = PositionSide.Long;
 			foreach (var symbol in MonitoringSymbols)
@@ -375,7 +375,7 @@ namespace Mercury.Backtests
 			}
 		}
 
-		public void EvaluateLsmaShortNextCandle(double rsiThreshold = 60)
+		public void EvaluateLsmaShortNextCandle(decimal rsiThreshold = 60m)
 		{
 			var side = PositionSide.Short;
 			foreach (var symbol in MonitoringSymbols)
@@ -542,7 +542,7 @@ namespace Mercury.Backtests
 		{
 			var chart = Charts[symbol];
 			var quotes = chart.Select(x => x.Quote);
-			var ts = quotes.TakeLast(20).SkipLast(1).Concat(new[] { lastQuote }).GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
+			var ts = quotes.TakeLast(20).SkipLast(1).Concat([lastQuote]).GetTripleSupertrend(10, 1.2, 10, 3, 10, 10);
 			var r1 = ts.Select(x => x.Supertrend1);
 			var r2 = ts.Select(x => x.Supertrend2);
 			var r3 = ts.Select(x => x.Supertrend3);
@@ -582,13 +582,13 @@ namespace Mercury.Backtests
 			return count >= 2;
 		}
 
-		private double MinGreenSignal(ChartInfo info)
+		private decimal MinGreenSignal(ChartInfo info)
 		{
 			var supertrends = new[] { info.Supertrend1, info.Supertrend2, info.Supertrend3 };
 			return supertrends.Where(x => x > 0).Min() ?? 0;
 		}
 
-		private double MaxRedSignal(ChartInfo info)
+		private decimal MaxRedSignal(ChartInfo info)
 		{
 			var supertrends = new[] { info.Supertrend1, info.Supertrend2, info.Supertrend3 };
 			return supertrends.Where(x => x < 0).Select(x => Math.Abs(x ?? 0)).Max();
@@ -640,7 +640,7 @@ namespace Mercury.Backtests
 						var nc0 = newCharts[^1];
 						var nc1 = newCharts[^2];
 						// TS 연두색 선이 2개 이상 존재하고 EMA 200 선 위에 있고 StochRSI K값이 20 골든크로스 하면
-						if (IsTwoGreenSignal(nc0) && (double)quote.Close > nc0.Ema1 && nc0.K > 20 && nc1.K < 20)
+						if (IsTwoGreenSignal(nc0) && quote.Close > nc0.Ema1 && nc0.K > 20 && nc1.K < 20)
 						{
 							var price = testPrice;
 							var stopLossPrice = (decimal)MinGreenSignal(nc0);
@@ -747,7 +747,7 @@ namespace Mercury.Backtests
 						var nc0 = newCharts[^1];
 						var nc1 = newCharts[^2];
 						// TS 빨간색 선이 2개 이상 존재하고 EMA 200 선 아래에 있고 StochRSI K값이 80 데드크로스 하면
-						if (IsTwoRedSignal(nc0) && (double)quote.Close < nc0.Ema1 && nc0.K < 80 && nc1.K > 80)
+						if (IsTwoRedSignal(nc0) && quote.Close < nc0.Ema1 && nc0.K < 80 && nc1.K > 80)
 						{
 							var price = testPrice;
 							var stopLossPrice = (decimal)MaxRedSignal(nc0);
@@ -841,7 +841,7 @@ namespace Mercury.Backtests
 					}
 
 					// TS 연두색 선이 2개 이상 존재하고 EMA 200 선 위에 있고 StochRSI K값이 20 골든크로스 하면
-					if (IsTwoGreenSignal(c1) && (double)c1.Quote.Close > c1.Ema1 && c1.K > 20 && c2.K < 20)
+					if (IsTwoGreenSignal(c1) && c1.Quote.Close > c1.Ema1 && c1.K > 20 && c2.K < 20)
 					{
 						var price = c0.Quote.Open;
 						var stopLossPrice = (decimal)MinGreenSignal(c1);
@@ -937,7 +937,7 @@ namespace Mercury.Backtests
 					}
 
 					// TS 빨간색 선이 2개 이상 존재하고 EMA 200 선 아래에 있고 StochRSI K값이 80 데드크로스 하면
-					if (IsTwoRedSignal(c1) && (double)c1.Quote.Close < c1.Ema1 && c1.K < 80 && c2.K > 80)
+					if (IsTwoRedSignal(c1) && c1.Quote.Close < c1.Ema1 && c1.K < 80 && c2.K > 80)
 					{
 						var price = c0.Quote.Open;
 						var stopLossPrice = (decimal)MaxRedSignal(c1);
@@ -1744,7 +1744,7 @@ namespace Mercury.Backtests
 			}
 		}
 
-		public bool IsPowerGoldenCross(List<ChartInfo> charts, int lookback, double? currentMacd = null)
+		public bool IsPowerGoldenCross(List<ChartInfo> charts, int lookback, decimal? currentMacd = null)
 		{
 			// Starts at charts[^2]
 			for (int i = 2; i < 2 + lookback; i++)
@@ -1770,7 +1770,7 @@ namespace Mercury.Backtests
 			return false;
 		}
 
-		public bool IsPowerGoldenCross2(List<ChartInfo> charts, int lookback, double? currentMacd = null)
+		public bool IsPowerGoldenCross2(List<ChartInfo> charts, int lookback, decimal? currentMacd = null)
 		{
 			// Starts at charts[^2]
 			for (int i = 2; i < 2 + lookback; i++)
@@ -1796,7 +1796,7 @@ namespace Mercury.Backtests
 			return false;
 		}
 
-		public bool IsPowerDeadCross(List<ChartInfo> charts, int lookback, double? currentMacd = null)
+		public bool IsPowerDeadCross(List<ChartInfo> charts, int lookback, decimal? currentMacd = null)
 		{
 			// Starts at charts[^2]
 			for (int i = 2; i < 2 + lookback; i++)
@@ -1822,7 +1822,7 @@ namespace Mercury.Backtests
 			return false;
 		}
 
-		public bool IsPowerDeadCross2(List<ChartInfo> charts, int lookback, double? currentMacd = null)
+		public bool IsPowerDeadCross2(List<ChartInfo> charts, int lookback, decimal? currentMacd = null)
 		{
 			// Starts at charts[^2]
 			for (int i = 2; i < 2 + lookback; i++)
@@ -2166,7 +2166,7 @@ namespace Mercury.Backtests
 				//var maxPrice = charts.TakeLast(14).Max(x => x.Quote.High);
 				//var slPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 1.1m;
 				//var tpPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 1.5m;
-				var bbTouch = charts.TakeLast(14).Count(x => (double)x.Quote.Low < x.Bb2Lower);
+				var bbTouch = charts.TakeLast(14).Count(x => x.Quote.Low < x.Bb2Lower);
 
 				if (position == null)
 				{
@@ -2175,7 +2175,7 @@ namespace Mercury.Backtests
 						continue;
 					}
 
-					if ((double)c1.Quote.Close > c1.Sma1 && (double)c2.Quote.Close < c2.Sma1 && bbTouch > 0 && c1.Adx > 30)
+					if (c1.Quote.Close > c1.Sma1 && c2.Quote.Close < c2.Sma1 && bbTouch > 0 && c1.Adx > 30)
 					{
 						var price = c0.Quote.Open;
 						var quantity = BaseOrderSize / price;
@@ -2190,7 +2190,7 @@ namespace Mercury.Backtests
 				}
 				else
 				{
-					if (position.Stage == 0 && c0.Quote.Low <= (decimal)c0.Bb1Lower)
+					if (position.Stage == 0 && c0.Quote.Low <= c0.Bb1Lower)
 					{
 						var price = (decimal)c0.Bb1Lower;
 						var quantity = position.Quantity;
@@ -2204,7 +2204,7 @@ namespace Mercury.Backtests
 						Lose++;
 						Money -= FeeSize;
 					}
-					else if (position.Stage == 0 && c0.Quote.High >= (decimal)c0.Bb2Upper)
+					else if (position.Stage == 0 && c0.Quote.High >= c0.Bb2Upper)
 					{
 						var price = (decimal)c0.Bb2Upper;
 						var quantity = position.Quantity;
@@ -2256,7 +2256,7 @@ namespace Mercury.Backtests
 				//var maxPrice = charts.TakeLast(14).Max(x => x.Quote.High);
 				//var slPer = Calculator.Roe(side, c0.Quote.Open, minPrice) * 1.1m;
 				//var tpPer = Calculator.Roe(side, c0.Quote.Open, maxPrice) * 1.5m;
-				var bb2Touch = charts.TakeLast(14).Count(x => (double)x.Quote.High > x.Bb2Upper);
+				var bb2Touch = charts.TakeLast(14).Count(x => x.Quote.High > x.Bb2Upper);
 
 				if (position == null)
 				{
@@ -2265,7 +2265,7 @@ namespace Mercury.Backtests
 						continue;
 					}
 
-					if ((double)c1.Quote.Close < c1.Sma1 && (double)c2.Quote.Close > c2.Sma1 && c1.Adx > 30)
+					if (c1.Quote.Close < c1.Sma1 && c2.Quote.Close > c2.Sma1 && c1.Adx > 30)
 					{
 						var price = c0.Quote.Open;
 						var quantity = BaseOrderSize / price;
@@ -2280,7 +2280,7 @@ namespace Mercury.Backtests
 				}
 				else
 				{
-					if (position.Stage == 0 && c0.Quote.High >= (decimal)c0.Bb1Upper)
+					if (position.Stage == 0 && c0.Quote.High >= c0.Bb1Upper)
 					{
 						var price = (decimal)c0.Bb1Upper;
 						var quantity = position.Quantity;
@@ -2294,7 +2294,7 @@ namespace Mercury.Backtests
 						Lose++;
 						Money -= FeeSize;
 					}
-					else if (position.Stage == 0 && c0.Quote.Low <= (decimal)c0.Bb2Lower)
+					else if (position.Stage == 0 && c0.Quote.Low <= c0.Bb2Lower)
 					{
 						var price = (decimal)c0.Bb2Lower;
 						var quantity = position.Quantity;
@@ -2428,8 +2428,8 @@ namespace Mercury.Backtests
 		{
 			public string Symbol { get; set; } = string.Empty;
 			public PositionSide CurrentSide { get; set; }
-			public double BasedMacd { get; set; }
-			public double BasedStoch { get; set; }
+			public decimal BasedMacd { get; set; }
+			public decimal BasedStoch { get; set; }
 			public decimal TakeProfitPrice { get; set; }
 		}
 		List<MemorySmacd> memorySmacds = new();

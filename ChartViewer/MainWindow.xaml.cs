@@ -86,9 +86,10 @@ namespace ChartViewer
 			CandleCountTextBox.Text = Settings.Default.CandleCount;
 			IntervalComboBox.SelectedIndex = Settings.Default.Interval;
 			CandleCountTextBox.Focus();
-			Supertrend1CheckBox.IsChecked = true;
-			Supertrend2CheckBox.IsChecked = true;
-			Supertrend3CheckBox.IsChecked = true;
+
+			RsiCheckBox.IsChecked = true;
+			AtrCheckBox.IsChecked = true;
+			BbCheckBox.IsChecked = true;
 		}
 
 		private void SymbolTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -279,7 +280,32 @@ namespace ChartViewer
 					Charts[i].EmaAtrUpper = ema.ElementAt(i).Ema == 0 ? ERROR_VALUE : ema.ElementAt(i).Ema + atr.ElementAt(i).Atr;
 				}
 			}
-
+			if (RsiCheckBox.IsChecked ?? true)
+			{
+				var rsi = quotes.GetRsi(RsiPeriodText.Text.ToInt()).Select(x => x.Rsi);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Rsi1 = rsi.ElementAt(i) == 0 ? ERROR_VALUE : rsi.ElementAt(i);
+				}
+			}
+			if (AtrCheckBox.IsChecked ?? true)
+			{
+				var atr = quotes.GetAtr(AtrPeriodText.Text.ToInt()).Select(x => x.Atr);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Atr = atr.ElementAt(i) == 0 ? ERROR_VALUE : atr.ElementAt(i);
+				}
+			}
+			if (BbCheckBox.IsChecked ?? true)
+			{
+				var bb = quotes.GetBollingerBands(BbPeriodText.Text.ToInt(), BbDeviationText.Text.ToDouble());
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					Charts[i].Bb1Sma = bb.ElementAt(i).Sma == 0 ? ERROR_VALUE : bb.ElementAt(i).Sma;
+					Charts[i].Bb1Upper = bb.ElementAt(i).Upper == 0 ? ERROR_VALUE : bb.ElementAt(i).Upper;
+					Charts[i].Bb1Lower = bb.ElementAt(i).Lower == 0 ? ERROR_VALUE : bb.ElementAt(i).Lower;
+				}
+			}
 			CandleChart.InvalidateVisual();
 		}
 
@@ -344,7 +370,7 @@ namespace ChartViewer
 
 		private void DrawIndicator(SKCanvas canvas, int viewIndex, double? preValue, double? value, double max, double min, SKColor color, float strokeWidth = 1)
 		{
-			if (preValue == ERROR_VALUE || value == ERROR_VALUE)
+			if (preValue == null || value == null || preValue == ERROR_VALUE || value == ERROR_VALUE)
 			{
 				return;
 			}
@@ -556,6 +582,26 @@ namespace ChartViewer
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].EmaAtrUpper : Charts[i - 1].EmaAtrUpper, Charts[i].EmaAtrUpper, yMax, yMin, SKColors.White);
 					DrawIndicator(canvas, i, i == 0 ? Charts[i].EmaAtrLower : Charts[i - 1].EmaAtrLower, Charts[i].EmaAtrLower, yMax, yMin, SKColors.White);
 				}
+				if (RsiCheckBox.IsChecked ?? true)
+				{
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Rsi1 : Charts[i - 1].Rsi1, Charts[i].Rsi1, 100, 0, SKColors.Yellow);
+				}
+				if (AtrCheckBox.IsChecked ?? true)
+				{
+					var atrList = Charts.Where(x => x.Atr != null && x.Atr != ERROR_VALUE).Select(x => x.Atr.Value);
+					if (atrList.Any())
+					{
+						var atrMin = atrList.Min();
+						var atrMax = atrList.Max();
+						DrawIndicator(canvas, i, i == 0 ? Charts[i].Atr : Charts[i - 1].Atr, Charts[i].Atr, (double)atrMax, (double)atrMin, SKColors.White);
+					}
+				}
+				if (BbCheckBox.IsChecked ?? true)
+				{
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Bb1Upper : Charts[i - 1].Bb1Upper, Charts[i].Bb1Upper, yMax, yMin, SKColors.Green);
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Bb1Sma : Charts[i - 1].Bb1Sma, Charts[i].Bb1Sma, yMax, yMin, SKColors.AliceBlue);
+					DrawIndicator(canvas, i, i == 0 ? Charts[i].Bb1Lower : Charts[i - 1].Bb1Lower, Charts[i].Bb1Lower, yMax, yMin, SKColors.Red);
+				}
 				#endregion
 			}
 
@@ -605,7 +651,9 @@ namespace ChartViewer
 				CandleInfoFont.Size = Math.Max(10, (float)ActualHeight / 75);
 				var pointingChart = CurrentMouseX == -1358 ? Charts[ChartCount - 1] : Charts[(int)(CurrentMouseX / LiveActualItemFullWidth)];
 				var changeText = pointingChart.Quote.Close >= pointingChart.Quote.Open ? $"+{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}" : $"{(pointingChart.Quote.Close - pointingChart.Quote.Open) / pointingChart.Quote.Open:P2}";
-				canvas.DrawText($"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close} ({changeText}) V {pointingChart.Quote.Volume}", 2, CandleInfoFont.Size + 2, CandleInfoFont, CandleInfoPaint);
+				var text = $"{pointingChart.DateTime:yyyy-MM-dd HH:mm:ss}, O {pointingChart.Quote.Open} H {pointingChart.Quote.High} L {pointingChart.Quote.Low} C {pointingChart.Quote.Close} ({changeText}) V {pointingChart.Quote.Volume}";
+				text += Environment.NewLine + $"RSI {pointingChart.Rsi1.Value.Round(2)} ATR {pointingChart.Atr.Value.Round(4)} BB-SMA {pointingChart.Bb1Sma.Value.Round(4)}";
+				canvas.DrawText(text, 2, CandleInfoFont.Size + 2, CandleInfoFont, CandleInfoPaint);
 			}
 			catch
 			{

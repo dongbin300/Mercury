@@ -51,200 +51,86 @@ namespace MarinerX.Views
     public partial class QuoteMonitorView : Window
     {
         DispatcherTimer timer = new ();
-        DispatcherTimer timer2 = new ();
-        readonly KlineInterval DefaultInterval = KlineInterval.FiveMinutes;
+        readonly KlineInterval DefaultInterval = KlineInterval.OneDay;
 #pragma warning disable CS0414
         private bool isRunning;
 #pragma warning restore CS0414
-        readonly List<string> MonitorSymbolNames = new()
-        {
-            "AAVEUSDT",
-            "ALGOUSDT",
-            "ALICEUSDT",
-            "ALPHAUSDT",
-            "ANKRUSDT",
-            "ANTUSDT",
-            "APEUSDT",
-            "API3USDT",
-            "APTUSDT",
-            "ARPAUSDT",
-            "ARUSDT",
-            "ATAUSDT",
-            "ATOMUSDT",
-            "AUDIOUSDT",
-            "AVAXUSDT",
-            "AXSUSDT",
-            "BAKEUSDT",
-            "BALUSDT",
-            "BANDUSDT",
-            "BATUSDT",
-            "BELUSDT",
-            "BLUEBIRDUSDT",
-            "BLZUSDT",
-            "BTCDOMUSDT",
-            "BTCSTUSDT",
-            "C98USDT",
-            "CELRUSDT",
-            "CHRUSDT",
-            "CHZUSDT",
-            "COMPUSDT",
-            "COTIUSDT",
-            "CRVUSDT",
-            "CTKUSDT",
-            "CTSIUSDT",
-            "CVCUSDT",
-            "DARUSDT",
-            "DASHUSDT",
-            "DEFIUSDT",
-            "DENTUSDT",
-            "DGBUSDT",
-            "DOGEUSDT",
-            "DOTUSDT",
-            "DUSKUSDT",
-            "DYDXUSDT",
-            "EGLDUSDT",
-            "ENJUSDT",
-            "ENSUSDT",
-            "ETCUSDT",
-            "FETUSDT",
-            "FILUSDT",
-            "FLMUSDT",
-            "FOOTBALLUSDT",
-            "FTMUSDT",
-            "FTTUSDT",
-            "FXSUSDT",
-            "GALAUSDT",
-            "GALUSDT",
-            "GMTUSDT",
-            "GRTUSDT",
-            "GTCUSDT",
-            "HBARUSDT",
-            "HNTUSDT",
-            "HOOKUSDT",
-            "HOTUSDT",
-            "ICXUSDT",
-            "IMXUSDT",
-            "INJUSDT",
-            "IOSTUSDT",
-            "IOTAUSDT",
-            "IOTXUSDT",
-            "JASMYUSDT",
-            "KAVAUSDT",
-            "KNCUSDT",
-            "KSMUSDT",
-            "LDOUSDT",
-            "LINAUSDT",
-            "LITUSDT",
-            "LPTUSDT",
-            "LRCUSDT",
-            "LUNA2USDT",
-            "MAGICUSDT",
-            "MANAUSDT",
-            "MASKUSDT",
-            "MATICUSDT",
-            "MKRUSDT",
-            "MTLUSDT",
-            "NEARUSDT",
-            "NKNUSDT",
-            "OCEANUSDT",
-            "OGNUSDT",
-            "OMGUSDT",
-            "ONEUSDT",
-            "ONTUSDT",
-            "OPUSDT",
-            "PEOPLEUSDT",
-            "QTUMUSDT",
-            "REEFUSDT",
-            "RENUSDT",
-            "RLCUSDT",
-            "ROSEUSDT",
-            "RSRUSDT",
-            "RUNEUSDT",
-            "RVNUSDT",
-            "SANDUSDT",
-            "SFPUSDT",
-            "SKLUSDT",
-            "SNXUSDT",
-            "SOLUSDT",
-            "SRMUSDT",
-            "STGUSDT",
-            "STMXUSDT",
-            "STORJUSDT",
-            "SUSHIUSDT",
-            "SXPUSDT",
-            "THETAUSDT",
-            "TLMUSDT",
-            "TOMOUSDT",
-            "TRBUSDT",
-            "UNFIUSDT",
-            "UNIUSDT",
-            "VETUSDT",
-            "WAVESUSDT",
-            "WOOUSDT",
-            "XEMUSDT",
-            "XTZUSDT",
-            "YFIUSDT",
-            "ZECUSDT",
-            "ZENUSDT",
-            "ZILUSDT",
-            "ZRXUSDT"
-        };
+		public List<string> MonitorSymbolNames = [];
         private Dictionary<string, double?> RsiValues = new();
 
         public QuoteMonitorView()
         {
             InitializeComponent();
 
-            MonitorStopButton.Visibility = Visibility.Hidden;
-            foreach (var symbol in LocalApi.SymbolNames)
-            {
-                BinanceSocketApi.GetKlineUpdatesAsync(symbol, KlineInterval.FiveMinutes);
-            }
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer2.Interval = TimeSpan.FromSeconds(30);
-            timer.Tick += Timer_Tick;
-            timer2.Tick += Timer2_Tick;
-        }
+			MonitorStopButton.Visibility = Visibility.Hidden;
 
-        private void Timer2_Tick(object? sender, EventArgs e)
-        {
-            RsiValues.Clear();
-            foreach (var symbol in MonitorSymbolNames)
-            {
-                var quotes = BinanceRestApi.GetQuotes(symbol, DefaultInterval, null, null, 30);
-                RsiValues.Add(symbol, quotes.GetRsi(14).Last().Rsi);
-            }
-        }
+			//foreach (var symbol in LocalApi.SymbolNames)
+			//{
+			//    BinanceSocketApi.GetKlineUpdatesAsync(symbol, KlineInterval.FiveMinutes);
+			//}
+			//timer.Interval = TimeSpan.FromSeconds(30);
+			//timer.Tick += Timer_Tick;
+		}
 
-        private void Timer_Tick(object? sender, EventArgs e)
-        {
-            try
-            {
-                ClockText.Text = DateTime.Now.ToString("HH:mm:ss");
-                MonitorDataGrid.Items.Clear();
+		private void Window_Loaded(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				MonitorSymbolNames = BinanceRestApi.GetFuturesSymbolNames();
+				MonitorSymbolNames.Remove("BTCSTUSDT");
 
-                foreach (var symbol in MonitorSymbolNames)
-                {
-                    var quote = QuoteFactory.GetQuote(symbol);
-                    if (quote == null)
-                    {
-                        continue;
-                    }
+				ClockText.Text = DateTime.Now.ToString("HH:mm:ss");
+				MonitorDataGrid.Items.Clear();
 
-                    if (RsiValues[symbol] >= 40 && RsiValues[symbol] <= 45)
-                    {
-                        MonitorDataGrid.Items.Add(new QuoteMonitorData(quote.Symbol, RsiValues[symbol]));
-                    }
-                }
-            }
-            catch { }
-        }
+				foreach (var symbol in MonitorSymbolNames)
+				{
+					try
+					{
+						var quotes = BinanceRestApi.GetQuotes(symbol, DefaultInterval, null, null, 300);
+						var charts = quotes.Select(x => new ChartInfo(symbol, x)).ToList();
+						if (charts == null || charts.Count < 300) continue;
+						int lastIdx = charts.Count - 1;
 
-        private void MonitorStartButton_Click(object sender, RoutedEventArgs e)
+						var ema = charts.Select(x => x.Quote).GetEma(120).Select(x => x.Ema);
+						var ema2 = charts.Select(x => x.Quote).GetEma(240).Select(x => x.Ema);
+						for (int i = 0; i < charts.Count; i++)
+						{
+							charts[i].Ema1 = ema.ElementAt(i);
+							charts[i].Ema2 = ema2.ElementAt(i);
+						}
+
+						bool cond1 = IsInEmaRange(charts, lastIdx, 30, 5); // 30봉 이내 EMA1~EMA2 5회 이상
+						bool cond2 = IsNearEma120(charts, lastIdx, 30, 0.98m, 1.05m, 3); // 30봉 이내 120EMA 근접 3회 이상
+						bool cond3 = HasHighOverPrevClose(charts, lastIdx, 30, 20); // 30봉 이내 전일종가대비 고가 20% 이상
+
+						if (cond1 && cond2 && cond3 &&
+							charts[^1].Quote.Close > (decimal)charts[^1].Ema1 && charts[^1].Quote.Close < (decimal)charts[^1].Ema2
+							)
+						{
+							MonitorDataGrid.Items.Add(new QuoteMonitorData(symbol, 0)); // 0대신 원하는 값 넣기
+						}
+					}
+					catch
+					{
+					}
+					
+				}
+			}
+			catch
+			{
+			}
+		}
+
+		private void Timer_Tick(object? sender, EventArgs e)
+		{
+			
+		}
+
+
+		private void MonitorStartButton_Click(object sender, RoutedEventArgs e)
         {
             isRunning = true;
             timer.Start();
-            timer2.Start();
             MonitorStartButton.Visibility = Visibility.Hidden;
             MonitorStopButton.Visibility = Visibility.Visible;
         }
@@ -253,9 +139,54 @@ namespace MarinerX.Views
         {
             isRunning = false;
             timer.Stop();
-            timer2.Stop();
             MonitorStartButton.Visibility = Visibility.Visible;
             MonitorStopButton.Visibility = Visibility.Hidden;
         }
-    }
+
+		private bool IsInEmaRange(List<ChartInfo> charts, int currentIndex, int lookback, int minCount)
+		{
+			int count = 0;
+			int from = Math.Max(0, currentIndex - lookback + 1);
+			for (int i = from; i <= currentIndex; i++)
+			{
+				var c = charts[i];
+				if (c.Ema1 == null || c.Ema2 == null) continue;
+				if (c.Quote.Close > (decimal)c.Ema1 && c.Quote.Close < (decimal)c.Ema2)
+					count++;
+			}
+			return count >= minCount;
+		}
+
+		private bool IsNearEma120(List<ChartInfo> charts, int currentIndex, int lookback, decimal lower, decimal upper, int minCount)
+		{
+			int count = 0;
+			int from = Math.Max(0, currentIndex - lookback + 1);
+			for (int i = from; i <= currentIndex; i++)
+			{
+				var c = charts[i];
+				if (c.Ema1 == null) continue;
+				var ratio = c.Quote.Close / (decimal)c.Ema1;
+				if (ratio >= lower && ratio <= upper)
+					count++;
+			}
+			return count >= minCount;
+		}
+
+		private bool HasHighOverPrevClose(List<ChartInfo> charts, int currentIndex, int lookback = 30, decimal percent = 20)
+		{
+			int from = Math.Max(1, currentIndex - lookback + 1); // 0번째는 전일 종가가 없으니 1부터 시작
+			decimal ratio = 1 + (percent / 100m);
+
+			for (int i = from; i <= currentIndex; i++)
+			{
+				var prevClose = charts[i - 1].Quote.Close;
+				var high = charts[i].Quote.High;
+				if (prevClose == 0) continue; // 0으로 나누는 경우 방지
+				if (high >= prevClose * ratio)
+					return true;
+			}
+			return false;
+		}
+		
+	}
 }

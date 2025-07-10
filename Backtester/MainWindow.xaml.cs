@@ -324,7 +324,7 @@ namespace Backtester
 		}
 
 		#region MACD Golden/Dead Cross
-		public bool IsPowerGoldenCross(IList<ChartInfo> charts, int startIndex, int lookback, double? currentMacd = null)
+		public bool IsPowerGoldenCross(IList<ChartInfo> charts, int startIndex, int lookback, decimal? currentMacd = null)
 		{
 			for (int i = startIndex; i >= startIndex - lookback; i--)
 			{
@@ -349,7 +349,7 @@ namespace Backtester
 			return false;
 		}
 
-		public bool IsPowerGoldenCross2(IList<ChartInfo> charts, int startIndex, int lookback, double? currentMacd = null)
+		public bool IsPowerGoldenCross2(IList<ChartInfo> charts, int startIndex, int lookback, decimal? currentMacd = null)
 		{
 			for (int i = startIndex; i >= startIndex - lookback; i--)
 			{
@@ -374,7 +374,7 @@ namespace Backtester
 			return false;
 		}
 
-		public bool IsPowerDeadCross(IList<ChartInfo> charts, int startIndex, int lookback, double? currentMacd = null)
+		public bool IsPowerDeadCross(IList<ChartInfo> charts, int startIndex, int lookback, decimal? currentMacd = null)
 		{
 			for (int i = startIndex; i >= startIndex - lookback; i--)
 			{
@@ -399,7 +399,7 @@ namespace Backtester
 			return false;
 		}
 
-		public bool IsPowerDeadCross2(IList<ChartInfo> charts, int startIndex, int lookback, double? currentMacd = null)
+		public bool IsPowerDeadCross2(IList<ChartInfo> charts, int startIndex, int lookback, decimal? currentMacd = null)
 		{
 			for (int i = startIndex; i >= startIndex - lookback; i--)
 			{

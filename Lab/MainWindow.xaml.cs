@@ -1,48 +1,20 @@
-﻿using Binance.Net.Clients;
-using Binance.Net.Enums;
-using Binance.Net.Objects.Models;
-using Binance.Net.Objects.Models.Futures.Socket;
-using Binance.Net.Objects.Models.Spot;
+﻿using Binance.Net.Enums;
 
-using CryptoExchange.Net.Authentication;
-using CryptoExchange.Net.Objects.Sockets;
-
-using Mercury;
-using Mercury.Apis;
-using Mercury.Backtests.Calculators;
 using Mercury.Charts;
-using Mercury.Cryptos.Binance;
 using Mercury.Extensions;
 using Mercury.Maths;
-
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
+using Mercury.StatisticalAnalyses;
 
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 
 namespace Lab
 {
-	public class Position
-	{
-		public string Symbol { get; set; }
-		public decimal Change { get; set; }
-		public decimal BarPer { get; set; }
-		public SolidColorBrush BarColor => Change > 0 ? new SolidColorBrush(Color.FromRgb(0, 0, 255)) : new SolidColorBrush(Color.FromRgb(255, 0, 0));
-	}
-
 	/// <summary>
-	/// Interaction logic for MainWindow.xaml
 	/// TODO
 	/// CubeAlgorithmCreator
 	/// SC Mini
@@ -50,110 +22,45 @@ namespace Lab
 	public partial class MainWindow : Window
 	{
 		string[] symbols = [
-			"JASMYUSDT",
-			"DOGEUSDT",
-			"ZECUSDT",
-			"UNIUSDT",
-			"XMRUSDT",
-			"MASKUSDT",
-			"SUSHIUSDT",
-			"ATOMUSDT",
-			"GRTUSDT",
-			"ENSUSDT",
-			"CHZUSDT",
-			"BNBUSDT",
-			"NKNUSDT",
-			"OMGUSDT",
-			"NEOUSDT",
-			"WAVESUSDT",
-			"XRPUSDT",
-			"DASHUSDT",
-			"OCEANUSDT",
-			"ROSEUSDT",
-			"BALUSDT",
-			"SANDUSDT",
-			"BANDUSDT",
-			"COTIUSDT",
-			"EGLDUSDT",
-			"IOSTUSDT",
-			"LTCUSDT",
-			"ADAUSDT",
-			"KAVAUSDT",
-			"RLCUSDT",
-			"MATICUSDT",
-			"AAVEUSDT",
-			"BELUSDT",
-			"FTMUSDT",
-			"ALPHAUSDT",
-			"XLMUSDT",
-			"KNCUSDT",
-			"ETCUSDT",
-			"OPUSDT",
-			"HBARUSDT"
-			];
+			"BTCUSDT",
+"ETHUSDT",
+"BCHUSDT",
+"XRPUSDT",
+"EOSUSDT",
+"LTCUSDT",
+"TRXUSDT",
+"ETCUSDT",
+"XLMUSDT",
+"ADAUSDT",
+"XMRUSDT",
+"DASHUSDT",
+"ZECUSDT",
+"XTZUSDT",
+"BNBUSDT",
+"ATOMUSDT",
+"ONTUSDT",
+"IOTAUSDT",
+"BATUSDT",
+"VETUSDT",
+"NEOUSDT",
+"QTUMUSDT",
+"IOSTUSDT",
+"THETAUSDT",
+"ALGOUSDT",
+"ZILUSDT",
+"KNCUSDT",
+"ZRXUSDT",
+"COMPUSDT",
+"OMGUSDT"
+		];
 
-		List<string> histories = [];
-
-		public enum Subject
-		{
-			None,
-			Master,
-			Long,
-			Short
-		}
-
-		public enum Act
-		{
-			None,
-			OpenOrder,
-			CloseOrder,
-			CancelOrder,
-			BotOn,
-			BotOff,
-			Collect
-		}
-
-		public static void EvaluateCandleScore(
-	double?[] scores, double[] close, int forward = 5, double scoreThreshold = 1.0)
-		{
-			int totalLong = 0, totalShort = 0;
-			int correctLong = 0, correctShort = 0;
-
-			for (int i = 0; i < close.Length - forward; i++)
-			{
-				if (scores[i] == null) continue;
-
-				double score = scores[i].Value;
-				double futureReturn = (close[i + forward] - close[i]) / close[i];
-
-				if (score >= scoreThreshold)
-				{
-					totalLong++;
-					if (futureReturn > 0) correctLong++;
-				}
-				else if (score <= -scoreThreshold)
-				{
-					totalShort++;
-					if (futureReturn < 0) correctShort++;
-				}
-			}
-
-			double accLong = totalLong > 0 ? (double)correctLong / totalLong * 100 : 0;
-			double accShort = totalShort > 0 ? (double)correctShort / totalShort * 100 : 0;
-
-			Debug.WriteLine($"📊 롱 조건 (Score ≥ {scoreThreshold})");
-			Debug.WriteLine($"  → 총: {totalLong}개, 적중: {correctLong}개, 정확도: {accLong:0.00}%");
-
-			Debug.WriteLine($"📉 숏 조건 (Score ≤ -{scoreThreshold})");
-			Debug.WriteLine($"  → 총: {totalShort}개, 적중: {correctShort}개, 정확도: {accShort:0.00}%");
-		}
 
 		public MainWindow()
 		{
 			InitializeComponent();
 
 			var startTime = new DateTime(2022, 1, 1);
-			var endTime = new DateTime(2023, 12, 31);
+			var endTime = new DateTime(2024, 12, 31);
 			var symbol = "BTCUSDT";
 			var interval = KlineInterval.FifteenMinutes;
 
@@ -167,95 +74,143 @@ namespace Lab
 			var low = quotes.Select(x => (double)x.Quote.Low).ToArray();
 			var volume = quotes.Select(x => (double)x.Quote.Volume).ToArray();
 
-			//var cci = ArrayCalculator.Cci(high, low, close, 20);
-			//var ewmac = ArrayCalculator.Ewmac(close.ToNullable(), 20, 60);
-			//var tr = ArrayCalculator.TrendRider(high, low, close, 10, 3.0, 14, 12, 26, 9);
-			//var trend = tr.Item1;
-			//for (int i = 0; i < trend.Length; i++)
+			//var vwap = ArrayCalculator.Vwap(high.ToNullable(), low.ToNullable(), close.ToNullable(), volume.ToNullable());
+			//var rvwap = ArrayCalculator.RollingVwap(high.ToNullable(), low.ToNullable(), close.ToNullable(), volume.ToNullable(), 20);
+			//var stoch = ArrayCalculator.StochasticRsi(close, 3, 3, 14, 14);
+
+			ChartLoader.Charts = [];
+			List<ChartPack> chartPacks = [];
+			for (int i = 0; i < symbols.Length; i++)
+			{
+				ChartLoader.InitCharts(symbols[i], interval, startTime, endTime);
+			}
+			for (int i = 0; i < symbols.Length; i++)
+			{
+				chartPacks.Add(ChartLoader.GetChartPack(symbols[i], interval));
+			}
+			for (int i = 0; i < chartPacks.Count; i++)
+			{
+				chartPacks[i].UseRsi(14);
+				chartPacks[i].UseSma(20, 50);
+				chartPacks[i].UseBollingerBands(20, 2);
+				chartPacks[i].UseStochasticRsi(3, 3, 14, 14);
+				chartPacks[i].UseMacd(12, 26, 9);
+				chartPacks[i].UseAtr(14);
+				chartPacks[i].UseVwap();
+				chartPacks[i].UseRollingVwap(20);
+				chartPacks[i].UseEvwap(13);
+				chartPacks[i].UseElderRayPower(13);
+			}
+			//var model = new Correlation();
+			//model.Init(chartPacks);
+			//var result = model.Run();
+
+			var model2 = new CandleVolume1();
+			model2.Init(chartPacks);
+
+			model2.Run_MarketAdaptiveStrategy();
+
+			model2.Run_MarketStructureOrderBlockImproved();
+			model2.Run_BollingerUpperRsiVolumeStat();
+			model2.Run_MarketContextStrategy(); // Sma20, 50
+
+			//model2.Run_ThreeWhiteSoldiersStat();
+			//model2.Run_EngulfingStat();
+			//model2.Run_RSIDivergenceStat();
+			//model2.Run_WedgeBreakoutStat();
+			//model2.Run_BollingerBandBreakStat();
+			//model2.Run_RsiHammerVolumeStat();
+			//model2.Run_BollingerLowerRsiVolumeStat();
+			//model2.Run_StochHammerVolumeStat();
+			//model2.Run_MacdCrossVolumeStat();
+			model2.Run_BollingerUpperRsiVolumeStat();
+			//model2.Run_VolumeDivergence();
+			//model2.Run_SupportResistanceBreak();
+			model2.Run_MacdRsiConvergence();
+			//model2.Run_BollingerSqueeze();
+			//model2.Run_DivergenceCandleVolume();
+			model2.Run_VolatilityBreakout();
+			//model2.Run_SupportResistanceCluster();
+			//model2.Run_TrendFilterEngulfing();
+			//model2.Run_TrendPullbackStrategy(); // Sma50, 200 사용
+			//model2.Run_MacdVolumeWeighted();
+			//model2.Run_BreakoutRetest();
+			//model2.Run_RsiDivergencePriceAction();
+			//model2.Run_BollingerSqueezeBreakout();
+			//model2.Run_VolumeSpikeWithTrendDivergence();
+			//model2.Run_MomentumReversalCluster();
+			//model2.Run_CompositeATRBreakout();
+			//model2.Run_SessionOpenBreakout();
+			model2.Run_HighConfidenceBreakout();
+			//model2.Run_VolumeMomentumDivergence();
+			//model2.Run_SupportResistanceConfluence();
+			//model2.Run_AdvancedATRVolume();
+			//model2.Run_SessionVolumeTiming();
+			//model2.Run_ThreeTouchBreakoutStrategy();
+			//model2.Run_DoubleBottomVolumeStrategy();
+			//model2.Run_MeanReversionFibonacciStrategy();
+			model2.Run_IchimokuBreakoutMomentumStrategy();
+			model2.Run_CompositeSignalStrategy();
+			model2.Run_MarketContextStrategy(); // Sma 20,50 사용
+												//model2.Run_VolumeProfileMarketStructure();
+												//model2.Run_MultiTimeframeMomentumStrategy();
+												//model2.Run_SmartMoneyConceptStrategy();
+												//model2.Run_MarketStructureOrderBlockStrategy();		
+			model2.Run_IntegratedEliteStrategy(); // Sma1, 2 사용
+			model2.Run_VolumeProfileMarketStructureImproved(); // Sma1, 2 사용
+			model2.Run_MultiTimeframeMomentumImproved(); // Sma1 사용
+			model2.Run_MarketStructureOrderBlockImproved();
+			model2.Run_HybridEliteStrategy(); // Sma1 사용
+			model2.Run_AdaptiveMarketRegimeStrategy();  // Sma1 사용
+
+			//model2.Run_VwapStochRsiPullbackImproved();
+			//model2.Run_ElderRayEmaRibbonDivergenceImproved(); // Ema1, 2, 3 사용
+			//model2.Run_EvwapStochRsiPullback();
+			//model2.Run_RevisedElderRayEmaRibbon();
+			//model2.Run_CompositeAtrVwapRsi();
+
+
+
+			//var a1 = ArrayCalculator.Atr(high, low, close, 14);
+			//var a2 = ArrayCalculator.Etr(high, low, close, 14);
+			//var a3 = ArrayCalculator.Eatr(high, low, close, 14, 14);
+
+			//var fr = Calculator.FibonacciRetracementLevels(1000, 5000);
+
+			//var fibLevels = new decimal[]
 			//{
-			//	quotes[i].TrendRiderTrend = trend[i];
-			//}
-			var cs = ArrayCalculator.CandleScore(open, high, low, close, volume);
-			EvaluateCandleScore(cs, close, 5, 0.5);
-
-			//quotes.Select(x=> x.DateTime + " | " + x.TrendRiderTrend)
-			//(var value, var direction, var signal) = ArrayCalculator.SqueezeMomentum(high, low, close, 20, 2.0, 20, 1.5, true);
-
-
-			//var score = ArrayCalculator.MarketScore(high, low, close);
-			//for(int i = 0; i < score.Length; i++)
+			//		fr.Level0,
+			//		fr.Level236,
+			//		fr.Level382,
+			//		fr.Level500,
+			//		fr.Level618,
+			//		fr.Level786,
+			//		fr.Level1000
+			//};
+			//var zone = GetFibonacciZone(2100, fibLevels);
+			//if (zone != null)
 			//{
-			//	quotes[i].MarketScore = score[i];
+			//	int lower = zone.Value.LowerIdx;
+			//	int upper = zone.Value.UpperIdx;
+
+			//	decimal stopLoss = fibLevels[lower]; // 하단 레벨
+			//	decimal takeProfit = fibLevels[upper]; // 상단 레벨
 			//}
-
-			//BinanceRestApi.Init();
-			//var result = BinanceRestApi.BinanceClient.UsdFuturesApi.Account.GetAccountInfoV3Async().Result;
-
-			//var result = BinanceRestApi.GetQuotes("BTCUSDT", KlineInterval.OneMinute, startTime, null, 1000);
-			//var result1 = BinanceRestApi.BinanceClient.UsdFuturesApi.Trading.GetOrdersAsync("ZECUSDT", null, startTime, endTime, 1000).Result;
-			//var result2 = BinanceRestApi.GetFuturesTradeHistory(new string[] { "JASMYUSDT" }, new DateTime(2024, 8, 30)).ToList();
-
-			/* trade history */
-			//var trades = BinanceRestApi.GetFuturesTradeHistory(symbols, new DateTime(2024, 8, 6)).ToList();
-			//trades.Sort(new BinanceFuturesTradeComparer());
-
-			//var builder = new StringBuilder();
-			//builder.AppendLine("Time,Symbol,PositionSide,Side,Price,Quantity,QuoteQuantity,Fee,FeeAsset,RealizedPnl,IsMaker");
-			//foreach (var trade in trades)
-			//{
-			//	builder.AppendLine($"{trade.Time:yyyy-MM-dd HH:mm:ss},{trade.Symbol},{trade.PositionSide},{trade.Side},{trade.Price},{trade.Quantity},{trade.QuoteQuantity.Round(3)},{trade.Fee},{trade.FeeAsset},{trade.RealizedPnl},{trade.IsMaker}");
-			//}
-			//File.WriteAllText(MercuryPath.Desktop.Down($"binance_trade_history_{DateTime.Today:yyyyMMdd}.csv"), builder.ToString());
-
-
-
-
-			//ChartLoader.InitCharts("BTCUSDT", KlineInterval.OneDay);
-			//var chartPack = ChartLoader.GetChartPack("BTCUSDT", KlineInterval.OneDay);
-			//chartPack.UsePredictiveRanges();
-
-			//var calculator = new PredictiveRangesRiskCalculator(chartPack.Symbol, [.. chartPack.Charts], 50);
-			//var result = calculator.Run(1057);
-
-			//var upper2 = chartPack.Charts.Select(x => x.PredictiveRangesUpper2);
-			//var upper = chartPack.Charts.Select(x => x.PredictiveRangesUpper);
-			//var average = chartPack.Charts.Select(x => x.PredictiveRangesAverage);
-			//var lower = chartPack.Charts.Select(x => x.PredictiveRangesLower);
-			//var lower2 = chartPack.Charts.Select(x => x.PredictiveRangesLower2);
 		}
 
-		//public async Task SubscribeToUserDataUpdatesAsync()
+		//private (int LowerIdx, int UpperIdx)? GetFibonacciZone(decimal price, decimal[] fibLevels)
 		//{
-		//	BinanceSocketApi.BinanceClient.ClientOptions.OutputOriginalData = true;
-		//	var listenKey = BinanceRestApi.StartUserStream();
-		//	var result = await BinanceSocketApi.BinanceClient.UsdFuturesApi.SubscribeToUserDataUpdatesAsync(
-		//		listenKey,
-		//		null,
-		//		null,
-		//		AccountUpdateOnMessage,
-		//		null,
-		//		ListenKeyExpiredOnMessage
-		//		).ConfigureAwait(false);
-
-		//	var substate = BinanceSocketApi.BinanceClient.GetSubscriptionsState();
-		//}
-
-		//public void ListenKeyExpiredOnMessage(DataEvent<BinanceStreamEvent> obj)
-		//{
-
-		//}
-
-		//public void AccountUpdateOnMessage(DataEvent<BinanceFuturesStreamAccountUpdate> obj)
-		//{
-
-		//}
-
-		//private async void Test_Click(object sender, RoutedEventArgs e)
-		//{
-		//	BinanceRestApi.Init();
-		//	BinanceSocketApi.Init();
-
-		//	await SubscribeToUserDataUpdatesAsync().ConfigureAwait(false);
+		//	// 피보나치 레벨은 보통 고가~저가 방향이기 때문에 내림차순일 수 있음
+		//	for (int j = 0; j < fibLevels.Length - 1; j++)
+		//	{
+		//		// 구간: fibLevels[j+1] < price <= fibLevels[j] (내림차순)
+		//		if (price <= fibLevels[j] && price > fibLevels[j + 1])
+		//			return (j + 1, j); // 하단, 상단 인덱스 반환
+		//							   // 오름차순이면 부등호 반대로
+		//		if (price >= fibLevels[j] && price < fibLevels[j + 1])
+		//			return (j, j + 1);
+		//	}
+		//	return null; // 구간 밖
 		//}
 	}
 }

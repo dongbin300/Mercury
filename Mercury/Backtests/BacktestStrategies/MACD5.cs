@@ -90,7 +90,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			}
 		}
 
-		bool IsPowerGoldenCross(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		bool IsPowerGoldenCross(List<ChartInfo> charts, int lookback, int index, decimal? currentMacd = null)
 		{
 			// Starts at charts[index - 1]
 			for (int i = 0; i < lookback; i++)
@@ -116,7 +116,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			return false;
 		}
 
-		bool IsPowerGoldenCross2(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		bool IsPowerGoldenCross2(List<ChartInfo> charts, int lookback, int index, decimal? currentMacd = null)
 		{
 			// Starts at charts[index - 1]
 			for (int i = 0; i < lookback; i++)
@@ -142,7 +142,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			return false;
 		}
 
-		bool IsPowerDeadCross(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		bool IsPowerDeadCross(List<ChartInfo> charts, int lookback, int index, decimal? currentMacd = null)
 		{
 			// Starts at charts[index - 1]
 			for (int i = 0; i < lookback; i++)
@@ -168,7 +168,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			return false;
 		}
 
-		bool IsPowerDeadCross2(List<ChartInfo> charts, int lookback, int index, double? currentMacd = null)
+		bool IsPowerDeadCross2(List<ChartInfo> charts, int lookback, int index, decimal? currentMacd = null)
 		{
 			// Starts at charts[index - 1]
 			for (int i = 0; i < lookback; i++)

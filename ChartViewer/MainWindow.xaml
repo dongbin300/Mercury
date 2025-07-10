@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
-        Title="Mariner X Chart Viewer" Height="400" Width="850" Background="{StaticResource Background}"
+        Title="Mariner X Chart Viewer" Height="600" Width="850" Background="{StaticResource Background}"
         MouseMove="Window_MouseMove">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -134,6 +134,19 @@
                     <CheckBox x:Name="EmaAtrCheckBox">EMA+ATR</CheckBox>
                     <TextBox x:Name="EmaAtrEmaPeriodText">20</TextBox>
                     <TextBox x:Name="EmaAtrAtrPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="RsiCheckBox">RSI</CheckBox>
+                    <TextBox x:Name="RsiPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="AtrCheckBox">ATR</CheckBox>
+                    <TextBox x:Name="AtrPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="BbCheckBox">Bollinger Band</CheckBox>
+                    <TextBox x:Name="BbPeriodText">20</TextBox>
+                    <TextBox x:Name="BbDeviationText">2</TextBox>
                 </StackPanel>
             </StackPanel>
         </Grid>

@@ -187,52 +187,52 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseSma(int period1, int? period2 = null, int? period3 = null)
+		public void UseSma(params int[] periods)
 		{
-			var sma = Charts.Select(x => x.Quote).GetSma(period1).Select(x => x.Sma);
-			for (int i = 0; i < Charts.Count; i++)
+			int count = Math.Min(periods.Length, 10);
+			for (int p = 0; p < count; p++)
 			{
-				Charts[i].Sma1 = sma.ElementAt(i);
-			}
-			if (period2 != null)
-			{
-				var sma2 = Charts.Select(x => x.Quote).GetSma(period2.Value).Select(x => x.Sma);
+				var sma = Charts.Select(x => x.Quote).GetSma(periods[p]).Select(x => x.Sma);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Sma2 = sma2.ElementAt(i);
-				}
-			}
-			if (period3 != null)
-			{
-				var sma3 = Charts.Select(x => x.Quote).GetSma(period3.Value).Select(x => x.Sma);
-				for (int i = 0; i < Charts.Count; i++)
-				{
-					Charts[i].Sma3 = sma3.ElementAt(i);
+					switch (p)
+					{
+						case 0: Charts[i].Sma1 = sma.ElementAt(i); break;
+						case 1: Charts[i].Sma2 = sma.ElementAt(i); break;
+						case 2: Charts[i].Sma3 = sma.ElementAt(i); break;
+						case 3: Charts[i].Sma4 = sma.ElementAt(i); break;
+						case 4: Charts[i].Sma5 = sma.ElementAt(i); break;
+						case 5: Charts[i].Sma6 = sma.ElementAt(i); break;
+						case 6: Charts[i].Sma7 = sma.ElementAt(i); break;
+						case 7: Charts[i].Sma8 = sma.ElementAt(i); break;
+						case 8: Charts[i].Sma9 = sma.ElementAt(i); break;
+						case 9: Charts[i].Sma10 = sma.ElementAt(i); break;
+					}
 				}
 			}
 		}
 
-		public void UseEma(int period1, int? period2 = null, int? period3 = null)
+		public void UseEma(params int[] periods)
 		{
-			var ema = Charts.Select(x => x.Quote).GetEma(period1).Select(x => x.Ema);
-			for (int i = 0; i < Charts.Count; i++)
+			int count = Math.Min(periods.Length, 10);
+			for (int p = 0; p < count; p++)
 			{
-				Charts[i].Ema1 = ema.ElementAt(i);
-			}
-			if (period2 != null)
-			{
-				var ema2 = Charts.Select(x => x.Quote).GetEma(period2.Value).Select(x => x.Ema);
+				var ema = Charts.Select(x => x.Quote).GetEma(periods[p]).Select(x => x.Ema);
 				for (int i = 0; i < Charts.Count; i++)
 				{
-					Charts[i].Ema2 = ema2.ElementAt(i);
-				}
-			}
-			if (period3 != null)
-			{
-				var ema3 = Charts.Select(x => x.Quote).GetEma(period3.Value).Select(x => x.Ema);
-				for (int i = 0; i < Charts.Count; i++)
-				{
-					Charts[i].Ema3 = ema3.ElementAt(i);
+					switch (p)
+					{
+						case 0: Charts[i].Ema1 = ema.ElementAt(i); break;
+						case 1: Charts[i].Ema2 = ema.ElementAt(i); break;
+						case 2: Charts[i].Ema3 = ema.ElementAt(i); break;
+						case 3: Charts[i].Ema4 = ema.ElementAt(i); break;
+						case 4: Charts[i].Ema5 = ema.ElementAt(i); break;
+						case 5: Charts[i].Ema6 = ema.ElementAt(i); break;
+						case 6: Charts[i].Ema7 = ema.ElementAt(i); break;
+						case 7: Charts[i].Ema8 = ema.ElementAt(i); break;
+						case 8: Charts[i].Ema9 = ema.ElementAt(i); break;
+						case 9: Charts[i].Ema10 = ema.ElementAt(i); break;
+					}
 				}
 			}
 		}
@@ -367,6 +367,18 @@ namespace Mercury.Charts
 			}
 		}
 
+		public void UseMercuryRanges(int period = 200, double factor = 6.0)
+		{
+			var mercuryRanges = Charts.Select(x => x.Quote).GetMercuryRanges(period, factor);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				var mr = mercuryRanges.ElementAt(i);
+				Charts[i].MercuryRangesUpper = mr.Upper;
+				Charts[i].MercuryRangesAverage = mr.Average;
+				Charts[i].MercuryRangesLower = mr.Lower;
+			}
+		}
+
 		public void UseStoch(int period = 14)
 		{
 			var stoch = Charts.Select(x => x.Quote).GetStoch(period).Select(x => x.Stoch);
@@ -452,6 +464,54 @@ namespace Mercury.Charts
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].CandleScore = candleScore.ElementAt(i);
+			}
+		}
+
+		public void UseVwap()
+		{
+			var vwap = Charts.Select(x => x.Quote).GetVwap().Select(x => x.Vwap);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Vwap = vwap.ElementAt(i);
+			}
+		}
+
+		public void UseRollingVwap(int period = 20)
+		{
+			var rollingVwap = Charts.Select(x => x.Quote).GetRollingVwap(period).Select(x => x.RollingVwap);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].RollingVwap = rollingVwap.ElementAt(i);
+			}
+		}
+
+		public void UseEvwap(int period = 13)
+		{
+			var evwap = Charts.Select(x => x.Quote).GetEvwap(period).Select(x => x.Evwap);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Evwap = evwap.ElementAt(i);
+			}
+		}
+
+		public void UseElderRayPower(int emaPeriod = 13)
+		{
+			var elderRayPower = Charts.Select(x => x.Quote).GetElderRayPower(emaPeriod);
+			var bullPower = elderRayPower.Select(x => x.BullPower);
+			var bearPower = elderRayPower.Select(x => x.BearPower);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].ElderRayBullPower = bullPower.ElementAt(i);
+				Charts[i].ElderRayBearPower = bearPower.ElementAt(i);
+			}
+		}
+
+		public void UseVolumeSma(int period = 20)
+		{
+			var volumsSma = Charts.Select(x => x.Quote).GetVolumeSma(period).Select(x => x.Sma);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].VolumeSma = volumsSma.ElementAt(i);
 			}
 		}
 	}
