@@ -7,24 +7,22 @@ using Mercury.Maths;
 namespace Mercury.Backtests.BacktestStrategies
 {
 	/// <summary>
-	/// Supertrend with Ema
+	/// Stefano
 	/// </summary>
 	/// <param name="reportFileName"></param>
 	/// <param name="startMoney"></param>
 	/// <param name="leverage"></param>
 	/// <param name="maxActiveDealsType"></param>
 	/// <param name="maxActiveDeals"></param>
-	public class ST1(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
+	public class Stefano1(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
-		public decimal slth = 0.6m;
-		public decimal slrate = 0.2m;
 		public decimal sltprate = 2.0m;
+		public decimal th = 4m;
 
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
 		{
 			chartPack.UseEma(12, 26);
-			chartPack.UseAdx();
-			chartPack.UseSupertrend(10, 1.5);
+			chartPack.UseMaAngles();
 		}
 
 		protected override void LongEntry(string symbol, List<ChartInfo> charts, int i)
@@ -33,18 +31,15 @@ namespace Mercury.Backtests.BacktestStrategies
 			var c1 = charts[i - 1];
 			var c2 = charts[i - 2];
 
-			if (c2.Ema1 < c2.Ema2 && c1.Ema1 > c1.Ema2)
+			if (c2.Ema1 < c2.Ema2 && c1.Ema1 > c1.Ema2 && c1.JmaSlope >= th)
 			{
-				var ema2 = c1.Ema2.Value;
+				var crossPrice = GetCrossPrice(c2.Ema1.Value, c2.Ema2.Value, c1.Ema1.Value, c1.Ema2.Value);
 				var entryPrice = c0.Quote.Open;
-				// 손절가: 진입가와 EMA 26 차이가 임계값 이상일 경우 EMA 26, 임계값 미만일 경우 EMA 26보다 조금 아래
-				var stopLossPrice =
-					Calculator.Roe(PositionSide.Short, entryPrice, ema2) >= slth ?
-					c1.Ema2 :
-					Calculator.TargetPrice(PositionSide.Short, ema2, slrate);
+				var stopLossPrice = crossPrice;
 				var takeProfitPrice = entryPrice + (entryPrice - stopLossPrice) * sltprate;
 
 				EntryPosition(PositionSide.Long, c0, entryPrice, stopLossPrice, takeProfitPrice);
+				//EntryPositionOnlySize(PositionSide.Long, c0, entryPrice, Seed, stopLossPrice, takeProfitPrice);
 			}
 		}
 

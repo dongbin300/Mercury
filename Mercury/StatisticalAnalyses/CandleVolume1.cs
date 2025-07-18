@@ -173,7 +173,7 @@ namespace Mercury.StatisticalAnalyses
 					var currClose = charts[i].Quote.Close;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 
-					if (currClose < (decimal)charts[i].Bb1Lower && charts[i].Quote.Volume > avgVolume * 1.5m)
+					if (currClose < charts[i].Bb1Lower && charts[i].Quote.Volume > avgVolume * 1.5m)
 					{
 						var stat = AnalyzeFuture(charts, i, 10, isLong: true);
 						stats.Add(stat);
@@ -214,7 +214,7 @@ namespace Mercury.StatisticalAnalyses
 				{
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					if (
-						charts[i].Quote.Close < (decimal)charts[i].Bb1Lower
+						charts[i].Quote.Close < charts[i].Bb1Lower
 						&& charts[i].Rsi1 <= 35
 						&& charts[i].Quote.Volume > avgVolume * 1.5m
 					)
@@ -238,7 +238,7 @@ namespace Mercury.StatisticalAnalyses
 				{
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					if (
-						charts[i].StochK <= 20
+						charts[i].StochasticRsiK <= 20
 						&& IsHammer(charts[i])
 						&& charts[i].Quote.Volume > avgVolume * 1.5m
 					)
@@ -286,7 +286,7 @@ namespace Mercury.StatisticalAnalyses
 				{
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					if (
-						charts[i].Quote.Close > (decimal)charts[i].Bb1Upper
+						charts[i].Quote.Close > charts[i].Bb1Upper
 						&& charts[i].Rsi1 >= 70
 						&& charts[i].Quote.Volume > avgVolume * 1.5m
 					)
@@ -394,14 +394,14 @@ namespace Mercury.StatisticalAnalyses
 						charts[i - 5].Bb1Upper == null || charts[i - 5].Bb1Lower == null)
 						continue;
 
-					decimal bandwidthD = charts[i].Bb1Upper.Value - charts[i].Bb1Lower.Value;
-					decimal prevBandwidthD = charts[i - 5].Bb1Upper.Value - charts[i - 5].Bb1Lower.Value;
-					decimal bandwidth = (decimal)bandwidthD;
-					decimal prevBandwidth = (decimal)prevBandwidthD;
+					decimal bandwidthD = (charts[i].Bb1Upper - charts[i].Bb1Lower) ?? 0;
+					decimal prevBandwidthD = (charts[i - 5].Bb1Upper - charts[i - 5].Bb1Lower) ?? 0;
+					decimal bandwidth = bandwidthD;
+					decimal prevBandwidth = prevBandwidthD;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 
 					bool squeeze = bandwidth < prevBandwidth * 0.7m;
-					bool breakout = charts[i].Quote.Close > (decimal)charts[i].Bb1Upper.Value;
+					bool breakout = charts[i].Quote.Close > charts[i].Bb1Upper;
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.5m;
 
 					if (squeeze && breakout && volumeSpike)
@@ -445,7 +445,7 @@ namespace Mercury.StatisticalAnalyses
 				for (int i = 20; i < charts.Count - 10; i++)
 				{
 					// ATR 돌파(당일 고가-저가 > 20봉 ATR*1.5), 거래량 급증
-					decimal atr = charts[i].Atr.Value;
+					decimal atr = charts[i].Atr ?? 0;
 					decimal range = charts[i].Quote.High - charts[i].Quote.Low;
 					if (atr > 0 && range > (atr * 1.5m)
 						&& charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 2.0m)
@@ -490,7 +490,7 @@ namespace Mercury.StatisticalAnalyses
 				{
 					if (charts[i].Sma3 == null) continue; // null이면 건너뛰기
 
-					if (charts[i].Quote.Close > (decimal)charts[i].Sma3
+					if (charts[i].Quote.Close > charts[i].Sma3
 						&& IsBullishEngulfing(charts[i - 1], charts[i])
 						&& charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 1.5m)
 					{
@@ -516,14 +516,14 @@ namespace Mercury.StatisticalAnalyses
 						continue;
 
 					// 장기 추세 확인 (MA200 위)
-					if (charts[i].Quote.Close < (decimal)charts[i].Sma2.Value) continue;
+					if (charts[i].Quote.Close < charts[i].Sma2) continue;
 
 					// 풀백 확인 (MA50 접근)
-					decimal ma50 = (decimal)charts[i].Sma1.Value;
+					decimal ma50 = charts[i].Sma1 ?? 0;
 					bool isPullback = Math.Abs(charts[i].Quote.Close - ma50) < ma50 * 0.01m;
 
 					// 모멘텀 확인 (RSI 40-60)
-					bool isMomentumOk = charts[i].Rsi1.Value > 40 && charts[i].Rsi1.Value < 60;
+					bool isMomentumOk = charts[i].Rsi1 > 40 && charts[i].Rsi1 < 60;
 
 					// 거래량 스파이크 (2.5배 이상)
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
@@ -654,12 +654,12 @@ namespace Mercury.StatisticalAnalyses
 						charts[i - 5].Bb1Upper == null || charts[i - 5].Bb1Lower == null)
 						continue;
 
-					decimal currentBandwidth = charts[i].Bb1Upper.Value - charts[i].Bb1Lower.Value;
-					decimal prevBandwidth = charts[i - 5].Bb1Upper.Value - charts[i - 5].Bb1Lower.Value;
+					decimal currentBandwidth = (charts[i].Bb1Upper - charts[i].Bb1Lower) ?? 0;
+					decimal prevBandwidth = (charts[i - 5].Bb1Upper - charts[i - 5].Bb1Lower) ?? 0;
 					bool isSqueeze = currentBandwidth < prevBandwidth * 0.4m;
 
 					// 상향 돌파 확인
-					bool isBreakout = charts[i].Quote.Close > (decimal)charts[i].Bb1Upper.Value;
+					bool isBreakout = charts[i].Quote.Close > charts[i].Bb1Upper;
 
 					// 거래량 스파이크 (3배 이상)
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
@@ -687,7 +687,7 @@ namespace Mercury.StatisticalAnalyses
 					if (charts[i].Rsi1 == null) continue;
 					// 가격은 저점 갱신, RSI는 저점 미갱신, 강세 Engulfing, 거래량 2배
 					if (charts[i].Quote.Low < charts[i - 5].Quote.Low
-						&& charts[i].Rsi1.Value > charts[i - 5].Rsi1.Value
+						&& charts[i].Rsi1 > charts[i - 5].Rsi1
 						&& IsBullishEngulfing(charts[i - 1], charts[i])
 						&& charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 2.0m)
 					{
@@ -711,7 +711,7 @@ namespace Mercury.StatisticalAnalyses
 					// 최근 30봉 저점/고점 근처, RSI 35 이하, Hammer, 거래량 2배
 					decimal support = charts.Skip(i - 30).Take(30).Min(x => x.Quote.Low);
 					if (Math.Abs(charts[i].Quote.Low - support) < support * 0.003m
-						&& charts[i].Rsi1.Value <= 35
+						&& charts[i].Rsi1 <= 35
 						&& IsHammer(charts[i])
 						&& charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 2.0m)
 					{
@@ -732,10 +732,10 @@ namespace Mercury.StatisticalAnalyses
 				for (int i = 20; i < charts.Count - 10; i++)
 				{
 					if (charts[i].Bb1Upper == null || charts[i].Atr == null) continue;
-					decimal atr = charts[i].Atr.Value;
+					decimal atr = charts[i].Atr ?? 0;
 					decimal range = charts[i].Quote.High - charts[i].Quote.Low;
 					bool atrBreak = atr > 0 && range > (atr * 1.2m);
-					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper.Value;
+					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.0m;
 					if (atrBreak && bbBreak && volumeSpike)
@@ -760,7 +760,7 @@ namespace Mercury.StatisticalAnalyses
 					// 세션 오픈(UTC 8시, 13시, 20시) 근처
 					var hour = charts[i].Quote.Date.Hour;
 					bool isSessionOpen = hour == 8 || hour == 13 || hour == 20;
-					bool bbBreak = charts[i].Quote.Close > (decimal)charts[i].Bb1Upper.Value;
+					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.0m;
 					if (isSessionOpen && bbBreak && volumeSpike)
@@ -782,13 +782,13 @@ namespace Mercury.StatisticalAnalyses
 				for (int i = 30; i < charts.Count - 15; i++)
 				{
 					if (charts[i].Bb1Upper == null || charts[i].Atr == null || charts[i].Rsi1 == null) continue;
-					decimal atr = charts[i].Atr.Value;
+					decimal atr = charts[i].Atr ?? 0;
 					decimal range = charts[i].Quote.High - charts[i].Quote.Low;
 					bool atrBreak = atr > 0 && range > (atr * 1.3m);
-					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper.Value;
+					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.5m;
-					bool rsiFilter = charts[i].Rsi1.Value > 55 && charts[i].Rsi1.Value < 75;
+					bool rsiFilter = charts[i].Rsi1 > 55 && charts[i].Rsi1 < 75;
 					if (atrBreak && bbBreak && volumeSpike && rsiFilter)
 					{
 						var stat = AnalyzeFuture(charts, i, 15, true);
@@ -809,7 +809,7 @@ namespace Mercury.StatisticalAnalyses
 				{
 					if (charts[i].Rsi1 == null) continue;
 					bool priceLower = charts[i].Quote.Low < charts[i - 5].Quote.Low;
-					bool rsiHigher = charts[i].Rsi1.Value > charts[i - 5].Rsi1.Value + 7;
+					bool rsiHigher = charts[i].Rsi1 > charts[i - 5].Rsi1 + 7;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.2m;
 					bool isBullishEngulfing = IsBullishEngulfing(charts[i - 1], charts[i]);
@@ -836,7 +836,7 @@ namespace Mercury.StatisticalAnalyses
 					decimal resistance = charts.Skip(i - 30).Take(30).Max(x => x.Quote.High);
 					bool nearSupport = Math.Abs(charts[i].Quote.Low - support) < support * 0.0025m;
 					bool nearResistance = Math.Abs(charts[i].Quote.High - resistance) < resistance * 0.0025m;
-					bool rsiLow = charts[i].Rsi1.Value <= 38;
+					bool rsiLow = charts[i].Rsi1 <= 38;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.0m;
 					bool isHammer = IsHammer(charts[i]);
@@ -859,13 +859,13 @@ namespace Mercury.StatisticalAnalyses
 				for (int i = 20; i < charts.Count - 10; i++)
 				{
 					if (charts[i].Atr == null || charts[i].Bb1Upper == null || charts[i].Rsi1 == null) continue;
-					decimal atr = charts[i].Atr.Value;
+					decimal atr = charts[i].Atr ?? 0;
 					decimal range = charts[i].Quote.High - charts[i].Quote.Low;
 					bool atrBreak = atr > 0 && range > (atr * 1.4m);
-					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper.Value;
+					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 3.0m;
-					bool rsiFilter = charts[i].Rsi1.Value > 50 && charts[i].Rsi1.Value < 70;
+					bool rsiFilter = charts[i].Rsi1 > 50 && charts[i].Rsi1 < 70;
 					if (atrBreak && bbBreak && volumeSpike && rsiFilter)
 					{
 						var stat = AnalyzeFuture(charts, i, 15, true);
@@ -887,7 +887,7 @@ namespace Mercury.StatisticalAnalyses
 					if (charts[i].Bb1Upper == null) continue;
 					var hour = charts[i].Quote.Date.Hour;
 					bool isSessionOpen = hour == 8 || hour == 13 || hour == 20;
-					bool bbBreak = charts[i].Quote.Close > (decimal)charts[i].Bb1Upper.Value;
+					bool bbBreak = charts[i].Quote.Close > charts[i].Bb1Upper;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.5m;
 					if (isSessionOpen && bbBreak && volumeSpike)
@@ -927,7 +927,7 @@ namespace Mercury.StatisticalAnalyses
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool isBreakout = charts[i].Quote.Close > resistance * 1.002m;
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.5m;
-					bool rsiFilter = charts[i].Rsi1.Value > 50 && charts[i].Rsi1.Value < 75;
+					bool rsiFilter = charts[i].Rsi1 > 50 && charts[i].Rsi1 < 75;
 
 					if (touchCount == 3 && isBreakout && volumeSpike && rsiFilter)
 					{
@@ -966,7 +966,7 @@ namespace Mercury.StatisticalAnalyses
 					// 거래량 급증 및 RSI 과매도 탈출
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeSpike = charts[i].Quote.Volume > avgVolume * 2.0m;
-					bool rsiRecovery = charts[i].Rsi1.Value > 35 && charts[i].Rsi1.Value < 60;
+					bool rsiRecovery = charts[i].Rsi1 > 35 && charts[i].Rsi1 < 60;
 
 					if (isDoubleBottom && necklineBreak && volumeSpike && rsiRecovery)
 					{
@@ -991,7 +991,7 @@ namespace Mercury.StatisticalAnalyses
 					if (charts[i].Bb1Lower == null || charts[i].Bb1Upper == null || charts[i].Rsi1 == null) continue;
 
 					// 평균회귀 조건: 볼린저밴드 하단 돌파
-					bool meanReversionSignal = charts[i].Quote.Close < (decimal)charts[i].Bb1Lower.Value;
+					bool meanReversionSignal = charts[i].Quote.Close < charts[i].Bb1Lower;
 
 					// 최근 20봉 고점/저점으로 피보나치 레벨 계산
 					decimal high = charts.Skip(i - 20).Take(20).Max(x => x.Quote.High);
@@ -1003,7 +1003,7 @@ namespace Mercury.StatisticalAnalyses
 					bool nearFibSupport = charts[i].Quote.Low <= fib618 && charts[i].Quote.Close >= fib618 * 0.995m;
 
 					// RSI 과매도 + 거래량 증가
-					bool rsiOversold = charts[i].Rsi1.Value <= 30;
+					bool rsiOversold = charts[i].Rsi1 <= 30;
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volumeIncrease = charts[i].Quote.Volume > avgVolume * 1.5m;
 
@@ -1052,7 +1052,7 @@ namespace Mercury.StatisticalAnalyses
 					bool tenkanKijunBullish = tenkan > kijun;
 
 					// 모멘텀 확인: MACD > 0, RSI > 50
-					bool momentumConfirm = charts[i].Macd > 0 && charts[i].Rsi1.Value > 50;
+					bool momentumConfirm = charts[i].Macd > 0 && charts[i].Rsi1 > 50;
 
 					// 거래량 급증
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
@@ -1106,10 +1106,10 @@ namespace Mercury.StatisticalAnalyses
 									 charts.Skip(i - 9).Take(9).Min(x => x.Quote.Low)) / 2;
 					decimal kijun = (charts.Skip(i - 26).Take(26).Max(x => x.Quote.High) +
 									charts.Skip(i - 26).Take(26).Min(x => x.Quote.Low)) / 2;
-					bool tenkanKijunCross = tenkan > kijun && charts[i - 1].Quote.Close < (decimal)charts[i - 1].Sma1;
+					bool tenkanKijunCross = tenkan > kijun && charts[i - 1].Quote.Close < charts[i - 1].Sma1;
 
 					// 4. RSI 과매도 회복
-					bool rsiRecovery = charts[i].Rsi1.Value < 40 && charts[i].Rsi1.Value > charts[i - 1].Rsi1.Value;
+					bool rsiRecovery = charts[i].Rsi1 < 40 && charts[i].Rsi1 > charts[i - 1].Rsi1;
 
 					// 5. MACD 골든크로스
 					bool macdCross = charts[i - 1].Macd < charts[i - 1].MacdSignal &&
@@ -1153,15 +1153,15 @@ namespace Mercury.StatisticalAnalyses
 						charts[i].Rsi1 == null) continue;
 
 					// 시장 상황 판단 (추세/횡보장)
-					decimal ma20 = charts[i].Sma1.Value;
-					decimal ma50 = charts[i].Sma2.Value;
-					decimal bandWidth = charts[i].Bb1Upper.Value - charts[i].Bb1Lower.Value;
+					decimal ma20 = charts[i].Sma1 ?? 0;
+					decimal ma50 = charts[i].Sma2 ?? 0;
+					decimal bandWidth = (charts[i].Bb1Upper - charts[i].Bb1Lower) ?? 0;
 					decimal avgBandWidth = 0;
 
 					for (int j = i - 10; j < i; j++)
 					{
 						if (charts[j].Bb1Upper != null && charts[j].Bb1Lower != null)
-							avgBandWidth += (charts[j].Bb1Upper.Value - charts[j].Bb1Lower.Value);
+							avgBandWidth += (charts[j].Bb1Upper - charts[j].Bb1Lower) ?? 0;
 					}
 					avgBandWidth /= 10;
 
@@ -1201,7 +1201,7 @@ namespace Mercury.StatisticalAnalyses
 					else if (isRangebound)
 					{
 						// 볼린저밴드 하단 접근
-						bool nearLowerBand = charts[i].Quote.Low < (decimal)charts[i].Bb1Lower.Value * 1.01m;
+						bool nearLowerBand = charts[i].Quote.Low < charts[i].Bb1Lower * 1.01m;
 
 						// 피보나치 지지선
 						decimal high = charts.Skip(i - 20).Take(20).Max(x => x.Quote.High);
@@ -1209,7 +1209,7 @@ namespace Mercury.StatisticalAnalyses
 						decimal fib618 = high - (high - low) * 0.618m;
 
 						// RSI 과매도
-						bool rsiOversold = charts[i].Rsi1.Value < 35;
+						bool rsiOversold = charts[i].Rsi1 < 35;
 
 						bool reversalSignal = nearLowerBand &&
 											 Math.Abs(charts[i].Quote.Low - fib618) < fib618 * 0.01m &&
@@ -1250,10 +1250,10 @@ namespace Mercury.StatisticalAnalyses
 						lows.Add(charts.Skip(j).Take(5).Min(x => x.Quote.Low));
 					}
 
-					bool higherHighs = highs.Count >= 3 && highs[highs.Count - 1] > highs[highs.Count - 2] &&
-									  highs[highs.Count - 2] > highs[highs.Count - 3];
-					bool higherLows = lows.Count >= 3 && lows[lows.Count - 1] > lows[lows.Count - 2] &&
-									 lows[lows.Count - 2] > lows[lows.Count - 3];
+					bool higherHighs = highs.Count >= 3 && highs[^1] > highs[^2] &&
+									  highs[^2] > highs[^3];
+					bool higherLows = lows.Count >= 3 && lows[^1] > lows[^2] &&
+									 lows[^2] > lows[^3];
 					bool uptrend = higherHighs && higherLows;
 
 					// 2. 볼륨 프로파일 (거래량 집중 구간)
@@ -1271,8 +1271,8 @@ namespace Mercury.StatisticalAnalyses
 					bool nearVolumeNode = Math.Abs(charts[i].Quote.Low - maxVolumePrice) < maxVolumePrice * 0.01m;
 
 					// 3. 기술적 조건
-					bool maAlignment = (decimal)charts[i].Sma1.Value > (decimal)charts[i].Sma2.Value;
-					bool rsiCondition = charts[i].Rsi1.Value > 45 && charts[i].Rsi1.Value < 65;
+					bool maAlignment = charts[i].Sma1 > charts[i].Sma2;
+					bool rsiCondition = charts[i].Rsi1 > 45 && charts[i].Rsi1 < 65;
 					bool volumeSpike = charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 1.8m;
 
 					// 4. 캔들 패턴
@@ -1312,10 +1312,10 @@ namespace Mercury.StatisticalAnalyses
 					}
 
 					// 2. 모멘텀 확인
-					bool rsiRising = i >= 3 && charts[i].Rsi1.Value > charts[i - 3].Rsi1.Value;
+					bool rsiRising = i >= 3 && charts[i].Rsi1 > charts[i - 3].Rsi1;
 					bool macdCrossover = charts[i - 1].Macd < charts[i - 1].MacdSignal &&
 										charts[i].Macd > charts[i].MacdSignal;
-					bool priceAboveMA = charts[i].Quote.Close > (decimal)charts[i].Sma1.Value;
+					bool priceAboveMA = charts[i].Quote.Close > charts[i].Sma1;
 
 					// 3. 거래량 확인
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
@@ -1397,11 +1397,11 @@ namespace Mercury.StatisticalAnalyses
 
 					// 매수 조건
 					bool buyCondition = liquiditySwipLow && imbalanceUp && volumeDecline &&
-									   charts[i].Rsi1.Value < 40 && reversalCandle;
+									   charts[i].Rsi1 < 40 && reversalCandle;
 
 					// 매도 조건
 					bool sellCondition = liquiditySwipHigh && imbalanceDown && volumeDecline &&
-										charts[i].Rsi1.Value > 60 && reversalCandle;
+										charts[i].Rsi1 > 60 && reversalCandle;
 
 					if (buyCondition)
 					{
@@ -1493,7 +1493,7 @@ namespace Mercury.StatisticalAnalyses
 					if (lastLowIndex != -1 && i - lastLowIndex <= 10)
 					{
 						if (charts[i].Quote.Low < charts[lastLowIndex].Quote.Low &&
-							charts[i].Rsi1.Value > charts[lastLowIndex].Rsi1.Value)
+							charts[i].Rsi1 > charts[lastLowIndex].Rsi1)
 							rsiDivergence = true;
 					}
 
@@ -1528,7 +1528,7 @@ namespace Mercury.StatisticalAnalyses
 						charts[i].Sma2 == null || charts[i].Atr == null) continue;
 
 					// 1. 시장 맥락 확인
-					bool isUptrend = (decimal)charts[i].Sma1.Value > (decimal)charts[i].Sma2.Value;
+					bool isUptrend = charts[i].Sma1 > charts[i].Sma2;
 
 					// 2. 시간대 필터 (최적 거래 시간)
 					int hour = charts[i].Quote.Date.Hour;
@@ -1549,15 +1549,15 @@ namespace Mercury.StatisticalAnalyses
 
 					// 4. 기술적 지표 조합
 					bool rsiFilter = isUptrend ?
-									(charts[i].Rsi1.Value > 40 && charts[i].Rsi1.Value < 70) :
-									(charts[i].Rsi1.Value > 30 && charts[i].Rsi1.Value < 60);
+									(charts[i].Rsi1 > 40 && charts[i].Rsi1 < 70) :
+									(charts[i].Rsi1 > 30 && charts[i].Rsi1 < 60);
 
 					bool macdSignal = isUptrend ?
 									 (charts[i].Macd > charts[i].MacdSignal) :
 									 (charts[i - 1].Macd < charts[i - 1].MacdSignal && charts[i].Macd > charts[i].MacdSignal);
 
 					// 5. 변동성 필터
-					decimal atr = charts[i].Atr.Value;
+					decimal atr = charts[i].Atr ?? 0;
 					decimal range = charts[i].Quote.High - charts[i].Quote.Low;
 					bool volatilityFilter = isUptrend ?
 										   (range > (atr * 1.2m)) :
@@ -1570,7 +1570,7 @@ namespace Mercury.StatisticalAnalyses
 					// 7. 캔들 패턴
 					bool candlePattern = isUptrend ?
 									   (charts[i].Quote.Close > charts[i].Quote.Open * 1.008m) :
-									   (IsHammer(charts[i]));
+									   IsHammer(charts[i]);
 
 					// 모든 조건 조합 (시장 맥락에 따라 다른 조건 적용)
 					int conditionsMet = 0;
@@ -1616,8 +1616,8 @@ namespace Mercury.StatisticalAnalyses
 						lows.Add(charts.Skip(j).Take(5).Min(x => x.Quote.Low));
 					}
 
-					bool higherHighs = highs.Count >= 3 && highs[highs.Count - 1] > highs[highs.Count - 3];
-					bool higherLows = lows.Count >= 3 && lows[lows.Count - 1] > lows[lows.Count - 3];
+					bool higherHighs = highs.Count >= 3 && highs[^1] > highs[^3];
+					bool higherLows = lows.Count >= 3 && lows[^1] > lows[^3];
 					bool uptrend = higherHighs || higherLows; // OR 조건으로 완화
 
 					// 2. 볼륨 프로파일 (거래량 집중 구간) - 범위 확대
@@ -1635,8 +1635,8 @@ namespace Mercury.StatisticalAnalyses
 					bool nearVolumeNode = Math.Abs(charts[i].Quote.Low - maxVolumePrice) < maxVolumePrice * 0.015m;
 
 					// 3. 기술적 조건 - 필수 조건만 유지
-					bool maAlignment = (decimal)charts[i].Sma1.Value > (decimal)charts[i].Sma2.Value;
-					bool rsiCondition = charts[i].Rsi1.Value > 40 && charts[i].Rsi1.Value < 70;
+					bool maAlignment = charts[i].Sma1 > charts[i].Sma2;
+					bool rsiCondition = charts[i].Rsi1 > 40 && charts[i].Rsi1 < 70;
 					bool volumeSpike = charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 1.5m;
 
 					// 필수 조건만 조합 (조건 수 감소)
@@ -1673,10 +1673,10 @@ namespace Mercury.StatisticalAnalyses
 					}
 
 					// 2. 모멘텀 확인 - 필수 조건만 유지
-					bool rsiRising = i >= 3 && charts[i].Rsi1.Value > charts[i - 3].Rsi1.Value;
+					bool rsiRising = i >= 3 && charts[i].Rsi1 > charts[i - 3].Rsi1;
 					bool macdCrossover = charts[i - 1].Macd < charts[i - 1].MacdSignal &&
 										charts[i].Macd > charts[i].MacdSignal;
-					bool priceAboveMA = charts[i].Quote.Close > (decimal)charts[i].Sma1.Value;
+					bool priceAboveMA = charts[i].Quote.Close > charts[i].Sma1;
 
 					// 3. 거래량 확인
 					var avgVolume = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
@@ -1729,7 +1729,7 @@ namespace Mercury.StatisticalAnalyses
 							if (lastLowIndex != -1)
 							{
 								// ATR 기반 돌파 감지 (1% 대신 0.5배 ATR 사용)
-								decimal atr = charts[j].Atr.Value;
+								decimal atr = charts[j].Atr ?? 0;
 								if (charts[j].Quote.Low < charts[lastLowIndex].Quote.Low - (atr * 0.5m))
 									structureBreak = true;
 							}
@@ -1742,7 +1742,7 @@ namespace Mercury.StatisticalAnalyses
 					for (int j = i - 15; j < i - 2; j++)
 					{
 						// 몸통 크기 (ATR 기반)
-						decimal atr = charts[j].Atr.Value;
+						decimal atr = charts[j].Atr ?? 0;
 						decimal body = Math.Abs(charts[j].Quote.Close - charts[j].Quote.Open);
 						bool strongMomentum = body > (atr * 0.3m);
 						bool largeBody = body > charts.Skip(i - 20).Take(20)
@@ -1761,7 +1761,7 @@ namespace Mercury.StatisticalAnalyses
 					{
 						decimal obLow = charts[orderBlockIndex].Quote.Low;
 						decimal obHigh = charts[orderBlockIndex].Quote.High;
-						decimal atr = charts[orderBlockIndex].Atr.Value;
+						decimal atr = charts[orderBlockIndex].Atr ?? 0;
 
 						for (int j = orderBlockIndex + 1; j <= i; j++)
 						{
@@ -1778,17 +1778,17 @@ namespace Mercury.StatisticalAnalyses
 
 					// 4. RSI 조건
 					bool rsiDivergence = false;
-					bool rsiOversold = charts[i].Rsi1.Value < 40;
+					bool rsiOversold = charts[i].Rsi1 < 40;
 
 					if (lastLowIndex != -1 && i - lastLowIndex <= 15)
 					{
 						if (charts[i].Quote.Low < charts[lastLowIndex].Quote.Low &&
-							charts[i].Rsi1.Value > charts[lastLowIndex].Rsi1.Value)
+							charts[i].Rsi1 > charts[lastLowIndex].Rsi1)
 							rsiDivergence = true;
 					}
 
 					// 5. 거래량 확인 (ATR 상대적)
-					decimal avgAtr = charts.Skip(i - 20).Take(20).Average(c => c.Atr.Value);
+					decimal avgAtr = charts.Skip(i - 20).Take(20).Average(c => c.Atr ?? 0);
 					bool volumeConfirmation = charts[i].Quote.Volume > charts.Skip(i - 20)
 						.Take(20).Average(x => x.Quote.Volume) * (1 + avgAtr * 0.1m);
 
@@ -1874,7 +1874,7 @@ namespace Mercury.StatisticalAnalyses
 								if (lastLowIndex != -1)
 								{
 									// ATR 기반 돌파 감지 (1% 대신 0.5배 ATR 사용)
-									decimal atr = charts[j].Atr.Value;
+									decimal atr = charts[j].Atr ?? 0;
 									if (charts[j].Quote.Low < charts[lastLowIndex].Quote.Low - (atr * 0.5m))
 										structureBreak = true;
 								}
@@ -1887,7 +1887,7 @@ namespace Mercury.StatisticalAnalyses
 						for (int j = i - 15; j < i - 2; j++)
 						{
 							// 몸통 크기 (ATR 기반)
-							decimal atr = charts[j].Atr.Value;
+							decimal atr = charts[j].Atr ?? 0;
 							decimal body = Math.Abs(charts[j].Quote.Close - charts[j].Quote.Open);
 							bool strongMomentum = body > (atr * 0.3m);
 							bool largeBody = body > charts.Skip(i - 20).Take(20)
@@ -1906,7 +1906,7 @@ namespace Mercury.StatisticalAnalyses
 						{
 							decimal obLow = charts[orderBlockIndex].Quote.Low;
 							decimal obHigh = charts[orderBlockIndex].Quote.High;
-							decimal atr = charts[orderBlockIndex].Atr.Value;
+							decimal atr = charts[orderBlockIndex].Atr ?? 0;
 
 							for (int j = orderBlockIndex + 1; j <= i; j++)
 							{
@@ -1923,17 +1923,17 @@ namespace Mercury.StatisticalAnalyses
 
 						// 4. RSI 조건
 						bool rsiDivergence = false;
-						bool rsiOversold = charts[i].Rsi1.Value < 40;
+						bool rsiOversold = charts[i].Rsi1 < 40;
 
 						if (lastLowIndex != -1 && i - lastLowIndex <= 15)
 						{
 							if (charts[i].Quote.Low < charts[lastLowIndex].Quote.Low &&
-								charts[i].Rsi1.Value > charts[lastLowIndex].Rsi1.Value)
+								charts[i].Rsi1 > charts[lastLowIndex].Rsi1)
 								rsiDivergence = true;
 						}
 
 						// 5. 거래량 확인 (ATR 상대적)
-						decimal avgAtr = charts.Skip(i - 20).Take(20).Average(c => c.Atr.Value);
+						decimal avgAtr = charts.Skip(i - 20).Take(20).Average(c => c.Atr ?? 0);
 						bool volumeConfirmation = charts[i].Quote.Volume > charts.Skip(i - 20)
 							.Take(20).Average(x => x.Quote.Volume) * (1 + avgAtr * 0.1m);
 
@@ -1951,7 +1951,7 @@ namespace Mercury.StatisticalAnalyses
 						{
 							continue;
 						}
-						bool lowerTouch = charts[i].Quote.Close < (decimal)charts[i].Bb1Lower;
+						bool lowerTouch = charts[i].Quote.Close < charts[i].Bb1Lower;
 						bool rsiLow = charts[i].Rsi1 < 35;
 						var avgVol = charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 						bool volSpike = charts[i].Quote.Volume > avgVol * 1.2m;
@@ -1981,7 +1981,7 @@ namespace Mercury.StatisticalAnalyses
 						charts[i].Bb1Lower == null || charts[i].Sma1 == null) continue;
 
 					// 1. 시장 맥락 확인
-					bool isUptrend = (decimal)charts[i].Sma1.Value > charts[i - 20].Quote.Close;
+					bool isUptrend = charts[i].Sma1 > charts[i - 20].Quote.Close;
 
 					// 2. 볼륨 프로파일 (거래량 집중 구간)
 					var volumeByPrice = new Dictionary<decimal, decimal>();
@@ -1998,8 +1998,8 @@ namespace Mercury.StatisticalAnalyses
 
 					// 3. 기술적 지표 조합
 					bool rsiFilter = isUptrend ?
-									(charts[i].Rsi1.Value > 40 && charts[i].Rsi1.Value < 70) :
-									(charts[i].Rsi1.Value > 30 && charts[i].Rsi1.Value < 60);
+									(charts[i].Rsi1 > 40 && charts[i].Rsi1 < 70) :
+									(charts[i].Rsi1 > 30 && charts[i].Rsi1 < 60);
 
 					bool macdSignal = isUptrend ?
 									 (charts[i].Macd > charts[i].MacdSignal) :
@@ -2012,7 +2012,7 @@ namespace Mercury.StatisticalAnalyses
 					// 5. 캔들 패턴
 					bool candlePattern = isUptrend ?
 									   (charts[i].Quote.Close > charts[i].Quote.Open * 1.005m) :
-									   (IsHammer(charts[i]));
+									   IsHammer(charts[i]);
 
 					// 조건 조합 - 필수 조건 + 선택 조건
 					bool essentialConditions = isUptrend && volumeFilter; // 필수 조건
@@ -2054,12 +2054,12 @@ namespace Mercury.StatisticalAnalyses
 					if (charts[i].Bb1Upper != null && charts[i].Bb1Lower != null &&
 						charts[i - 20].Bb1Upper != null && charts[i - 20].Bb1Lower != null)
 					{
-						bandwidthCurrent = charts[i].Bb1Upper.Value - charts[i].Bb1Lower.Value;
-						bandwidthPast = charts[i - 20].Bb1Upper.Value - charts[i - 20].Bb1Lower.Value;
+						bandwidthCurrent = (charts[i].Bb1Upper - charts[i].Bb1Lower) ?? 0;
+						bandwidthPast = (charts[i - 20].Bb1Upper - charts[i - 20].Bb1Lower) ?? 0;
 					}
 
-					bool isTrending = charts[i].Sma1.Value > charts[i - 20].Quote.Close * 1.02m ||
-									 charts[i].Sma1.Value < charts[i - 20].Quote.Close * 0.98m;
+					bool isTrending = charts[i].Sma1 > charts[i - 20].Quote.Close * 1.02m ||
+									 charts[i].Sma1 < charts[i - 20].Quote.Close * 0.98m;
 					bool isRangebound = bandwidthCurrent < bandwidthPast * 0.8m;
 					bool isVolatile = bandwidthCurrent > bandwidthPast * 1.2m;
 
@@ -2069,8 +2069,8 @@ namespace Mercury.StatisticalAnalyses
 					// 추세 레짐: 추세 추종 전략
 					if (isTrending)
 					{
-						bool trendFollowSignal = charts[i].Quote.Close > charts[i].Sma1.Value &&
-												charts[i].Rsi1.Value > 50 &&
+						bool trendFollowSignal = charts[i].Quote.Close > charts[i].Sma1 &&
+												charts[i].Rsi1 > 50 &&
 												charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 1.5m;
 
 						if (trendFollowSignal)
@@ -2083,8 +2083,8 @@ namespace Mercury.StatisticalAnalyses
 					// 횡보 레짐: 평균 회귀 전략
 					else if (isRangebound)
 					{
-						bool meanReversionSignal = charts[i].Quote.Close < charts[i].Bb1Lower.Value * 1.01m &&
-												  charts[i].Rsi1.Value < 40 &&
+						bool meanReversionSignal = charts[i].Quote.Close < charts[i].Bb1Lower * 1.01m &&
+												  charts[i].Rsi1 < 40 &&
 												  charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 1.3m;
 
 						if (meanReversionSignal)
@@ -2097,7 +2097,7 @@ namespace Mercury.StatisticalAnalyses
 					// 변동성 레짐: 돌파 전략
 					else if (isVolatile)
 					{
-						bool breakoutSignal = charts[i].Quote.Close > charts[i].Bb1Upper.Value * 0.99m &&
+						bool breakoutSignal = charts[i].Quote.Close > charts[i].Bb1Upper * 0.99m &&
 											 charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 1.8m;
 
 						if (breakoutSignal)
@@ -2111,7 +2111,7 @@ namespace Mercury.StatisticalAnalyses
 					// 레짐 판단이 불확실한 경우: 기본 전략
 					if (!signalGenerated && !isTrending && !isRangebound && !isVolatile)
 					{
-						bool defaultSignal = charts[i].Rsi1.Value > 40 && charts[i].Rsi1.Value < 60 &&
+						bool defaultSignal = charts[i].Rsi1 > 40 && charts[i].Rsi1 < 60 &&
 											charts[i].Quote.Volume > charts.Skip(i - 20).Take(20).Average(x => x.Quote.Volume) * 1.5m;
 
 						if (defaultSignal)
@@ -2133,14 +2133,14 @@ namespace Mercury.StatisticalAnalyses
 				var ch = cp.Charts;
 				for (int i = 20; i < ch.Count - 10; i++)
 				{
-					if (ch[i].Vwap == null || ch[i].StochK == null) continue;
+					if (ch[i].Vwap == null || ch[i].StochasticRsiK == null) continue;
 					// 1) VWAP 아래 돌파 후 리테스트
-					bool vwapBreak = ch[i - 1].Quote.Close > (decimal)ch[i - 1].Vwap &&
-									 ch[i].Quote.Close < (decimal)ch[i].Vwap;
-					bool vwapRetest = ch[i + 1].Quote.Close > (decimal)ch[i].Vwap;
+					bool vwapBreak = ch[i - 1].Quote.Close > ch[i - 1].Vwap &&
+									 ch[i].Quote.Close < ch[i].Vwap;
+					bool vwapRetest = ch[i + 1].Quote.Close > ch[i].Vwap;
 					// 2) Stochastic RSI 과매도 반등
-					bool stochRsiOk = ch[i].StochK.Value <= 20 &&
-									  ch[i + 1].StochK.Value > ch[i].StochK.Value;
+					bool stochRsiOk = ch[i].StochasticRsiK <= 20 &&
+									  ch[i + 1].StochasticRsiK > ch[i].StochasticRsiK;
 					// 3) 거래량 스파이크
 					var avgVol = ch.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
 					bool volSpike = ch[i].Quote.Volume > avgVol * 1.8m;
@@ -2167,7 +2167,7 @@ namespace Mercury.StatisticalAnalyses
 					bool emaTrend = ch[i].Ema1 > ch[i].Ema2 && ch[i].Ema2 > ch[i].Ema3;
 					// 2) Bull Power 다이버전스 (가격 저점 갱신, Bull Power 미갱신)
 					bool divergence = ch[i].Quote.Low < ch[i - 5].Quote.Low &&
-									  ch[i].ElderRayBullPower.Value >= ch[i - 5].ElderRayBullPower.Value;
+									  ch[i].ElderRayBullPower >= ch[i - 5].ElderRayBullPower;
 					// 3) 강세 캔들 & 거래량 스파이크
 					bool bullCandle = ch[i].Quote.Close > ch[i].Quote.Open;
 					var avgVol = ch.Skip(i - 20).Take(20).Average(x => x.Quote.Volume);
@@ -2195,20 +2195,20 @@ namespace Mercury.StatisticalAnalyses
 					if (charts[i - 1].RollingVwap == null ||
 						charts[i].RollingVwap == null ||
 						charts[i + 1].RollingVwap == null ||
-						charts[i].StochK == null ||
-						charts[i + 1].StochK == null)
+						charts[i].StochasticRsiK == null ||
+						charts[i + 1].StochasticRsiK == null)
 						continue;  // null시 건너뛰기[1]
 
 					// 1) 이동식 VWAP 돌파 후 되돌림
-					decimal prevVwap = charts[i - 1].RollingVwap.Value;
-					decimal currVwap = charts[i].RollingVwap.Value;
+					decimal prevVwap = charts[i - 1].RollingVwap ?? 0;
+					decimal currVwap = charts[i].RollingVwap ?? 0;
 					bool breakBelow = charts[i - 1].Quote.Close > prevVwap &&
 									   charts[i].Quote.Close < currVwap;
 					bool retestAbove = charts[i + 1].Quote.Close > currVwap;
 
 					// 2) StochRSI 과매도(≤20) → 중립권(>50) 반등
-					decimal prevStoch = charts[i].StochK.Value;
-					decimal nextStoch = charts[i + 1].StochK.Value;
+					decimal prevStoch = charts[i].StochasticRsiK ?? 0;
+					decimal nextStoch = charts[i + 1].StochasticRsiK ?? 0;
 					bool stochSignal = prevStoch <= 20 && nextStoch > 50;
 
 					// 3) 거래량 스파이크
@@ -2242,16 +2242,16 @@ namespace Mercury.StatisticalAnalyses
 						continue;  // null시 건너뛰기[1]
 
 					// 1) EMA 리본 정렬
-					decimal ema1 = charts[i].Ema1.Value;
-					decimal ema2 = charts[i].Ema2.Value;
-					decimal ema3 = charts[i].Ema3.Value;
+					decimal ema1 = charts[i].Ema1 ?? 0;
+					decimal ema2 = charts[i].Ema2 ?? 0;
+					decimal ema3 = charts[i].Ema3 ?? 0;
 					bool ribbonUp = (ema1 >= ema2) && (ema2 >= ema3);
 
 					// 2) Bull Power 다이버전스
 					decimal currLow = charts[i].Quote.Low;
 					decimal prevLow = charts[i - 5].Quote.Low;
-					decimal currBull = charts[i].ElderRayBullPower.Value;
-					decimal prevBull = charts[i - 5].ElderRayBullPower.Value;
+					decimal currBull = charts[i].ElderRayBullPower ?? 0;
+					decimal prevBull = charts[i - 5].ElderRayBullPower ?? 0;
 					bool divergence = currLow < prevLow && currBull >= prevBull;
 
 					// 3) 강세 캔들 + 거래량 스파이크
@@ -2280,8 +2280,8 @@ namespace Mercury.StatisticalAnalyses
 					var prevVW = ch[i - 1].RollingVwap.GetValueOrDefault(0);
 					var curVW = ch[i].RollingVwap.GetValueOrDefault(0);
 					var nextVW = ch[i + 1].RollingVwap.GetValueOrDefault(0);
-					var curSt = ch[i].StochK.GetValueOrDefault(0);
-					var nxtSt = ch[i + 1].StochK.GetValueOrDefault(0);
+					var curSt = ch[i].StochasticRsiK.GetValueOrDefault(0);
+					var nxtSt = ch[i + 1].StochasticRsiK.GetValueOrDefault(0);
 
 					// EVWAP 풀백
 					bool breakBelow = ch[i - 1].Quote.Close > (decimal)prevVW
@@ -2319,13 +2319,13 @@ namespace Mercury.StatisticalAnalyses
 						|| ch[i].Ema3 == null || ch[i].ElderRayBullPower == null)
 						continue;
 
-					decimal e1 = ch[i].Ema1.Value;
-					decimal e2 = ch[i].Ema2.Value;
-					decimal e3 = ch[i].Ema3.Value;
+					decimal e1 = ch[i].Ema1 ?? 0;
+					decimal e2 = ch[i].Ema2 ?? 0;
+					decimal e3 = ch[i].Ema3 ?? 0;
 					bool ribbonUp = e1 >= e2 * 1.002m && e2 >= e3 * 1.002m;
 
 					bool divergence = ch[i].Quote.Low < ch[i - 5].Quote.Low
-								   && ch[i].ElderRayBullPower.Value >= ch[i - 5].ElderRayBullPower.Value * 0.95m;
+								   && ch[i].ElderRayBullPower >= ch[i - 5].ElderRayBullPower * 0.95m;
 
 					bool bullCandle = ch[i].Quote.Close > ch[i].Quote.Open;
 					var avgVol = ch.Skip(i - 20).Take(20).Average(c => c.Quote.Volume);
@@ -2350,12 +2350,12 @@ namespace Mercury.StatisticalAnalyses
 					if (ch[i].Atr == null || ch[i].RollingVwap == null || ch[i].Rsi1 == null)
 						continue;
 
-					decimal atr = ch[i].Atr.Value;
+					decimal atr = ch[i].Atr ?? 0;
 					decimal range = ch[i].Quote.High - ch[i].Quote.Low;
 					bool atrBreak = atr > 0 && range > (atr * 1.3m);
 
-					bool vwapBreak = ch[i].Quote.Close > ch[i].RollingVwap.Value;
-					bool rsiOk = ch[i].Rsi1.Value >= 40 && ch[i].Rsi1.Value <= 60;
+					bool vwapBreak = ch[i].Quote.Close > ch[i].RollingVwap;
+					bool rsiOk = ch[i].Rsi1 >= 40 && ch[i].Rsi1 <= 60;
 
 					var avgVol = ch.Skip(i - 20).Take(20).Average(c => c.Quote.Volume);
 					bool volSpike = ch[i].Quote.Volume > avgVol * 2.0m;

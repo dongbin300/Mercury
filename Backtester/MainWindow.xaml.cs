@@ -641,7 +641,7 @@ namespace Backtester
 				var r2 = ts.Select(x => x.Supertrend2);
 				var r3 = ts.Select(x => x.Supertrend3);
 				var r4 = quotes.GetEma(200).Select(x => x.Ema);
-				var r5 = quotes.GetStochasticRsi(3, 3, 14, 14).Select(x => x.K);
+				var r5 = quotes.GetStochasticRsi(14, 14, 3, 3).Select(x => x.K);
 
 				for (int i = 0; i < charts.Count; i++)
 				{

@@ -48,8 +48,8 @@ namespace Mercury.Backtests
 					var yesterday2Chart = Charts.GetLatestChartBefore(time.AddDays(-1)); // 엊그제 캔들
 
 					// Long/Short 그리드인 경우 PRA 크로스하는지 주기적으로 체크
-					if ((Grid.GridType == GridType.Long && yesterdayChart.Quote.Close < (decimal)yesterdayChart.PredictiveRangesAverage) ||
-						(Grid.GridType == GridType.Short && yesterdayChart.Quote.Close > (decimal)yesterdayChart.PredictiveRangesAverage))
+					if ((Grid.GridType == GridType.Long && yesterdayChart.Quote.Close < yesterdayChart.PredictiveRangesAverage) ||
+						(Grid.GridType == GridType.Short && yesterdayChart.Quote.Close > yesterdayChart.PredictiveRangesAverage))
 					{
 						WriteStatus(i, "PRA_CROSS");
 						CloseAllPositions(i);
@@ -63,7 +63,7 @@ namespace Mercury.Backtests
 						WriteStatus(i, "CHANGE_PRA");
 						CloseAllPositions(i);
 
-						ExecuteInitGrid(i, yesterdayChart.Quote.Close > (decimal)yesterday2Chart.PredictiveRangesAverage ? GridType.Long : GridType.Short);
+						ExecuteInitGrid(i, yesterdayChart.Quote.Close > yesterday2Chart.PredictiveRangesAverage ? GridType.Long : GridType.Short);
 					}
 
 					// 청산 확인
@@ -113,15 +113,15 @@ namespace Mercury.Backtests
 			var currentTime = Prices[chartIndex].Date;
 			var yesterday2 = Charts.GetLatestChartBefore(currentTime.AddDays(-1));
 
-			var upperPrice = (decimal)yesterday2.PredictiveRangesUpper2;
-			var lowerPrice = (decimal)yesterday2.PredictiveRangesLower2;
-			UpperStopLossPrice = (decimal)yesterday2.PredictiveRangesUpper2;
-			LowerStopLossPrice = (decimal)yesterday2.PredictiveRangesLower2;
+			var upperPrice = yesterday2.PredictiveRangesUpper2 ?? 0;
+			var lowerPrice = yesterday2.PredictiveRangesLower2 ?? 0;
+			UpperStopLossPrice = yesterday2.PredictiveRangesUpper2 ?? 0;
+			LowerStopLossPrice = yesterday2.PredictiveRangesLower2 ?? 0;
 
 			// 최근 한달간의 일봉 ATR 평균 계산
-			var monthlyAtrAverage = (decimal)Charts.Where(d => d.DateTime <= currentTime).OrderByDescending(d => d.DateTime).Take(30).Average(x => x.Atr);
+			var monthlyAtrAverage = Charts.Where(d => d.DateTime <= currentTime).OrderByDescending(d => d.DateTime).Take(30).Average(x => x.Atr);
 
-			var gridInterval = monthlyAtrAverage * AtrRatio;
+			var gridInterval = monthlyAtrAverage ?? 0 * AtrRatio;
 
 			InitGrid(gridType, upperPrice, lowerPrice, gridInterval, chartIndex);
 		}

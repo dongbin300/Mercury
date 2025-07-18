@@ -2,29 +2,31 @@
 
 using Mercury.Charts;
 using Mercury.Enums;
-using Mercury.Maths;
 
 namespace Mercury.Backtests.BacktestStrategies
 {
 	/// <summary>
-	/// Supertrend with Ema
+	/// LSMA
+	/// RSI 40라인을 골든 크로스 이후, 3봉 이내에 LSMA 10이 30을 골든 크로스하면 매수
+	/// LSMA 교차점 SL
+	/// SLTP 비율 1:2
 	/// </summary>
 	/// <param name="reportFileName"></param>
 	/// <param name="startMoney"></param>
 	/// <param name="leverage"></param>
 	/// <param name="maxActiveDealsType"></param>
 	/// <param name="maxActiveDeals"></param>
-	public class ST1(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
+	public class Lsma1(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
-		public decimal slth = 0.6m;
-		public decimal slrate = 0.2m;
 		public decimal sltprate = 2.0m;
+		public decimal th = 4m;
+		public decimal rsith = 40;
 
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
 		{
-			chartPack.UseEma(12, 26);
-			chartPack.UseAdx();
-			chartPack.UseSupertrend(10, 1.5);
+			chartPack.UseLsma(10, 30);
+			chartPack.UseRsi(14);
+			chartPack.UseMaAngles();
 		}
 
 		protected override void LongEntry(string symbol, List<ChartInfo> charts, int i)
@@ -32,19 +34,19 @@ namespace Mercury.Backtests.BacktestStrategies
 			var c0 = charts[i];
 			var c1 = charts[i - 1];
 			var c2 = charts[i - 2];
+			var c3 = charts[i - 3];
+			var c4 = charts[i - 4];
 
-			if (c2.Ema1 < c2.Ema2 && c1.Ema1 > c1.Ema2)
+			if (c2.Lsma1 < c2.Lsma2 && c1.Lsma1 > c1.Lsma2 &&
+				((c2.Rsi1 < rsith && c1.Rsi1 > rsith) || (c3.Rsi1 < rsith && c2.Rsi1 > rsith) || (c4.Rsi1 < rsith && c3.Rsi1 > rsith)))
 			{
-				var ema2 = c1.Ema2.Value;
+				var crossPrice = GetCrossPrice(c2.Lsma1.Value, c2.Lsma2.Value, c1.Lsma1.Value, c1.Lsma2.Value);
 				var entryPrice = c0.Quote.Open;
-				// 손절가: 진입가와 EMA 26 차이가 임계값 이상일 경우 EMA 26, 임계값 미만일 경우 EMA 26보다 조금 아래
-				var stopLossPrice =
-					Calculator.Roe(PositionSide.Short, entryPrice, ema2) >= slth ?
-					c1.Ema2 :
-					Calculator.TargetPrice(PositionSide.Short, ema2, slrate);
+				var stopLossPrice = crossPrice;
 				var takeProfitPrice = entryPrice + (entryPrice - stopLossPrice) * sltprate;
 
 				EntryPosition(PositionSide.Long, c0, entryPrice, stopLossPrice, takeProfitPrice);
+				//EntryPositionOnlySize(PositionSide.Long, c0, entryPrice, Seed, stopLossPrice, takeProfitPrice);
 			}
 		}
 

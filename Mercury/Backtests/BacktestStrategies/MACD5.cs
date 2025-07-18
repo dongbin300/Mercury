@@ -28,7 +28,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			var c1 = charts[i - 1];
 			var minPrice = GetMinPrice(charts, 14, i);
 
-			var tpPrice = (decimal)c1.Ema1;
+			var tpPrice = c1.Ema1 ?? 0;
 			var slPrice = minPrice - (tpPrice - minPrice) * 0.1m;
 			var tpPer = Calculator.Roe(PositionSide.Long, c0.Quote.Open, tpPrice);
 			if (IsPowerGoldenCross(charts, 14, i, c1.Macd) && IsPowerGoldenCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)
@@ -62,7 +62,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			var c1 = charts[i - 1];
 			var maxPrice = GetMaxPrice(charts, 14, i);
 
-			var tpPrice = (decimal)c1.Ema1;
+			var tpPrice = c1.Ema1 ?? 0;
 			var slPrice = maxPrice + (maxPrice - tpPrice) * 0.1m;
 			var tpPer = Calculator.Roe(PositionSide.Short, c0.Quote.Open, tpPrice);
 			if (IsPowerDeadCross(charts, 14, i, c1.Macd) && IsPowerDeadCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)

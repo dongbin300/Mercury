@@ -5,13 +5,15 @@
     public record AdxResult(DateTime Date, decimal? Adx);
 	public record AtrmaResult(DateTime Date, decimal? Atrma);
 	public record AtrResult(DateTime Date, decimal? Atr);
-    public record BbResult(DateTime Date, decimal? Sma, decimal? Upper, decimal? Lower);
+	public record AtrVolumeResult(DateTime Date, decimal? AtrVolume);
+	public record BbResult(DateTime Date, decimal? Sma, decimal? Upper, decimal? Lower);
     public record CandleScoreResult(DateTime Date, decimal? CandleScore);
     public record CciResult(DateTime Date, decimal? Cci);
 	public record CustomResult(DateTime Date, decimal? Upper, decimal? Lower, decimal? Pioneer, decimal? Player);
 	public record DonchianChannelResult(DateTime Date, decimal? Basis, decimal? Upper, decimal? Lower);
+	public record EatrResult(DateTime Date, decimal? Eatr);
 	public record ElderRayPowerResult(DateTime Date, decimal? BullPower, decimal? BearPower);
-    public record EmaResult(DateTime Date, decimal? Ema);
+	public record EmaResult(DateTime Date, decimal? Ema);
 	/// <summary>
 	/// Exponential Volume Weighted Average Price (EVWAP)
 	/// </summary>
@@ -27,7 +29,8 @@
 	/// <param name="Date"></param>
 	/// <param name="Lsma"></param>
 	public record LsmaResult(DateTime Date, decimal? Lsma);
-    public record MacdResult(DateTime Date, decimal? Macd, decimal? Signal, decimal? Hist);
+	public record MaAnglesResult(DateTime Date, decimal? JmaSlope, decimal? JmaFastSlope, decimal? Ma27Slope, decimal? Ma83Slope, decimal? Ma278Slope);
+	public record MacdResult(DateTime Date, decimal? Macd, decimal? Signal, decimal? Hist);
 	public record MercuryRangesResult(DateTime Date, decimal? Upper, decimal? Average, decimal? Lower);
 	/// <summary>
 	/// Machine Learning Momentum Index with Pivot (MLMIP)
@@ -54,6 +57,7 @@
 	public record SmaResult(DateTime Date, decimal? Sma);
 	public record SqueezeMomentumResult(DateTime Date, decimal? Value, int? Direction, int? Signal);
     public record StdevResult(DateTime Date, decimal? Stdev);
+    public record StochasticResult(DateTime Date, decimal? K, decimal? D);
     public record StochasticRsiResult(DateTime Date, decimal? K, decimal? D);
 	public record StochResult(DateTime Date, decimal? Stoch);
 	public record SupertrendResult(DateTime Date, decimal? Supertrend);
@@ -72,5 +76,6 @@
 	/// <param name="Date"></param>
 	/// <param name="Vwap"></param>
 	public record VwapResult(DateTime Date, decimal? Vwap);
-    public record WmaResult(DateTime Date, decimal? Wma);
+	public record WilliamsVixFixResult(DateTime Date, decimal? Wvf, bool Signal);
+	public record WmaResult(DateTime Date, decimal? Wma);
 }

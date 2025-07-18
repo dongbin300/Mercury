@@ -280,7 +280,7 @@ namespace Mercury.Backtests
 
 								case "macd5":
 									{
-										var tpPrice = (decimal)c1.Ema1;
+										var tpPrice = c1.Ema1 ?? 0;
 										var slPrice = minPrice - (tpPrice - minPrice) * 0.1m;
 										var tpPer = Calculator.Roe(PositionSide.Long, c0.Quote.Open, tpPrice);
 										if (IsPowerGoldenCross(charts, 14, i, c1.Macd) && IsPowerGoldenCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)
@@ -291,7 +291,7 @@ namespace Mercury.Backtests
 									break;
 
 								case "triple_rsi":
-									if (c1.Rsi3 > 50 && c1.Rsi1 > c1.Rsi2 && c1.Rsi2 > c1.Rsi3 && c1.Quote.Close > (decimal)c1.Ema1 && c1.Adx > 20)
+									if (c1.Rsi3 > 50 && c1.Rsi1 > c1.Rsi2 && c1.Rsi2 > c1.Rsi3 && c1.Quote.Close > c1.Ema1 && c1.Adx > 20)
 									{
 										EntryPosition(PositionSide.Long, c0,
 											c0.Quote.Open,
@@ -301,7 +301,7 @@ namespace Mercury.Backtests
 									break;
 
 								case "goldbb":
-									if (c1.Quote.Close > (decimal)c1.Bb1Upper)
+									if (c1.Quote.Close > c1.Bb1Upper)
 									{
 										EntryPosition(PositionSide.Long, c0, c0.Quote.Open);
 									}
@@ -322,7 +322,7 @@ namespace Mercury.Backtests
 									break;
 
 								case "candlesma":
-									if (!(c1.Quote.Close < (decimal)c1.Ema1 && c1.Ema1 < c1.Ema2)) // 위에서부터 60이평, 20이평, 가격 순이면 매수하지 않음
+									if (!(c1.Quote.Close < c1.Ema1 && c1.Ema1 < c1.Ema2)) // 위에서부터 60이평, 20이평, 가격 순이면 매수하지 않음
 									{
 										if (c1.CandlestickType == CandlestickType.Bearish && c2.CandlestickType == CandlestickType.Bearish && c3.CandlestickType == CandlestickType.Bearish)
 										{
@@ -626,7 +626,7 @@ namespace Mercury.Backtests
 								break;
 
 							case "goldbb":
-								if (c1.Quote.Close < (decimal)c1.Ema1)
+								if (c1.Quote.Close < c1.Ema1)
 								{
 									ExitPosition(longPosition, c0, c0.Quote.Open);
 								}
@@ -767,7 +767,7 @@ namespace Mercury.Backtests
 
 								case "macd5":
 									{
-										var tpPrice = (decimal)c1.Ema1;
+										var tpPrice = c1.Ema1 ?? 0;
 										var slPrice = maxPrice + (maxPrice - tpPrice) * 0.1m;
 										var tpPer = Calculator.Roe(PositionSide.Short, c0.Quote.Open, tpPrice);
 										if (IsPowerDeadCross(charts, 14, i, c1.Macd) && IsPowerDeadCross2(charts, 14, i, c1.Macd2) && tpPer > 1.0m)
@@ -778,7 +778,7 @@ namespace Mercury.Backtests
 									break;
 
 								case "triple_rsi":
-									if (c1.Rsi3 < 50 && c1.Rsi1 < c1.Rsi2 && c1.Rsi2 < c1.Rsi3 && c1.Quote.Close < (decimal)c1.Ema1 && c1.Adx > 20)
+									if (c1.Rsi3 < 50 && c1.Rsi1 < c1.Rsi2 && c1.Rsi2 < c1.Rsi3 && c1.Quote.Close < c1.Ema1 && c1.Adx > 20)
 									{
 										EntryPosition(PositionSide.Short, c0,
 											c0.Quote.Open,
@@ -788,7 +788,7 @@ namespace Mercury.Backtests
 									break;
 
 								case "goldbb":
-									if (c1.Quote.Close < (decimal)c1.Bb1Lower)
+									if (c1.Quote.Close < c1.Bb1Lower)
 									{
 										EntryPosition(PositionSide.Short, c0, c0.Quote.Open);
 									}
@@ -809,7 +809,7 @@ namespace Mercury.Backtests
 									break;
 
 								case "candlesma":
-									if (!(c1.Quote.Close > (decimal)c1.Ema1 && c1.Ema1 > c1.Ema2)) // 위에서부터 가격, 20이평, 60이평 순이면 매도하지 않음
+									if (!(c1.Quote.Close > c1.Ema1 && c1.Ema1 > c1.Ema2)) // 위에서부터 가격, 20이평, 60이평 순이면 매도하지 않음
 									{
 										if (c1.CandlestickType == CandlestickType.Bullish && c2.CandlestickType == CandlestickType.Bullish && c3.CandlestickType == CandlestickType.Bullish)
 										{

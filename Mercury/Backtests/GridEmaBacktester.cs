@@ -367,7 +367,7 @@ namespace Mercury.Backtests
 		public bool SetGridType(int chartIndex)
 		{
 			var price = Prices[chartIndex];
-			var longTermEma = (decimal)LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
+			var longTermEma = LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
 
 			if (GridType == GridType.Long)
 			{
@@ -417,11 +417,11 @@ namespace Mercury.Backtests
 			var price = Prices[chartIndex];
 
 			var longTermChartsOrderByDescending = LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
-			var longTermEma = (decimal)longTermChartsOrderByDescending.ElementAt(1).Ema1;
+			var longTermEma = longTermChartsOrderByDescending.ElementAt(1).Ema1 ?? 0;
 			var longTermHighPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Max(x => x.Quote.High);
 			var longTermLowPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Min(x => x.Quote.Low);
 
-			var shortTermAverageAtr = (decimal)ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).Skip(1).Take(ATR_COUNT).Average(x => x.Atr);
+			var shortTermAverageAtr = ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).Skip(1).Take(ATR_COUNT).Average(x => x.Atr);
 
 			if (GridType == GridType.Long)
 			{

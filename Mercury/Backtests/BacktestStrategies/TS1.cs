@@ -20,7 +20,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			var c1 = charts[i - 1];
 			var c2 = charts[i - 2];
 
-			var slPrice = Math.Abs((decimal)c1.Supertrend2);
+			var slPrice = Math.Abs(c1.Supertrend2 ?? 0);
 			var tpPrice = c1.Quote.Close + (c1.Quote.Close - slPrice) * ProfitRatio; // 1:1.5
 
 			if(c1.Supertrend1 > 0 && c2.Supertrend1 < 0 && c1.Supertrend2 > 0 && c1.Supertrend3 > 0)
@@ -60,7 +60,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			var c1 = charts[i - 1];
 			var c2 = charts[i - 2];
 
-			var slPrice = Math.Abs((decimal)c1.Supertrend2);
+			var slPrice = Math.Abs(c1.Supertrend2 ?? 0);
 			var tpPrice = c1.Quote.Close - (slPrice - c1.Quote.Close) * ProfitRatio;
 
 			if (c1.Supertrend1 < 0 && c2.Supertrend1 > 0 && c1.Supertrend2 < 0 && c1.Supertrend3 < 0)

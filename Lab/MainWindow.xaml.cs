@@ -7,6 +7,7 @@ using Mercury.StatisticalAnalyses;
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows;
@@ -59,10 +60,10 @@ namespace Lab
 		{
 			InitializeComponent();
 
-			var startTime = new DateTime(2022, 1, 1);
-			var endTime = new DateTime(2024, 12, 31);
+			var startTime = new DateTime(2010, 1, 1);
+			var endTime = new DateTime(2025, 3, 1);
 			var symbol = "BTCUSDT";
-			var interval = KlineInterval.FifteenMinutes;
+			var interval = KlineInterval.OneDay;
 
 			//LocalApi.Init();
 			//var quotes = LocalApi.GetOneDayQuotes(symbol);
@@ -77,6 +78,11 @@ namespace Lab
 			//var vwap = ArrayCalculator.Vwap(high.ToNullable(), low.ToNullable(), close.ToNullable(), volume.ToNullable());
 			//var rvwap = ArrayCalculator.RollingVwap(high.ToNullable(), low.ToNullable(), close.ToNullable(), volume.ToNullable(), 20);
 			//var stoch = ArrayCalculator.StochasticRsi(close, 3, 3, 14, 14);
+
+			var cci = ArrayCalculator.Cci(high, low, close, 20);
+			var atr = ArrayCalculator.Atr(high, low, close, 14);
+			var atrv = ArrayCalculator.AtrVolume(high, low, close, volume, 14);
+			var res = ArrayCalculator.Stochastic(high, low, close, 10, 6, 6);
 
 			ChartLoader.Charts = [];
 			List<ChartPack> chartPacks = [];
@@ -93,7 +99,7 @@ namespace Lab
 				chartPacks[i].UseRsi(14);
 				chartPacks[i].UseSma(20, 50);
 				chartPacks[i].UseBollingerBands(20, 2);
-				chartPacks[i].UseStochasticRsi(3, 3, 14, 14);
+				chartPacks[i].UseStochasticRsi(14, 14, 3, 3);
 				chartPacks[i].UseMacd(12, 26, 9);
 				chartPacks[i].UseAtr(14);
 				chartPacks[i].UseVwap();

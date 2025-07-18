@@ -296,10 +296,10 @@ namespace Mercury.Backtests
 			var currentPrice = Prices[chartIndex].Value;
 			var currentTime = Prices[chartIndex].Date;
 
-			UpperPrice = (decimal)CurrentChart(currentTime).PredictiveRangesUpper2;
-			LowerPrice = (decimal)CurrentChart(currentTime).PredictiveRangesLower2;
-			UpperStopLossPrice = (decimal)CurrentChart(currentTime).PredictiveRangesUpper2;
-			LowerStopLossPrice = (decimal)CurrentChart(currentTime).PredictiveRangesLower2;
+			UpperPrice = CurrentChart(currentTime).PredictiveRangesUpper2 ?? 0;
+			LowerPrice = CurrentChart(currentTime).PredictiveRangesLower2 ?? 0;
+			UpperStopLossPrice = CurrentChart(currentTime).PredictiveRangesUpper2 ?? 0;
+			LowerStopLossPrice = CurrentChart(currentTime).PredictiveRangesLower2 ?? 0;
 
 			GridInterval = (UpperPrice - LowerPrice) / GRID_COUNT;
 			StandardBaseOrderSize = Money / GRID_COUNT;

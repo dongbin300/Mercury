@@ -472,7 +472,7 @@ namespace Mercury.Backtests
 			{
 				var quotes = chart.Value.Select(x => x.Quote);
 				var r1 = quotes.GetEma(200).Select(x => x.Ema);
-				var r2 = quotes.GetStochasticRsi(3, 3, 14, 14).Select(x => x.K);
+				var r2 = quotes.GetStochasticRsi(14, 14, 3, 3).Select(x => x.K);
 				var ts = quotes.GetTripleSupertrend(10, 1, 11, 2, 12, 3);
 				var r3 = ts.Select(x => x.Supertrend1);
 				var r4 = ts.Select(x => x.Supertrend2);
@@ -513,7 +513,7 @@ namespace Mercury.Backtests
 			var chart = Charts[symbol];
 			var quotes = chart.Select(x => x.Quote);
 			var r1 = quotes.TakeLast(202).SkipLast(1).Concat([lastQuote]).GetEma(200).Select(x => x.Ema);
-			var r2 = quotes.TakeLast(20).SkipLast(1).Concat([lastQuote]).GetStochasticRsi(3, 3, 14, 14).Select(x => x.K);
+			var r2 = quotes.TakeLast(20).SkipLast(1).Concat([lastQuote]).GetStochasticRsi(14, 14, 3, 3).Select(x => x.K);
 			var ts = quotes.TakeLast(20).SkipLast(1).Concat([lastQuote]).GetTripleSupertrend(10, 1, 11, 2, 12, 3);
 			var r3 = ts.Select(x => x.Supertrend1);
 			var r4 = ts.Select(x => x.Supertrend2);
@@ -3109,7 +3109,7 @@ namespace Mercury.Backtests
 						continue;
 					}
 
-					if (c1.Quote.Volume > (decimal)c1.VolumeSma &&
+					if (c1.Quote.Volume > c1.VolumeSma &&
 						charts.SkipLast(1).TakeLast(14).Count(x => x.Stoch < 20) > 0 &&
 						c1.Rsi1 > 50 &&
 						c2.Macd < c2.MacdSignal && c1.Macd > c1.MacdSignal && slPer < -0.8m)
@@ -3198,7 +3198,7 @@ namespace Mercury.Backtests
 						continue;
 					}
 
-					if (c1.Quote.Volume > (decimal)c1.VolumeSma &&
+					if (c1.Quote.Volume > c1.VolumeSma &&
 						charts.SkipLast(1).TakeLast(14).Count(x => x.Stoch > 80) > 0 &&
 						c1.Rsi1 < 50 &&
 						c2.Macd > c2.MacdSignal && c1.Macd < c1.MacdSignal && slPer < -0.8m)
@@ -3318,7 +3318,7 @@ namespace Mercury.Backtests
 
 					if (
 						c1.Rsi3 > 50 &&
-						c1.Rsi1 > c1.Rsi2 && c1.Rsi2 > c1.Rsi3 && c1.Quote.Close > (decimal)c1.Ema1 && c1.Adx > 20
+						c1.Rsi1 > c1.Rsi2 && c1.Rsi2 > c1.Rsi3 && c1.Quote.Close > c1.Ema1 && c1.Adx > 20
 						//slPer < -0.5m && tpPer > 0.5m
 						)
 					{
@@ -3399,7 +3399,7 @@ namespace Mercury.Backtests
 
 					if (
 						c1.Rsi3 < 50 &&
-						c1.Rsi1 < c1.Rsi2 && c1.Rsi2 < c1.Rsi3 && c1.Quote.Close < (decimal)c1.Ema1 && c1.Adx > 20
+						c1.Rsi1 < c1.Rsi2 && c1.Rsi2 < c1.Rsi3 && c1.Quote.Close < c1.Ema1 && c1.Adx > 20
 						//slPer < -0.5m && tpPer > 0.5m
 						)
 					{

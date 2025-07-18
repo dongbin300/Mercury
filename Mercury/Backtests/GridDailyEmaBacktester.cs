@@ -369,7 +369,7 @@ namespace Mercury.Backtests
 		{
 			var price = Prices[chartIndex];
 			var longTermChartsOrderByDescending = LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
-			var longTermEma = (decimal)longTermChartsOrderByDescending.ElementAt(1).Ema1;
+			var longTermEma = longTermChartsOrderByDescending.ElementAt(1).Ema1;
 			var longTermClosePrice = longTermChartsOrderByDescending.ElementAt(1).Quote.Close;
 
 			if (GridType == GridType.Long)
@@ -420,7 +420,7 @@ namespace Mercury.Backtests
 			var price = Prices[chartIndex];
 
 			var longTermChartsOrderByDescending = LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
-			var longTermEma = (decimal)longTermChartsOrderByDescending.ElementAt(1).Ema1;
+			var longTermEma = longTermChartsOrderByDescending.ElementAt(1).Ema1 ?? 0;
 			var longTermClosePrice = longTermChartsOrderByDescending.ElementAt(1).Quote.Close;
 			var longTermHighPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Max(x => x.Quote.High);
 			var longTermLowPrice = longTermChartsOrderByDescending.Skip(1).Take(40).Min(x => x.Quote.Low);
@@ -430,18 +430,18 @@ namespace Mercury.Backtests
 			var longTermMaxDiffToEma =
 				SL_DIFFEMA_TYPE switch
 				{
-					1 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Abs((decimal)x.Ema1 - x.Quote.Close)),
-					2 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Abs((decimal)x.Ema1 - (x.Quote.Open + x.Quote.Close) / 2)),
-					3 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Max(Math.Abs((decimal)x.Ema1 - x.Quote.High), Math.Abs((decimal)x.Ema1 - x.Quote.Low))),
+					1 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Abs(x.Ema1 ?? 0 - x.Quote.Close)),
+					2 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Abs(x.Ema1 ?? 0 - (x.Quote.Open + x.Quote.Close) / 2)),
+					3 => longTermChartsOrderByDescending.Skip(1).Take(SL_DIFFEMA_COUNT).Max(x => Math.Max(Math.Abs(x.Ema1 ?? 0 - x.Quote.High), Math.Abs(x.Ema1 ?? 0 - x.Quote.Low))),
 					_ => 1
 				};
 
 			// 2-1.
-			var longTermLastAtr = (decimal)longTermChartsOrderByDescending.ElementAt(1).Atr;
+			var longTermLastAtr = longTermChartsOrderByDescending.ElementAt(1).Atr ?? 0;
 			// 2-2.
-			var longTermAverageAtr = (decimal)longTermChartsOrderByDescending.Skip(1).Take(ATR_COUNT).Average(x => x.Atr);
+			var longTermAverageAtr = longTermChartsOrderByDescending.Skip(1).Take(ATR_COUNT).Average(x => x.Atr);
 			// 2-3.
-			var longTermAverageDiffToEma = longTermChartsOrderByDescending.Skip(1).Take(ATR_COUNT).Average(x => Math.Max(Math.Abs((decimal)x.Ema1 - x.Quote.Open), Math.Abs((decimal)x.Ema1 - x.Quote.Close)));
+			var longTermAverageDiffToEma = longTermChartsOrderByDescending.Skip(1).Take(ATR_COUNT).Average(x => Math.Max(Math.Abs(x.Ema1 ?? 0 - x.Quote.Open), Math.Abs(x.Ema1 ?? 0 - x.Quote.Close)));
 
 			if (GridType == GridType.Long)
 			{

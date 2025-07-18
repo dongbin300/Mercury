@@ -51,11 +51,17 @@ namespace Mercury.Charts
 		public decimal? Rsi3 { get; set; }
 		public decimal? Rsima { get; set; }
 		public decimal? JmaSlope { get; set; }
+		public decimal? JmaFastSlope { get; set; }
+		public decimal? Ma27Slope { get; set; }
+		public decimal? Ma83Slope { get; set; }
+		public decimal? Ma278Slope { get; set; }
 		public decimal? K { get; set; }
 		public decimal? D { get; set; }
 		public decimal? Stoch { get; set; }
-		public decimal? StochK { get; set; }
-		public decimal? StochD { get; set; }
+		public decimal? StochasticK { get; set; }
+		public decimal? StochasticD { get; set; }
+		public decimal? StochasticRsiK { get; set; }
+		public decimal? StochasticRsiD { get; set; }
 		public decimal? Cci { get; set; }
 		public decimal? Supertrend1 { get; set; }
 		public decimal? Supertrend2 { get; set; }
@@ -72,6 +78,8 @@ namespace Mercury.Charts
 		public decimal? Adx { get; set; }
 		public decimal? Atr { get; set; }
 		public decimal? Atrma { get; set; }
+		public decimal? Eatr { get; set; }
+		public decimal? AtrVolume { get; set; }
 		public decimal? Bb1Sma { get; set; }
 		public decimal? Bb1Upper { get; set; }
 		public decimal? Bb1Lower { get; set; }
@@ -128,6 +136,9 @@ namespace Mercury.Charts
 		public decimal? VolatilityRatio { get; set; }
 
 		public decimal? CandleScore { get; set; }
+
+		public decimal? Wvf { get; set; }
+		public bool WvfSignal { get; set; }
 
 		public decimal LiquidationPriceLong { get; set; } = 0m;
 		public decimal LiquidationPriceShort { get; set; } = 0m;

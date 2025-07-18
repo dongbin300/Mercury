@@ -109,7 +109,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		private bool IsStrongDowntrend(List<ChartInfo> charts, int i)
 		{
 			if (charts[i].Ema2 == null || charts[i].Rsi1 == null) return false;
-			return charts[i].Quote.Close < (decimal)charts[i].Ema2 * 0.97m &&
+			return charts[i].Quote.Close < charts[i].Ema2 * 0.97m &&
 				   charts[i].Rsi1 < 35;
 		}
 
@@ -130,7 +130,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			bool rsiCondition = DetectRSICondition(charts, i);
 
 			// 거래량 확인 (기존 대비 20% 완화)
-			var avgAtr = charts.Skip(i - 20).Take(20).Average(c => c.Atr.Value);
+			var avgAtr = charts.Skip(i - 20).Take(20).Average(c => c.Atr);
 			bool volumeConfirmation = c1.Quote.Volume > charts.Skip(i - 20)
 				.Take(20).Average(x => x.Quote.Volume) * (1 + avgAtr * 0.08m);
 
@@ -169,7 +169,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			// 
 			if (lowerTouch && rsiLow && volSpike && !IsStrongDowntrend(charts, i))
 			{
-				var atr = c1.Atr.Value;
+				var atr = c1.Atr ?? 0;
 
 				decimal entryPrice = c0.Quote.Open;
 				decimal stopLoss = entryPrice - (atr * 0.8m); // 1.0 -> 0.8 완화
@@ -205,7 +205,7 @@ namespace Mercury.Backtests.BacktestStrategies
 				{
 					if (lastLowIndex != -1)
 					{
-						var atr = charts[j].Atr.Value;
+						var atr = charts[j].Atr ?? 0;
 						if (charts[j].Quote.Low < charts[lastLowIndex].Quote.Low - (atr * 0.5m))
 							structureBreak = true;
 					}
@@ -222,7 +222,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			{
 				if (j < 0) continue;
 
-				var atr = charts[j].Atr.Value;
+				var atr = charts[j].Atr ?? 0;
 				decimal body = Math.Abs(charts[j].Quote.Close - charts[j].Quote.Open);
 				bool strongMomentum = body > (atr * 0.25m); // 0.3 -> 0.25로 완화
 				bool largeBody = body > charts.Skip(i - 20).Take(20)
@@ -240,7 +240,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			{
 				decimal obLow = charts[orderBlockIndex].Quote.Low;
 				decimal obHigh = charts[orderBlockIndex].Quote.High;
-				var atr = charts[orderBlockIndex].Atr.Value;
+				var atr = charts[orderBlockIndex].Atr ?? 0;
 
 				for (int j = orderBlockIndex + 1; j < i; j++)
 				{
@@ -261,7 +261,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		private bool DetectRSICondition(List<ChartInfo> charts, int i)
 		{
 			bool rsiDivergence = false;
-			bool rsiOversold = charts[i].Rsi1.Value < 42; // 40 -> 42 완화
+			bool rsiOversold = charts[i].Rsi1 < 42; // 40 -> 42 완화
 
 			// 구조적 저점 찾기
 			int lastLowIndex = -1;
@@ -285,7 +285,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			if (lastLowIndex != -1 && i - lastLowIndex <= 15)
 			{
 				if (charts[i - 1].Quote.Low < charts[lastLowIndex].Quote.Low &&
-					charts[i - 1].Rsi1.Value > charts[lastLowIndex].Rsi1.Value)
+					charts[i - 1].Rsi1 > charts[lastLowIndex].Rsi1)
 					rsiDivergence = true;
 			}
 
@@ -312,7 +312,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			}
 
 			// 트레일링 스톱 (ATR 기반)
-			decimal currentAtr = (decimal)(c1.Atr ?? 0);
+			decimal currentAtr = c1.Atr ?? 0;
 			decimal newStop = Math.Max(longPosition.StopLossPrice, c1.Quote.Close - currentAtr * 0.5m);
 			if (newStop > longPosition.StopLossPrice)
 				longPosition.StopLossPrice = newStop;

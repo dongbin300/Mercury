@@ -101,6 +101,7 @@ namespace Mercury.Backtests
 		/* Position */
 		public List<Position> Positions { get; set; } = [];
 		public bool IsGeneratePositionHistory { get; set; } = false;
+		public bool IsGenerateDailyHistory { get; set; } = true;
 		public List<PositionHistory> PositionHistories { get; set; } = [];
 		public int LongPositionCount => Positions.Count(x => x.Side.Equals(PositionSide.Long));
 		public int ShortPositionCount => Positions.Count(x => x.Side.Equals(PositionSide.Short));
@@ -147,7 +148,10 @@ namespace Mercury.Backtests
 				{
 					if (IsLiquidation())
 					{
-						File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), $"LIQ" + Environment.NewLine + Environment.NewLine);
+						if (IsGenerateDailyHistory)
+						{
+							File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), $"LIQ" + Environment.NewLine + Environment.NewLine);
+						}
 						WritePositionHistory();
 						return (string.Empty, 0m);
 					}
@@ -232,7 +236,11 @@ namespace Mercury.Backtests
 			var maxPer = Ests.Count <= 1 ? 1 : Ests[^1].Item2 / Ests.Max(x => x.Item2);
 			ChangePers.Add((time, changePer));
 			MaxPers.Add((time, maxPer));
-			File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), $"{time:yyyy-MM-dd HH:mm:ss},{Win},{Lose},{WinRate.Round(2)},{LongPositionCount},{ShortPositionCount},{EstimatedMoney.Round(0)},{change.Round(0)},{changePer.Round(4):P},{maxPer.Round(4):P}" + Environment.NewLine);
+
+			if (IsGenerateDailyHistory)
+			{
+				File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), $"{time:yyyy-MM-dd HH:mm:ss},{Win},{Lose},{WinRate.Round(2)},{LongPositionCount},{ShortPositionCount},{EstimatedMoney.Round(0)},{change.Round(0)},{changePer.Round(4):P},{maxPer.Round(4):P}" + Environment.NewLine);
+			}
 		}
 
 		void ResetOrderSize(DateTime time)
@@ -275,7 +283,10 @@ namespace Mercury.Backtests
 				builder.AppendLine();
 				builder.AppendLine();
 
-				File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), builder.ToString());
+				if (IsGenerateDailyHistory)
+				{
+					File.AppendAllText(MercuryPath.Desktop.Down($"{ReportFileName}.csv"), builder.ToString());
+				}
 			}
 		}
 
@@ -895,7 +906,7 @@ namespace Mercury.Backtests
 		/// <param name="i"></param>
 		/// <param name="condition"></param>
 		/// <returns></returns>
-		protected bool IsTrueCandle(List<ChartInfo> charts, int i, string condition)
+		protected bool IsTrueCandle(List<ChartInfo> charts, int i, string condition, decimal minBodyLength = 0)
 		{
 			// p = 0, charts[i-1], 1봉전, 가장 최근 봉
 			// p = 1, charts[i-2], 2봉전
@@ -904,17 +915,31 @@ namespace Mercury.Backtests
 			{
 				// Length = 6, p = 5 일경우 i - 1, 1봉전
 				var chartIndex = i + p - condition.Length;
+				var chart = charts[chartIndex];
+				var candleType = chart.CandlestickType;
+				var body = chart.BodyLength;
+
+				// 최소 변동 길이 이하일 경우, Doji로 간주
+				bool isDoji = body < minBodyLength;
+
 				switch (condition[p])
 				{
 					case 'U':
-						if (charts[chartIndex].CandlestickType == CandlestickType.Bearish)
+						if (candleType != CandlestickType.Bullish || isDoji)
 						{
 							return false;
 						}
 						break;
 
 					case 'D':
-						if (charts[chartIndex].CandlestickType == CandlestickType.Bullish)
+						if (candleType != CandlestickType.Bearish || isDoji)
+						{
+							return false;
+						}
+						break;
+
+					case 'N':
+						if (!isDoji)
 						{
 							return false;
 						}
@@ -924,5 +949,30 @@ namespace Mercury.Backtests
 
 			return true;
 		}
+
+		public static decimal? GetCrossPrice(decimal prevA, decimal prevB, decimal nextA, decimal nextB)
+		{
+			var diffPrev = prevA - prevB;
+			var diffNext = nextA - nextB;
+
+			if ((diffPrev < 0 && diffNext > 0) || (diffPrev > 0 && diffNext < 0))
+			{
+				var denominator = diffNext - diffPrev;
+				if (denominator == 0)
+				{
+					return null; // 분모 0 방지
+				}
+
+				var t = (prevB - prevA) / denominator;
+				// 교차점 y값
+				return prevA + (nextA - prevA) * t;
+			}
+			else
+			{
+				// 교차 없음
+				return null;
+			}
+		}
+
 	}
 }

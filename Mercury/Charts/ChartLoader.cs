@@ -3,6 +3,8 @@
 using Mercury.Cryptos;
 using Mercury.Extensions;
 
+using System.Collections.Concurrent;
+
 namespace Mercury.Charts
 {
 	public class ChartLoader
@@ -300,6 +302,7 @@ namespace Mercury.Charts
 				foreach (var (file, index) in filteredFiles.Select((file, index) => (file, index)))
 				{
 					reportProgressCount(index, filteredFiles.Count());
+
 					var date = CryptoSymbol.GetDatePriceCsvFileName(file); // CSV 파일의 날짜
 					var data = File.ReadAllLines(file);
 
@@ -313,6 +316,57 @@ namespace Mercury.Charts
 				}
 
 				return prices;
+			}
+			catch
+			{
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// 파일에서 가격 데이터를 병렬처리로 불러옵니다.
+		/// DateTime은 일괄적으로 파일 날짜 0시 0분 0초로 설정한다.
+		/// I/O 작업이라 병렬처리로 해도 오히려 더 느린 것 같다.
+		/// 받은 데이터가 정렬도 안되어있으니 결론적으로 이게 더 느림.
+		/// </summary>
+		/// <param name="reportProgressCount"></param>
+		/// <param name="symbol"></param>
+		/// <param name="startDate"></param>
+		/// <param name="endDate"></param>
+		/// <returns></returns>
+		public static List<Price> GetPricesParallel(Action<int, int> reportProgressCount, string symbol, DateTime? startDate = null, DateTime? endDate = null)
+		{
+			try
+			{
+				var prices = new ConcurrentBag<Price>();
+				var files = Directory.GetFiles(MercuryPath.BinanceFuturesData.Down("price", symbol))
+									 .Where(f => f.GetFileName().StartsWith(symbol));
+
+				var filteredFiles = (startDate == null && endDate == null)
+					? files
+					: files.Where(f => IsFileWithinDateRangeAggTrades(f, startDate, endDate));
+
+				int progress = 0;
+
+				Parallel.ForEach(filteredFiles, new ParallelOptions { MaxDegreeOfParallelism = 4 }, (file, state, index) =>
+				{
+					// 진행률(병렬이니 Interlocked 써서 충돌 방지)
+					int cur = Interlocked.Increment(ref progress);
+					reportProgressCount(cur - 1, filteredFiles.Count());
+
+					var date = CryptoSymbol.GetDatePriceCsvFileName(file);
+					var data = File.ReadAllLines(file);
+
+					foreach (var line in data)
+					{
+						if (decimal.TryParse(line, out var _price))
+						{
+							prices.Add(new Price(date, _price));
+						}
+					}
+				});
+
+				return [.. prices];
 			}
 			catch
 			{

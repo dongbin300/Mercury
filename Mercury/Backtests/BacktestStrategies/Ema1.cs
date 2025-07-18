@@ -64,7 +64,7 @@ namespace Mercury.Backtests.BacktestStrategies
 						LStage = 1;
 						LInnerCount = 0;
 					}
-					else if (c1.Quote.Close > (decimal)c1.Ema1)
+					else if (c1.Quote.Close > c1.Ema1)
 					{
 						LInnerCount++;
 					}
@@ -75,7 +75,7 @@ namespace Mercury.Backtests.BacktestStrategies
 					break;
 
 				case 1:
-					if (c2.Quote.Close > (decimal)c2.Ema1 && c1.Quote.Close < (decimal)c1.Ema1 &&
+					if (c2.Quote.Close > c2.Ema1 && c1.Quote.Close < c1.Ema1 &&
 						c1.Quote.Volume < GetAverageVolume(charts, i - 2, Stage0Count)) // ema cross + low volume
 					{
 						LStage = 2;
@@ -88,7 +88,7 @@ namespace Mercury.Backtests.BacktestStrategies
 						LStage = 0;
 						LInnerCount = 0;
 					}
-					else if (c2.Quote.Close < (decimal)c2.Ema1 && c1.Quote.Close > (decimal)c1.Ema1) // recross
+					else if (c2.Quote.Close < c2.Ema1 && c1.Quote.Close > c1.Ema1) // recross
 					{
 						var slPrice = GetMinPrice(charts, SlCount, i);
 						//var slPrice = c1.Quote.Low;
@@ -137,7 +137,7 @@ namespace Mercury.Backtests.BacktestStrategies
 						SStage = 1;
 						SInnerCount = 0;
 					}
-					else if (c1.Quote.Close < (decimal)c1.Ema1)
+					else if (c1.Quote.Close < c1.Ema1)
 					{
 						SInnerCount++;
 					}
@@ -148,7 +148,7 @@ namespace Mercury.Backtests.BacktestStrategies
 					break;
 
 				case 1:
-					if (c2.Quote.Close < (decimal)c2.Ema1 && c1.Quote.Close > (decimal)c1.Ema1 &&
+					if (c2.Quote.Close < c2.Ema1 && c1.Quote.Close > c1.Ema1 &&
 						c1.Quote.Volume < GetAverageVolume(charts, i - 2, Stage0Count)) // ema cross + low volume
 					{
 						SStage = 2;
@@ -161,7 +161,7 @@ namespace Mercury.Backtests.BacktestStrategies
 						SStage = 0;
 						SInnerCount = 0;
 					}
-					else if (c2.Quote.Close > (decimal)c2.Ema1 && c1.Quote.Close < (decimal)c1.Ema1) // recross
+					else if (c2.Quote.Close > c2.Ema1 && c1.Quote.Close < c1.Ema1) // recross
 					{
 						var slPrice = GetMaxPrice(charts, SlCount, i);
 						//var slPrice = c1.Quote.High;

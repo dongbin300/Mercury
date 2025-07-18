@@ -153,6 +153,24 @@ namespace Mercury.Charts
 			}
 		}
 
+		public void UseLsma(params int[] periods)
+		{
+			int count = Math.Min(periods.Length, 3);
+			for (int p = 0; p < count; p++)
+			{
+				var lsma = Charts.Select(x => x.Quote).GetLsma(periods[p]).Select(x => x.Lsma);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					switch (p)
+					{
+						case 0: Charts[i].Lsma1 = lsma.ElementAt(i); break;
+						case 1: Charts[i].Lsma2 = lsma.ElementAt(i); break;
+						case 2: Charts[i].Lsma3 = lsma.ElementAt(i); break;
+					}
+				}
+			}
+		}
+
 		public void UseRsi(int period1 = 14, int? period2 = null, int? period3 = null)
 		{
 			var rsi1 = Charts.Select(x => x.Quote).GetRsi(period1).Select(x => x.Rsi);
@@ -379,15 +397,6 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseStoch(int period = 14)
-		{
-			var stoch = Charts.Select(x => x.Quote).GetStoch(period).Select(x => x.Stoch);
-			for (int i = 0; i < Charts.Count; i++)
-			{
-				Charts[i].Stoch = stoch.ElementAt(i);
-			}
-		}
-
 		public void UseCci(int period)
 		{
 			var cci = Charts.Select(x => x.Quote).GetCci(period).Select(x => x.Cci);
@@ -397,15 +406,36 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseStochasticRsi(int smoothK = 3, int smoothD = 3, int rsiPeriod = 14, int stochasticPeriod = 14)
+		public void UseStoch(int period = 14)
 		{
-			var stochasticRsi = Charts.Select(x => x.Quote).GetStochasticRsi(smoothK, smoothD, rsiPeriod, stochasticPeriod);
+			var stoch = Charts.Select(x => x.Quote).GetStoch(period).Select(x => x.Stoch);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Stoch = stoch.ElementAt(i);
+			}
+		}
+
+		public void UseStochastic(int periodK = 14, int smoothK = 3, int smoothD = 3)
+		{
+			var stochastic = Charts.Select(x => x.Quote).GetStochastic(periodK, smoothK, smoothD);
+			var k = stochastic.Select(x => x.K);
+			var d = stochastic.Select(x => x.D);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].StochasticK = k.ElementAt(i);
+				Charts[i].StochasticD = d.ElementAt(i);
+			}
+		}
+
+		public void UseStochasticRsi(int rsiPeriod = 14, int stochasticPeriod = 14, int smoothK = 3, int smoothD = 3)
+		{
+			var stochasticRsi = Charts.Select(x => x.Quote).GetStochasticRsi(rsiPeriod, stochasticPeriod, smoothK, smoothD);
 			var k = stochasticRsi.Select(x => x.K);
 			var d = stochasticRsi.Select(x => x.D);
 			for (int i = 0; i < Charts.Count; i++)
 			{
-				Charts[i].StochK = k.ElementAt(i);
-				Charts[i].StochD = d.ElementAt(i);
+				Charts[i].StochasticRsiK = k.ElementAt(i);
+				Charts[i].StochasticRsiD = d.ElementAt(i);
 			}
 		}
 
@@ -427,6 +457,24 @@ namespace Mercury.Charts
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].Atrma = atrma.ElementAt(i);
+			}
+		}
+
+		public void UseEatr(int atrPeriod = 14, int emaPeriod = 20)
+		{
+			var eatr = Charts.Select(x => x.Quote).GetEatr(atrPeriod, emaPeriod).Select(x => x.Eatr);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Eatr = eatr.ElementAt(i);
+			}
+		}
+
+		public void UseAtrVolume(int period = 14)
+		{
+			var atrVolume = Charts.Select(x => x.Quote).GetAtrVolume(period).Select(x => x.AtrVolume);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].AtrVolume = atrVolume.ElementAt(i);
 			}
 		}
 
@@ -521,6 +569,36 @@ namespace Mercury.Charts
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].VolumeSma = volumsSma.ElementAt(i);
+			}
+		}
+
+		public void UseMaAngles()
+		{
+			var maAngles = Charts.Select(x => x.Quote).GetMaAngles();
+			var jmaSlope = maAngles.Select(x => x.JmaSlope);
+			var jmaFastSlope = maAngles.Select(x => x.JmaFastSlope);
+			var ma27Slope = maAngles.Select(x => x.Ma27Slope);
+			var ma83Slope = maAngles.Select(x => x.Ma83Slope);
+			var ma278Slope = maAngles.Select(x => x.Ma278Slope);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].JmaSlope = jmaSlope.ElementAt(i);
+				Charts[i].JmaFastSlope = jmaFastSlope.ElementAt(i);
+				Charts[i].Ma27Slope = ma27Slope.ElementAt(i);
+				Charts[i].Ma83Slope = ma83Slope.ElementAt(i);
+				Charts[i].Ma278Slope = ma278Slope.ElementAt(i);
+			}
+		}
+
+		public void UseWilliamsVixFix()
+		{
+			var wvf = Charts.Select(x => x.Quote).GetWilliamsVixFix();
+			var wvfValue = wvf.Select(x => x.Wvf);
+			var wvfSignal = wvf.Select(x => x.Signal);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Wvf = wvfValue.ElementAt(i);
+				Charts[i].WvfSignal = wvfSignal.ElementAt(i);
 			}
 		}
 	}

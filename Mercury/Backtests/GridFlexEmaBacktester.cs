@@ -248,8 +248,8 @@ namespace Mercury.Backtests
 			var startTime = Prices[startIndex].Date;
 			DateTime displayDate = startTime;
 			DateTime gridResetDate = startTime;
-			LastEma = (decimal)ShortTermCharts.Where(d => d.DateTime <= startTime).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
-			LastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= startTime).OrderByDescending(d => d.DateTime).ElementAt(1).Atr;
+			LastEma = ShortTermCharts.Where(d => d.DateTime <= startTime).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1 ?? 0;
+			LastAtr = LongTermCharts.Where(d => d.DateTime <= startTime).OrderByDescending(d => d.DateTime).ElementAt(1).Atr ?? 0;
 
 			SetGrid(startIndex);
 			SetOrder(startIndex);
@@ -377,8 +377,8 @@ namespace Mercury.Backtests
 					displayDate = displayDate.AddDays(1);
 
 					// 하루가 지나면 1일봉 EMA, 1주봉 ATR 재계산
-					LastEma = (decimal)ShortTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1;
-					LastAtr = (decimal)LongTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Atr;
+					LastEma = ShortTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Ema1 ?? 0;
+					LastAtr = LongTermCharts.Where(d => d.DateTime <= time).OrderByDescending(d => d.DateTime).ElementAt(1).Atr ?? 0;
 
 					WriteStatus(i);
 				}

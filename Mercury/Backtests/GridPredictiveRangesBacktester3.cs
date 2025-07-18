@@ -51,7 +51,7 @@ namespace Mercury.Backtests
 					// PRA가 바뀌면 그리드 재설정
 					if (yesterdayChart.MercuryRangesAverage != yesterday2Chart.MercuryRangesAverage)
 					{
-						var gridType = yesterdayChart.Quote.Close > (decimal)yesterday2Chart.MercuryRangesAverage ? GridType.Long : GridType.Short;
+						var gridType = yesterdayChart.Quote.Close > yesterday2Chart.MercuryRangesAverage ? GridType.Long : GridType.Short;
 
 						WriteStatus(i, "PRA_CHANGED");
 						CloseAllPositions(i);
@@ -117,15 +117,15 @@ namespace Mercury.Backtests
 			var yesterday = Charts.GetLatestChartBefore(currentTime);
 			var yesterday2 = Charts.GetLatestChartBefore(currentTime.AddDays(-1));
 
-			var upperPrice = (decimal)yesterday.MercuryRangesUpper;
-			var lowerPrice = (decimal)yesterday.MercuryRangesLower;
-			UpperStopLossPrice = (decimal)yesterday.MercuryRangesUpper;
-			LowerStopLossPrice = (decimal)yesterday.MercuryRangesLower;
+			var upperPrice = yesterday.MercuryRangesUpper ?? 0;
+			var lowerPrice = yesterday.MercuryRangesLower ?? 0;
+			UpperStopLossPrice = yesterday.MercuryRangesUpper ?? 0;
+			LowerStopLossPrice = yesterday.MercuryRangesLower ?? 0;
 
 			// 최근 한달간의 일봉 ATR 평균 계산
-			var monthlyAtrAverage = (decimal)Charts.Where(d => d.DateTime <= currentTime).OrderByDescending(d => d.DateTime).Take(30).Average(x => x.Atr);
+			var monthlyAtrAverage = Charts.Where(d => d.DateTime <= currentTime).OrderByDescending(d => d.DateTime).Take(30).Average(x => x.Atr);
 
-			var gridInterval = monthlyAtrAverage * AtrRatio;
+			var gridInterval = monthlyAtrAverage ?? 0 * AtrRatio;
 
 			InitGrid(gridType, upperPrice, lowerPrice, gridInterval, chartIndex);
 		}

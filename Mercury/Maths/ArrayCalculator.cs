@@ -1,4 +1,7 @@
 ﻿using Mercury.Extensions;
+using Mercury.Indicators;
+
+using Newtonsoft.Json.Linq;
 
 using System.Data;
 using System.Drawing;
@@ -611,6 +614,52 @@ namespace Mercury.Maths
 		}
 
 		/// <summary>
+		/// Recommend values is Quote.Close
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="period"></param>
+		/// <returns></returns>
+		public static double?[] Lsma(double[] values, int period)
+		{
+			var result = new double?[values.Length];
+
+			if (values == null || values.Length == 0 || period < 2)
+			{
+				return result;
+			}
+
+			for (int i = 0; i < values.Length; i++)
+			{
+				if (i + 1 < period)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				double sumX = 0;
+				double sumY = 0;
+				double sumXY = 0;
+				double sumXX = 0;
+
+				for (int a = 1; a <= period; a++)
+				{
+					double y = values[i - period + a];
+					sumX += a;
+					sumY += y;
+					sumXY += y * a;
+					sumXX += a * a;
+				}
+
+				double m = (sumXY - sumX * sumY / period) / (sumXX - sumX * sumX / period);
+				double b = sumY / period - m * sumX / period;
+				result[i] = m * period + b;
+			}
+
+			return result;
+		}
+
+
+		/// <summary>
 		/// Volume Weighted Average Price (VWAP)
 		/// </summary>
 		/// <param name="high"></param>
@@ -826,7 +875,7 @@ namespace Mercury.Maths
 				int idx = startIndex - (len - 1) + i;
 				if (src[idx].HasValue)
 				{
-					double y = src[idx].Value;
+					double y = src[idx] ?? 0;
 					y_sum += y;
 					xy_sum += i * y; // x 값은 0부터 len-1
 				}
@@ -1073,6 +1122,37 @@ namespace Mercury.Maths
 		}
 
 		/// <summary>
+		/// ATR과 거래량(Volume)를 곱해서 강도지수 산출 (거대값 대비 정규화 권장)
+		/// </summary>
+		public static double?[] AtrVolume(double[] high, double[] low, double[] close, double[] volume, int period, int startIndex = 0)
+		{
+			var atr = Atr(high, low, close, period, startIndex);
+			var avol = Rma(volume.ToNullable(), period, startIndex);
+
+			double atrMin = atr.Where(v => v.HasValue).Min(v => v.Value);
+			double atrMax = atr.Where(v => v.HasValue).Max(v => v.Value);
+			double volMin = avol.Where(v => v.HasValue).Min(v => v.Value);
+			double volMax = avol.Where(v => v.HasValue).Max(v => v.Value);
+
+			var result = new double?[atr.Length];
+			for (int i = 0; i < atr.Length; i++)
+			{
+				if (atr[i].HasValue && avol[i].HasValue)
+				{
+					double atrNorm = (atr[i] ?? 0 - atrMin) / (atrMax - atrMin + 1e-9);
+					double volNorm = (avol[i] ?? 0 - volMin) / (volMax - volMin + 1e-9);
+
+					result[i] = atr[i] * Math.Sqrt(atrNorm * volNorm);
+				}
+				else
+				{
+					result[i] = null;
+				}
+			}
+			return result;
+		}
+
+		/// <summary>
 		/// Relative Strength Index
 		/// </summary>
 		/// <param name="values"></param>
@@ -1122,10 +1202,13 @@ namespace Mercury.Maths
 		}
 
 		/// <summary>
-		/// Stochastic
+		/// Stoch
 		/// </summary>
-		/// <param name="values"></param>
+		/// <param name="high"></param>
+		/// <param name="low"></param>
+		/// <param name="close"></param>
 		/// <param name="period"></param>
+		/// <param name="startIndex"></param>
 		/// <returns></returns>
 		public static double?[] Stoch(double?[] high, double?[] low, double?[] close, int period, int startIndex = 0)
 		{
@@ -1233,7 +1316,16 @@ namespace Mercury.Maths
 			return (supertrend1, direction1, supertrend2, direction2, supertrend3, direction3);
 		}
 
-		public static (double?[] K, double?[] D) StochasticRsi(double[] close, int smoothK, int smoothD, int rsiPeriod, int stochasticPeriod)
+		public static (double?[] K, double?[] D) Stochastic(double[] high, double[] low, double[] close, int periodK, int smoothK, int smoothD)
+		{
+			var stoch = Stoch(high.ToNullable(), low.ToNullable(), close.ToNullable(), periodK);
+			var k = Sma(stoch, smoothK);
+			var d = Sma(k, smoothD);
+
+			return (k, d);
+		}
+
+		public static (double?[] K, double?[] D) StochasticRsi(double[] close, int rsiPeriod, int stochasticPeriod, int smoothK, int smoothD)
 		{
 			var rsi = Rsi(close, rsiPeriod);
 			var stoch = Stoch(rsi, rsi, rsi, stochasticPeriod, 2);
@@ -1524,7 +1616,7 @@ namespace Mercury.Maths
 			var cci = Cci(high, low, close, cciPeriod);
 			var adx = Adx(high, low, close, adxPeriod, adxDiPeriod);
 			var bb = BollingerBands(nClose, smaPeriod, 2.0); // (상단, 중단, 하단)
-			var (K, D) = StochasticRsi(close, stochRsiSmoothK, stochRsiSmoothD, stochRsiRsiPeriod, stochRsiStochPeriod);
+			var (K, D) = StochasticRsi(close, stochRsiRsiPeriod, stochRsiStochPeriod, stochRsiSmoothK, stochRsiSmoothD);
 			var stochRsiK = K;
 			var stochRsiD = D;
 
@@ -2083,8 +2175,7 @@ namespace Mercury.Maths
 			return score;
 		}
 
-		public static (double?[] BullPower, double?[] BearPower) ElderRayPower(
-	double?[] high, double?[] low, double?[] close, int emaPeriod)
+		public static (double?[] BullPower, double?[] BearPower) ElderRayPower(double?[] high, double?[] low, double?[] close, int emaPeriod)
 		{
 			int length = close.Length;
 			var ema = Ema(close, emaPeriod);
@@ -2109,6 +2200,171 @@ namespace Mercury.Maths
 			}
 
 			return (bull, bear);
+		}
+
+		/// <summary>
+		/// 각도 계산
+		/// </summary>
+		/// <param name="values"></param>
+		/// <returns></returns>
+		public static double?[] Angle(double[] high, double[] low, double[] close, double?[] values)
+		{
+			double?[] atr = Atr(high, low, close, 14);
+
+			double rad2deg = 180.0 / Math.PI;
+			double?[] slope = new double?[values.Length];
+
+			for (int i = 1; i < values.Length; i++)
+			{
+				if (values[i] == null || values[i - 1] == null || atr[i] == null || atr[i] == 0)
+				{
+					slope[i] = null;
+				}
+				else
+				{
+					slope[i] = rad2deg * Math.Atan(((values[i] ?? 0) - (values[i - 1] ?? 0)) / (atr[i] ?? 1));
+				}
+			}
+
+			return slope;
+		}
+
+		/// <summary>
+		/// Jurik Moving Average
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="length"></param>
+		/// <param name="phase"></param>
+		/// <param name="power"></param>
+		/// <returns></returns>
+		public static double?[] Jma(double[] values, int length, double phase, double power)
+		{
+			double?[] jma = new double?[values.Length];
+			double?[] e0 = new double?[values.Length];
+			double?[] e1 = new double?[values.Length];
+			double?[] e2 = new double?[values.Length];
+
+			double phaseRatio = phase < -100 ? 0.5 : (phase > 100 ? 2.5 : phase / 100.0 + 1.5);
+			double beta = 0.45 * (length - 1) / (0.45 * (length - 1) + 2);
+			double alpha = Math.Pow(beta, power);
+
+			e0[0] = values[0];
+			e1[0] = 0;
+			e2[0] = 0;
+			jma[0] = values[0];
+			for (int i = 1; i < values.Length; i++)
+			{
+				e0[i] = (1 - alpha) * values[i] + alpha * (e0[i - 1] ?? values[i]);
+				e1[i] = (values[i] - (e0[i] ?? values[i])) * (1 - beta) + beta * (e1[i - 1] ?? 0);
+				e2[i] = ((e0[i] ?? values[i]) + phaseRatio * (e1[i] ?? 0) - (jma[i - 1] ?? 0)) * Math.Pow(1 - alpha, 2) + Math.Pow(alpha, 2) * (e2[i - 1] ?? 0);
+				jma[i] = (e2[i] ?? 0) + (jma[i - 1] ?? 0);
+			}
+
+			return jma;
+		}
+
+		public static (double?[] jmaSlope, double?[] jmaFastSlope, double?[] ma27Slope, double?[] ma83Slope, double?[] ma278Slope) MaAngles(double[] open, double[] high, double[] low, double[] close)
+		{
+			double[] src = new double[close.Length];
+			for (int i = 0; i < close.Length; i++)
+			{
+				src[i] = (open[i] + high[i] + low[i] + close[i]) / 4.0;
+			}
+			var nullableSrc = src.ToNullable();
+
+			var jma = Jma(src, 10, 50, 1);
+			var jmaFast = Jma(src, 10, 50, 2);
+
+			double?[] ma27 = Ema(nullableSrc, 27);
+			double?[] ma83 = Ema(nullableSrc, 83);
+			double?[] ma278 = Ema(nullableSrc, 278);
+
+			var jmaSlope = Angle(high, low, close, jma);
+			var jmaFastSlope = Angle(high, low, close, jmaFast);
+			var ma27Slope = Angle(high, low, close, ma27);
+			var ma83Slope = Angle(high, low, close, ma83);
+			var ma278Slope = Angle(high, low, close, ma278);
+
+			return (jmaSlope, jmaFastSlope, ma27Slope, ma83Slope, ma278Slope);
+		}
+
+		public static (double?[] wvf, bool[] signal) WilliamsVixFix(double[] low, double[] close, int pd = 22, int bbl = 20, double mult = 3.0, int lb = 50, double ph = 0.85, double pl = 1.01)
+		{
+			double?[] wvf = new double?[close.Length];
+			bool[] signal = new bool[close.Length];
+			double?[] upperBand = new double?[close.Length];
+			double?[] lowerBand = new double?[close.Length];
+			double?[] rangeHigh = new double?[close.Length];
+			double?[] rangeLow = new double?[close.Length];
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				if (i + 1 >= pd)
+				{
+					double highestClose = close.Skip(i + 1 - pd).Take(pd).Max();
+					wvf[i] = (highestClose - low[i]) / highestClose * 100.0;
+				}
+				else
+				{
+					wvf[i] = null;
+				}
+			}
+
+			double?[] wvfStd = Stdev(wvf, bbl);
+			for (int i = 0; i < close.Length; i++)
+			{
+				if (i + 1 >= bbl)
+				{
+					var wvfSlice = wvf.Skip(i + 1 - bbl).Take(bbl).ToArray();
+					if (wvfSlice.All(x => x.HasValue))
+					{
+						double midLine = wvfSlice.Average(x => x!.Value);
+						double sDev = (wvfStd[i] ?? 0) * mult;
+						lowerBand[i] = midLine - sDev;
+						upperBand[i] = midLine + sDev;
+					}
+					else
+					{
+						lowerBand[i] = null;
+						upperBand[i] = null;
+					}
+				}
+				else
+				{
+					lowerBand[i] = null;
+					upperBand[i] = null;
+				}
+			}
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				if (i + 1 >= lb)
+				{
+					var wvfSlice = wvf.Skip(i + 1 - lb).Take(lb).ToArray();
+					if (wvfSlice.All(x => x.HasValue))
+					{
+						rangeHigh[i] = wvfSlice.Max(x => x!.Value) * ph;
+						rangeLow[i] = wvfSlice.Min(x => x!.Value) * pl;
+					}
+					else
+					{
+						rangeHigh[i] = null;
+						rangeLow[i] = null;
+					}
+				}
+				else
+				{
+					rangeHigh[i] = null;
+					rangeLow[i] = null;
+				}
+			}
+
+			for (int i = 0; i < close.Length; i++)
+			{
+				signal[i] = wvf[i] >= upperBand[i] || wvf[i] >= rangeHigh[i];
+			}
+
+			return (wvf, signal);
 		}
 
 	}

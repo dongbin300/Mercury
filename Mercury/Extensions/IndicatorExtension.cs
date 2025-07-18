@@ -84,40 +84,13 @@ namespace Mercury.Extensions
 
 		public static IEnumerable<LsmaResult> GetLsma(this IEnumerable<Quote> quotes, int period)
 		{
-			var pl = new List<double>();
 			var result = new List<LsmaResult>();
-			var quoteList = quotes.ToList();
 
-			for (int i = 0; i < quoteList.Count; i++)
+			var values = quotes.Select(x => (double)x.Close).ToArray();
+			var lsma = ArrayCalculator.Lsma(values, period);
+			for (int i = 0; i < lsma.Length; i++)
 			{
-				pl.Add((double)quoteList[i].Close);
-
-				if (pl.Count >= period)
-				{
-					double sumX = 0;
-					double sumY = 0;
-					double sumXY = 0;
-					double sumXX = 0;
-					double sumYY = 0;
-
-					for (int a = 1; a <= pl.Count; a++)
-					{
-						sumX += a;
-						sumY += pl[a - 1];
-						sumXY += pl[a - 1] * a;
-						sumXX += a * a;
-						sumYY += pl[a - 1] * pl[a - 1];
-					}
-
-					double m = (sumXY - sumX * sumY / period) / (sumXX - sumX * sumX / period);
-					double b = sumY / period - m * sumX / period;
-					result.Add(new LsmaResult(quoteList[i].Date, (decimal)(m * period + b)));
-					pl = [.. pl.Skip(1)];
-				}
-				else
-				{
-					result.Add(new LsmaResult(quoteList[i].Date, 0));
-				}
+				result.Add(new LsmaResult(quotes.ElementAt(i).Date, (decimal?)lsma[i]));
 			}
 
 			return result;
@@ -153,12 +126,28 @@ namespace Mercury.Extensions
 			return result;
 		}
 
-		public static IEnumerable<StochasticRsiResult> GetStochasticRsi(this IEnumerable<Quote> quotes, int smoothK = 3, int smoothD = 3, int rsiPeriod = 14, int stochasticPeriod = 14)
+		public static IEnumerable<StochasticResult> GetStochastic(this IEnumerable<Quote> quotes, int periodK = 14, int smoothK = 3, int smoothD = 3)
+		{
+			var result = new List<StochasticResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			(var k, var d) = ArrayCalculator.Stochastic(high, low, close, periodK, smoothK, smoothD);
+			for (int i = 0; i < k.Length; i++)
+			{
+				result.Add(new StochasticResult(quotes.ElementAt(i).Date, (decimal?)k[i], (decimal?)d[i]));
+			}
+
+			return result;
+		}
+
+		public static IEnumerable<StochasticRsiResult> GetStochasticRsi(this IEnumerable<Quote> quotes, int rsiPeriod = 14, int stochasticPeriod = 14, int smoothK = 3, int smoothD = 3)
 		{
 			var result = new List<StochasticRsiResult>();
 
 			var values = quotes.Select(x => (double)x.Close).ToArray();
-			(var k, var d) = ArrayCalculator.StochasticRsi(values, smoothK, smoothD, rsiPeriod, stochasticPeriod);
+			(var k, var d) = ArrayCalculator.StochasticRsi(values, rsiPeriod, stochasticPeriod, smoothK, smoothD);
 			for (int i = 0; i < k.Length; i++)
 			{
 				result.Add(new StochasticRsiResult(quotes.ElementAt(i).Date, (decimal?)k[i], (decimal?)d[i]));
@@ -543,6 +532,41 @@ namespace Mercury.Extensions
 			return result;
 		}
 
+		public static IEnumerable<EatrResult> GetEatr(this IEnumerable<Quote> quotes, int atrPeriod = 14, int emaPeriod = 20)
+		{
+			var result = new List<EatrResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			var eatr = ArrayCalculator.Eatr(high, low, close, atrPeriod, emaPeriod);
+
+			for (int i = 0; i < eatr.Length; i++)
+			{
+				result.Add(new EatrResult(quotes.ElementAt(i).Date, (decimal?)eatr[i]));
+			}
+
+			return result;
+		}
+
+		public static IEnumerable<AtrVolumeResult> GetAtrVolume(this IEnumerable<Quote> quotes, int period = 14)
+		{
+			var result = new List<AtrVolumeResult>();
+
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			var volume = quotes.Select(x => (double)x.Volume).ToArray();
+			var atrVolume = ArrayCalculator.AtrVolume(high, low, close, volume, period);
+
+			for (int i = 0; i < atrVolume.Length; i++)
+			{
+				result.Add(new AtrVolumeResult(quotes.ElementAt(i).Date, (decimal?)atrVolume[i]));
+			}
+
+			return result;
+		}
+
 		public static IEnumerable<RsimaResult> GetRsima(this IEnumerable<Quote> quotes, int rsiPeriod = 14, int maPeriod = 20)
 		{
 			var result = new List<RsimaResult>();
@@ -599,7 +623,8 @@ namespace Mercury.Extensions
 			var high = quotes.Select(x => (double)x.High).ToArray();
 			var low = quotes.Select(x => (double)x.Low).ToArray();
 			var close = quotes.Select(x => (double)x.Close).ToArray();
-			var candleScore = ArrayCalculator.CandleScore(open, high, low, close, null);
+			var volume = quotes.Select(x => (double)x.Volume).ToArray();
+			var candleScore = ArrayCalculator.CandleScore(open, high, low, close, volume);
 
 			for (int i = 0; i < candleScore.Length; i++)
 			{
@@ -676,6 +701,40 @@ namespace Mercury.Extensions
 			for (int i = 0; i < bullPower.Length; i++)
 			{
 				result.Add(new ElderRayPowerResult(quotes.ElementAt(i).Date, (decimal?)bullPower[i], (decimal?)bearPower[i]));
+			}
+
+			return result;
+		}
+
+		public static IEnumerable<MaAnglesResult> GetMaAngles(this IEnumerable<Quote> quotes)
+		{
+			var result = new List<MaAnglesResult>();
+
+			var open = quotes.Select(x => (double)x.Open).ToArray();
+			var high = quotes.Select(x => (double)x.High).ToArray();
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			(var jmaSlope, var jmaFastSlope, var ma27Slope, var ma83Slope, var ma278Slope) = ArrayCalculator.MaAngles(open, high, low, close);
+
+			for (int i = 0; i < jmaSlope.Length; i++)
+			{
+				result.Add(new MaAnglesResult(quotes.ElementAt(i).Date, (decimal?)jmaSlope[i], (decimal?)jmaFastSlope[i], (decimal?)ma27Slope[i], (decimal?)ma83Slope[i], (decimal?)ma278Slope[i]));
+			}
+
+			return result;
+		}
+
+		public static IEnumerable<WilliamsVixFixResult> GetWilliamsVixFix(this IEnumerable<Quote> quotes)
+		{
+			var result = new List<WilliamsVixFixResult>();
+
+			var low = quotes.Select(x => (double)x.Low).ToArray();
+			var close = quotes.Select(x => (double)x.Close).ToArray();
+			(var wvf, var signal) = ArrayCalculator.WilliamsVixFix(low, close);
+
+			for (int i = 0; i < wvf.Length; i++)
+			{
+				result.Add(new WilliamsVixFixResult(quotes.ElementAt(i).Date, (decimal?)wvf[i], signal[i]));
 			}
 
 			return result;

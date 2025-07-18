@@ -421,8 +421,8 @@ namespace Mercury.Backtests
 			var price = Prices[chartIndex];
 
 			var longTermChartsOrderByDescending = LongTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime);
-			var longTermSupertrend = (decimal)longTermChartsOrderByDescending.ElementAt(1).TrendRiderSupertrend;
-			var shortTermAverageAtr = (decimal)ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).Skip(1).Take(ATR_COUNT).Average(x => x.Atr);
+			var longTermSupertrend = longTermChartsOrderByDescending.ElementAt(1).TrendRiderSupertrend ?? 0;
+			var shortTermAverageAtr = ShortTermCharts.Where(d => d.DateTime <= price.Date).OrderByDescending(d => d.DateTime).Skip(1).Take(ATR_COUNT).Average(x => x.Atr) ?? 0;
 
 			if (GridType == GridType.Long)
 			{
