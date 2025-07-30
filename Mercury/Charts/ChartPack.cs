@@ -2,6 +2,8 @@
 
 using Mercury.Extensions;
 
+using IndicatorType = Mercury.Extensions.IndicatorType;
+
 namespace Mercury.Charts
 {
 	public class ChartPack(KlineInterval interval)
@@ -336,9 +338,23 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseBollingerBands(int period = 20, double deviation = 2.0)
+		public void UseBollingerBands(int period = 20, double deviation = 2.0, QuoteType quoteType = QuoteType.Close)
 		{
-			var bollingerBands = Charts.Select(x => x.Quote).GetBollingerBands(period, deviation);
+			var bollingerBands = Charts.Select(x => x.Quote).GetBollingerBands(period, deviation, quoteType);
+			var upper = bollingerBands.Select(x => x.Upper);
+			var lower = bollingerBands.Select(x => x.Lower);
+			var sma = bollingerBands.Select(x => x.Sma);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].Bb1Sma = sma.ElementAt(i);
+				Charts[i].Bb1Upper = upper.ElementAt(i);
+				Charts[i].Bb1Lower = lower.ElementAt(i);
+			}
+		}
+
+		public void UseBollingerBands(int period = 20, double deviation = 2.0, IndicatorType indicatorType = IndicatorType.Sma)
+		{
+			var bollingerBands = Charts.GetBollingerBands(period, deviation, indicatorType);
 			var upper = bollingerBands.Select(x => x.Upper);
 			var lower = bollingerBands.Select(x => x.Lower);
 			var sma = bollingerBands.Select(x => x.Sma);

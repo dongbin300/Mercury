@@ -9,7 +9,7 @@ namespace Mercury.Backtests.BacktestStrategies
 {
 	public class MACD5(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
-		public int AdxThreshold { get; set; }
+		public int AdxThreshold;
 
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
 		{

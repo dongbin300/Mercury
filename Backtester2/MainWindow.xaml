@@ -1,0 +1,92 @@
+﻿<Window x:Class="Backtester2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Backtester2"
+        mc:Ignorable="d"
+        Title="BACKTEST" Height="950" Width="1000" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Orientation="Vertical" Margin="10,10,20,10">
+                        <TextBlock Style="{StaticResource Description}">SYMBOL</TextBlock>
+                        <TextBox x:Name="SymbolInputTextBox" CharacterCasing="Upper" PreviewKeyDown="SymbolInputTextBox_PreviewKeyDown" TextChanged="SymbolInputTextBox_TextChanged" />
+                        <ListBox x:Name="SymbolFilteredListBox" Height="200" Visibility="Collapsed" />
+                        <WrapPanel x:Name="SymbolTickerPanel" Margin="0,10,0,0" />
+                        <TextBlock x:Name="SymbolCountTextBlock" Margin="5,0,0,10" FontWeight="Bold" Text="0" Foreground="{StaticResource Long}"/>
+                        <CheckBox x:Name="SingleSymbolCheckBox">Single</CheckBox>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="RandomSymbolCheckBox" Checked="RandomSymbolCheckBox_Checked">Random</CheckBox>
+                            <TextBox x:Name="RandomSymbolCountTextBox" Width="40" HorizontalContentAlignment="Right"/>
+                        </StackPanel>
+
+                        <TextBlock Style="{StaticResource Description}">DATE</TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="StartDateTextBox" Width="120" Text="2022-01-01" TextChanged="StartDateTextBox_TextChanged"/>
+                            <TextBox x:Name="EndDateTextBox" Width="120" Text="2022-12-31" TextChanged="EndDateTextBox_TextChanged"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="RandomDateCheckBox" Checked="RandomDateCheckBox_Checked">Random</CheckBox>
+                            <TextBox x:Name="RandomDatePeriodTextBox" Width="40" HorizontalContentAlignment="Right"/>
+                        </StackPanel>
+
+                        <TextBlock Style="{StaticResource Description}">INTERVAL</TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox x:Name="Interval1ComboBox" Width="90"/>
+                            <ComboBox x:Name="Interval2ComboBox" Width="90"/>
+                            <ComboBox x:Name="Interval3ComboBox" Width="90"/>
+                        </StackPanel>
+
+                        <TextBlock Style="{StaticResource Description}">STRATEGY</TextBlock>
+                        <ComboBox x:Name="StrategyComboBox" SelectionChanged="StrategyComboBox_SelectionChanged"/>
+                        <CheckBox x:Name="LongEnableCheckBox" IsChecked="True">Long</CheckBox>
+                        <CheckBox x:Name="ShortEnableCheckBox" IsChecked="True">Short</CheckBox>
+                        <StackPanel x:Name="StrategyParameterPanel" Orientation="Vertical" Margin="20,0,0,0"/>
+
+                        <TextBlock Style="{StaticResource Description}">SEED</TextBlock>
+                        <TextBox x:Name="SeedTextBox" HorizontalContentAlignment="Right" Text="123456789" PreviewTextInput="SeedTextBox_PreviewTextInput" TextChanged="SeedTextBox_TextChanged"/>
+
+                        <TextBlock Style="{StaticResource Description}">LEVERAGE</TextBlock>
+                        <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="10"/>
+
+                        <TextBlock Style="{StaticResource Description}">MAX POSITIONS</TextBlock>
+                        <TextBox x:Name="MaxPositionsTextBox" HorizontalContentAlignment="Right" Text="20"/>
+                        <CheckBox x:Name="MaxPositionsEachCheckBox">Each</CheckBox>
+
+                        <TextBlock Style="{StaticResource Description}">FEE RATE(%)</TextBlock>
+                        <TextBox x:Name="FeeRateTextBox" HorizontalContentAlignment="Right" Text="0.02"/>
+
+                        <TextBlock Style="{StaticResource Description}">FILE NAME</TextBlock>
+                        <TextBox x:Name="FileNameTextBox"/>
+                        <CheckBox x:Name="ReportDailyHistoryCheckBox">Daily</CheckBox>
+                        <CheckBox x:Name="ReportPositionHistoryCheckBox">Position</CheckBox>
+
+
+                        <Button x:Name="RunButton" Click="RunButton_Click">Run</Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <Grid Grid.Column="1">
+                
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <TextBlock x:Name="StatusTextBlock"/>
+        </Grid>
+        
+    </Grid>
+</Window>

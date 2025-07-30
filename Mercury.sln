@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsvPlus", "CsvPlus\CsvPlus.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonFastApiTest", "PythonFastApiTest\PythonFastApiTest.csproj", "{9F1D448E-D097-47CA-AAED-F5B92DE8DE3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backtester2", "Backtester2\Backtester2.csproj", "{D360CD4F-175F-4552-BCE8-F83D58E9062E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -397,6 +399,18 @@ Global
 		{9F1D448E-D097-47CA-AAED-F5B92DE8DE3E}.Release|x64.Build.0 = Release|Any CPU
 		{9F1D448E-D097-47CA-AAED-F5B92DE8DE3E}.Release|x86.ActiveCfg = Release|Any CPU
 		{9F1D448E-D097-47CA-AAED-F5B92DE8DE3E}.Release|x86.Build.0 = Release|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Debug|x64.Build.0 = Debug|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Debug|x86.Build.0 = Debug|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Release|x64.ActiveCfg = Release|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Release|x64.Build.0 = Release|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Release|x86.ActiveCfg = Release|Any CPU
+		{D360CD4F-175F-4552-BCE8-F83D58E9062E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

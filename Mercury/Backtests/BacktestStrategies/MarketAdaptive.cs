@@ -79,7 +79,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			chartPack.UseEma(50, 200);
 			chartPack.UseAtr(14);
 			chartPack.UseRsi(14);
-			chartPack.UseBollingerBands(20, 2);
+			chartPack.UseBollingerBands(20, 2, Extensions.QuoteType.Close);
 		}
 
 		protected override void LongEntry(string symbol, List<ChartInfo> charts, int i)

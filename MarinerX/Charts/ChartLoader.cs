@@ -562,7 +562,7 @@ namespace MarinerX.Charts
 		{
 			try
 			{
-				var manualStartTime = DateTime.Parse("2019-09-08");
+				var manualStartTime = DateTime.Parse("2025-03-01");
 				var symbols = LocalApi.SymbolNames;
 				var dayCountTemp = (DateTime.Today - manualStartTime).Days + 1;
 				var csvFileCount = symbols.Count * dayCountTemp;
@@ -572,7 +572,7 @@ namespace MarinerX.Charts
 				for (int j = 0; j < symbols.Count; j++)
 				{
 					var symbol = symbols[j];
-					var startTime = manualStartTime;
+					var startTime = SymbolUtil.GetStartDate(symbol);
 					var fileName = MercuryPath.BinanceFuturesData.Down(interval.ToIntervalString(), $"{symbol}.csv");
 
 					// 파일이 존재하면 가장 마지막 줄의 시간을 가져옴

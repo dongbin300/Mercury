@@ -14,8 +14,46 @@ namespace Mercury.Extensions
         public static double Round(this double value, int digit) => Math.Round(value, digit);
         public static decimal Round(this decimal value, int digit) => Math.Round(value, digit);
         public static int ToInt(this string value) => int.Parse(value);
+        public static int ToInt(this object? value)
+        {
+            if (value == null)
+            {
+                return 0;
+            }
+            try
+            {
+                if (value is int i)
+                {
+                    return i;
+                }
+                return Convert.ToInt32(value);
+            }
+            catch
+            {
+                return 0;
+			}
+		}
         public static double ToDouble(this string value) => double.Parse(value);
         public static decimal ToDecimal(this string value) => decimal.Parse(value);
+        public static decimal ToDecimal(this object? value)
+        {
+			if (value == null)
+            {
+				return 0m;
+			}
+			try
+			{
+				if (value is decimal d)
+                {
+					return d;
+				}
+				return Convert.ToDecimal(value);
+			}
+			catch
+			{
+				return 0m;
+			}
+		}
         public static long ToLong(this string value) => long.Parse(value);
         public static DateTime ToDateTime(this string value) => DateTime.Parse(value);
         public static DateTime ToDateTime(this long timestamp) => DateTimeOffset.FromUnixTimeMilliseconds(timestamp).UtcDateTime;

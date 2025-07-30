@@ -106,7 +106,7 @@ namespace Mercury.Backtests
 						break;
 
 					case "goldbb":
-						chartPack.UseBollingerBands();
+						chartPack.UseBollingerBands(20, 2, QuoteType.Close);
 						chartPack.UseSma(10);
 						chartPack.UseEma(10);
 						break;

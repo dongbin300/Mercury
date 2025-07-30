@@ -22,13 +22,13 @@ namespace Mercury.Backtests.BacktestStrategies
 	/// <param name="maxActiveDeals"></param>
 	public class Ema2(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
-		public int FibonacciPeriod { get; set; } = 365;
-		public int BasePeriod { get; set; } = 30;
-		public int Ema1Period { get; set; } = 120;
-		public int Ema2Period { get; set; } = 240;
-		public decimal NearLower { get; set; } = 0.98m;
-		public decimal NearUpper { get; set; } = 1.05m;
-		public decimal HighRange { get; set; } = 20m;
+		public int FibonacciPeriod = 365;
+		public int BasePeriod = 30;
+		public int Ema1Period = 120;
+		public int Ema2Period = 240;
+		public decimal NearLower = 0.98m;
+		public decimal NearUpper = 1.05m;
+		public decimal HighRange = 20m;
 
 
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)

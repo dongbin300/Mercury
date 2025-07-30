@@ -7,11 +7,11 @@ namespace Mercury.Backtests.BacktestStrategies
 {
 	public class MarketAdaptive2 : Backtester
 	{
-		//public int SmaPeriod { get; set; } = 50;
-		public int RsiLongThreshold { get; set; } = 38;
-		public double StopLossAtrMultiplier { get; set; } = 0.8;
-		public double NewStopLossAtrMultiplier { get; set; } = 0.5;
-		public int MaxHoldBars { get; set; } = 10;
+		//public int SmaPeriod = 50;
+		public int RsiLongThreshold = 38;
+		public double StopLossAtrMultiplier = 0.8;
+		public double NewStopLossAtrMultiplier = 0.5;
+		public int MaxHoldBars = 10;
 
 
 		public MarketAdaptive2(string reportFileName, decimal startMoney, int leverage,
@@ -25,7 +25,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			//chartPack.UseSma(SmaPeriod);
 			chartPack.UseAtr(14);
 			chartPack.UseRsi(14);
-			chartPack.UseBollingerBands(20, 2);
+			chartPack.UseBollingerBands(20, 2, Extensions.QuoteType.Close);
 		}
 
 		protected override void LongEntry(string symbol, List<ChartInfo> charts, int i)

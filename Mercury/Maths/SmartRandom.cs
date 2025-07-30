@@ -68,6 +68,21 @@ namespace Mercury.Maths
 			return values.ElementAt(Next(values.Count()));
 		}
 
+		public List<T> Next<T>(IEnumerable<T> values, int count)
+		{
+			var list = values.ToList();
+			int n = list.Count;
+			if (count > n) count = n;
+
+			for (int i = n - 1; i > 0; i--)
+			{
+				int j = Next(i + 1);
+				(list[i], list[j]) = (list[j], list[i]);
+			}
+
+			return [.. list.Take(count)];
+		}
+
 		public DateTime Next(DateTime startTime, DateTime endTime)
 		{
 			return startTime.Date.AddDays(Next(0, (endTime.Date - startTime.Date).Days + 1));

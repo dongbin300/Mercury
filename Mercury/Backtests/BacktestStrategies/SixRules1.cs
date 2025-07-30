@@ -87,14 +87,12 @@ namespace Mercury.Backtests.BacktestStrategies
 	public class SixRules1(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
 		// 2. 거래량 급증 기준
-		public decimal VolumeSpikeRatio { get; set; } = 1.5m; // 1.5배 이상 급증
-
+		public decimal VolumeSpikeRatio = 1.5m; // 1.5배 이상 급증
 		// 3. 지지/저항선 lookback
-		public int SupportResistanceLookback { get; set; } = 60;
-
+		public int SupportResistanceLookback = 60;
 		// 4. 손절/익절 비율
-		public decimal StopLossRatio { get; set; } = 0.97m; // -3%
-		public decimal TakeProfitRatio { get; set; } = 1.06m; // +6%
+		public decimal StopLossRatio = 0.97m; // -3%
+		public decimal TakeProfitRatio = 1.06m; // +6%
 
 
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)

@@ -14,10 +14,10 @@ namespace Mercury.Backtests.BacktestStrategies
 	/// </summary>
 	public class PS1 : Backtester
 	{
-		public int HoldBars { get; set; } = 1;
-		public double StopLossRate { get; set; } = 0.003;
-		public double TakeProfitRate { get; set; } = 0.007;
-		public int[] SmaPeriods { get; set; } = new int[] { 3, 5, 8, 13, 21, 34 };
+		public int HoldBars = 1;
+		public double StopLossRate = 0.003;
+		public double TakeProfitRate = 0.007;
+		public int[] SmaPeriods = [3, 5, 8, 13, 21, 34];
 
 		public PS1(string reportFileName, decimal startMoney, int leverage,
 			MaxActiveDealsType maxActiveDealsType, int maxActiveDeals)

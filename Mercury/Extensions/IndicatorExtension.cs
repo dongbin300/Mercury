@@ -1,4 +1,5 @@
-﻿using Mercury.Indicators;
+﻿using Mercury.Charts;
+using Mercury.Indicators;
 using Mercury.Maths;
 
 namespace Mercury.Extensions
@@ -9,6 +10,28 @@ namespace Mercury.Extensions
 		High,
 		Low,
 		Close
+	}
+
+	public enum IndicatorType
+	{
+		Ri,
+		Lsma,
+		Rsi,
+		Stoch,
+		Stochastic,
+		StochasticRsi,
+		Stdev,
+		Sma,
+		Ema,
+		Ewmac,
+		SmaVolume,
+		BollingerBands,
+		IchimokuCloud,
+		Macd,
+		Cci,
+		Supertrend,
+		Adx,
+		Atr
 	}
 
 	public static class IndicatorExtension
@@ -255,6 +278,27 @@ namespace Mercury.Extensions
 			for (int i = 0; i < sma.Length; i++)
 			{
 				result.Add(new BbResult(quotes.ElementAt(i).Date, (decimal?)sma[i], (decimal?)upper[i], (decimal?)lower[i]));
+			}
+
+			return result;
+		}
+
+		public static IEnumerable<BbResult> GetBollingerBands(this IEnumerable<ChartInfo> charts, int period = 20, double deviation = 2.0, IndicatorType indicatorType = IndicatorType.Sma)
+		{
+			var result = new List<BbResult>();
+
+			var values = indicatorType switch
+			{
+				IndicatorType.Ema => [.. charts.Select(x => (double?)x.Ema1)],
+				IndicatorType.Rsi => [.. charts.Select(x => (double?)x.Rsi1)],
+				IndicatorType.Cci => [.. charts.Select(x => (double?)x.Cci)],
+				IndicatorType.Sma or _ => charts.Select(x => (double?)x.Sma1).ToArray(),
+			};
+
+			(var sma, var upper, var lower) = ArrayCalculator.BollingerBands(values, period, deviation);
+			for (int i = 0; i < sma.Length; i++)
+			{
+				result.Add(new BbResult(charts.ElementAt(i).DateTime, (decimal?)sma[i], (decimal?)upper[i], (decimal?)lower[i]));
 			}
 
 			return result;

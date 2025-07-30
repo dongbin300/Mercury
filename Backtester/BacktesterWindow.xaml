@@ -117,6 +117,7 @@
                 <Button Grid.Column="2" x:Name="BacktestMacro2Button" Content="BACKTEST MACRO 2" Click="BacktestButton_Click"/>
                 <Button Grid.Column="3" x:Name="BacktestMacro3Button" Content="BACKTEST MACRO 3" Click="BacktestButton_Click"/>
                 <Button Grid.Column="0" Grid.Row="1" x:Name="BacktestMacroRButton" Content="RANDOM MACRO" Click="BacktestButton_Click"/>
+                <Button Grid.Column="1" Grid.Row="1" x:Name="BacktestMacroASButton" Content="ALL MACRO" Click="BacktestButton_Click" Background="Orange"/>
             </Grid>
         </Grid>
     </Grid>

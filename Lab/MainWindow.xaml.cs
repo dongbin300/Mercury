@@ -98,7 +98,7 @@ namespace Lab
 			{
 				chartPacks[i].UseRsi(14);
 				chartPacks[i].UseSma(20, 50);
-				chartPacks[i].UseBollingerBands(20, 2);
+				chartPacks[i].UseBollingerBands(20, 2, QuoteType.Close);
 				chartPacks[i].UseStochasticRsi(14, 14, 3, 3);
 				chartPacks[i].UseMacd(12, 26, 9);
 				chartPacks[i].UseAtr(14);

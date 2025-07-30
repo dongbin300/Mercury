@@ -16,7 +16,7 @@ namespace Mercury.Backtests.BacktestStrategies
 	/// <param name="maxActiveDeals"></param>
 	public class MLMIP1(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
-		public decimal ProfitRatio { get; set; }
+		public decimal ProfitRatio;
 
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
 		{

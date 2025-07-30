@@ -34,11 +34,11 @@ namespace Mercury.Backtests.BacktestStrategies
 		public int LInnerCount { get; set; }
 		public int SInnerCount { get; set; }
 
-		public int EmaPeriod { get; set; } = 50;
-		public int Stage0Count { get; set; } = 25;
-		public int Stage2Count { get; set; } = 10;
-		public int SlCount { get; set; } = 20;
-		public int TpCount { get; set; } = 40;
+		public int EmaPeriod = 50;
+		public int Stage0Count = 25;
+		public int Stage2Count = 10;
+		public int SlCount = 20;
+		public int TpCount = 40;
 
 		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
 		{
