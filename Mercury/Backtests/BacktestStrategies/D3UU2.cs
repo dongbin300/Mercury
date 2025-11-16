@@ -14,7 +14,7 @@ namespace Mercury.Backtests.BacktestStrategies
 
 		public decimal CloseBodyLengthMin { get; set; }
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 
 		}

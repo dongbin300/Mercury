@@ -5,6 +5,7 @@ namespace Mercury
     public class MercuryPath
     {
         public static string Desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        //public static string Desktop = "D:\\Project\\CS\\Mercury";
         public static string Base = "D:\\Assets";
         public static string BinanceApiKey = Base.Down("binance_api.txt");
         public static string BinanceFuturesData = Base.Down("BinanceFuturesData");

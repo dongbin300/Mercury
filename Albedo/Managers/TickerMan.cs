@@ -113,7 +113,7 @@ namespace Albedo.Managers
         }
         public static void UpdateBinanceCoinFuturesTicker(BinanceSocketClient client, MenuControl menu)
         {
-            client.CoinFuturesApi.SubscribeToAllTickerUpdatesAsync((obj) =>
+            client.UsdFuturesApi.ExchangeData.SubscribeToAllTickerUpdatesAsync((obj) =>
             {
                 if (Common.CurrentSelectedPairMarket.PairMarket == PairMarket.Favorites) // 즐겨찾기
                 {

@@ -42,6 +42,10 @@ namespace Mercury.Charts
 		public decimal? Ema8 { get; set; }
 		public decimal? Ema9 { get; set; }
 		public decimal? Ema10 { get; set; }
+		public decimal? Dema1 { get; set; }
+		public decimal? Dema2 { get; set; }
+		public decimal? Dema3 { get; set; }
+		public decimal? DemaSlope { get; set; }
 		public decimal? Ewmac { get; set; }
 		public decimal? Lsma1 { get; set; }
 		public decimal? Lsma2 { get; set; }
@@ -63,6 +67,9 @@ namespace Mercury.Charts
 		public decimal? StochasticRsiK { get; set; }
 		public decimal? StochasticRsiD { get; set; }
 		public decimal? Cci { get; set; }
+		public decimal? Cci2 { get; set; }
+		public decimal? Cci3 { get; set; }
+		public decimal? CciVolatilityThreshold { get; set; }
 		public decimal? Supertrend1 { get; set; }
 		public decimal? Supertrend2 { get; set; }
 		public decimal? Supertrend3 { get; set; }
@@ -88,6 +95,7 @@ namespace Mercury.Charts
 		public decimal? Bb2Lower { get; set; }
 
 		public decimal? VolumeSma { get; set; }
+		public decimal? VolumeEma { get; set; }
 
 		public decimal? CustomUpper { get; set; }
 		public decimal? CustomLower { get; set; }
@@ -135,6 +143,8 @@ namespace Mercury.Charts
 
 		public decimal? VolatilityRatio { get; set; }
 
+		public decimal? Volatility { get; set; }
+		public decimal? TrendStrength { get; set; }
 		public decimal? CandleScore { get; set; }
 
 		public decimal? Wvf { get; set; }
@@ -142,6 +152,12 @@ namespace Mercury.Charts
 
 		public decimal LiquidationPriceLong { get; set; } = 0m;
 		public decimal LiquidationPriceShort { get; set; } = 0m;
+
+		public decimal? IcConversion { get; set; }
+		public decimal? IcBase { get; set; }
+		public decimal? IcTrailingSpan { get; set; }
+		public decimal? IcLeadingSpan1 { get; set; }
+		public decimal? IcLeadingSpan2 { get; set; }
 
 		public override string ToString() => $"{Symbol} | {DateTime} | {Quote.Open} | {Quote.High} | {Quote.Low} | {Quote.Close} | {Quote.Volume}";
 
@@ -164,5 +180,34 @@ namespace Mercury.Charts
 			MtmTradeElementType.roe => asset.Position.AveragePrice * (1 + (tradeElement.Value / 100)),
 			_ => tradeElement.Value
 		};
+
+		public IchimokuCloudPosition GetIchimokuCloudPosition()
+		{
+			if (IcLeadingSpan1 is null || IcLeadingSpan2 is null || IcConversion is null || IcBase is null)
+			{
+				return IchimokuCloudPosition.None;
+			}
+
+			var close = Quote.Close;
+
+			var cloudTop = Math.Max(IcLeadingSpan1.Value, IcLeadingSpan2.Value);
+			var cloudBottom = Math.Min(IcLeadingSpan1.Value, IcLeadingSpan2.Value);
+
+			bool priceAboveCloud = close > cloudTop;
+			bool priceBelowCloud = close < cloudBottom;
+			bool bullishTenkanKijun = IcConversion > IcBase;
+			bool bearishTenkanKijun = IcConversion < IcBase;
+
+			if (priceAboveCloud && bullishTenkanKijun)
+			{
+				return IchimokuCloudPosition.Above;
+			}
+			if (priceBelowCloud && bearishTenkanKijun)
+			{
+				return IchimokuCloudPosition.Below;
+			}
+			return IchimokuCloudPosition.Inside;
+		}
+
 	}
 }

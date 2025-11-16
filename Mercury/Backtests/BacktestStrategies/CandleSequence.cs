@@ -21,7 +21,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		public string exitCondition2 = string.Empty;
 		public decimal minBody = 0m;
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			entryCondition2 = ReverseCondition(entryCondition);
 			exitCondition2 = ReverseCondition(exitCondition);

@@ -1,0 +1,175 @@
+<Window x:Class="ChartViewer2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+        mc:Ignorable="d"
+        Title="Mariner X Chart Viewer 2.0" Height="700" Width="850" Background="{StaticResource Background}"
+        MouseMove="Window_MouseMove">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="45"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Name="SettingGrid" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Symbol</TextBlock>
+                    <TextBox x:Name="SymbolTextBox" CharacterCasing="Upper" TextChanged="SymbolTextBox_TextChanged"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Date</TextBlock>
+                    <TextBox x:Name="DateTextBox" TextChanged="DateTextBox_TextChanged"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Interval</TextBlock>
+                    <ComboBox x:Name="IntervalComboBox" SelectedIndex="2">
+                        <ComboBoxItem>1m</ComboBoxItem>
+                        <ComboBoxItem>3m</ComboBoxItem>
+                        <ComboBoxItem>5m</ComboBoxItem>
+                        <ComboBoxItem>15m</ComboBoxItem>
+                        <ComboBoxItem>30m</ComboBoxItem>
+                        <ComboBoxItem>1h</ComboBoxItem>
+                        <ComboBoxItem>1D</ComboBoxItem>
+                        <ComboBoxItem>1W</ComboBoxItem>
+                        <ComboBoxItem>1M</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Orientation="Vertical" Margin="0">
+                    <TextBlock Style="{StaticResource Description}" Margin="0">Candle</TextBlock>
+                    <TextBox x:Name="CandleCountTextBox" Text="" PreviewKeyDown="CandleCountTextBox_PreviewKeyDown"/>
+                </StackPanel>
+
+                <Button Grid.Column="4" x:Name="LoadHistoryButton" Click="LoadHistoryButton_Click">Load</Button>
+                <Button Grid.Column="5" x:Name="NextHistoryButton" Click="NextHistoryButton_Click">Next</Button>
+            </Grid>
+
+            <Grid Name="CandleChartGrid" Grid.Row="1" Background="{StaticResource ChartBackground}">
+                <lvc:CartesianChart x:Name="CandleChart"
+                                   ZoomMode="X"
+                                   ZoomingSpeed="1"
+                                   Background="Transparent">
+                </lvc:CartesianChart>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <StackPanel Orientation="Vertical">
+                <Button x:Name="RefreshOptionButton" Click="RefreshOptionButton_Click">Refresh</Button>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ma1CheckBox">MA 1</CheckBox>
+                    <TextBox x:Name="Ma1Text">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ma2CheckBox">MA 2</CheckBox>
+                    <TextBox x:Name="Ma2Text">20</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ma3CheckBox">MA 3</CheckBox>
+                    <TextBox x:Name="Ma3Text">30</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ema1CheckBox">EMA 1</CheckBox>
+                    <TextBox x:Name="Ema1Text">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ema2CheckBox">EMA 2</CheckBox>
+                    <TextBox x:Name="Ema2Text">20</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Ema3CheckBox">EMA 3</CheckBox>
+                    <TextBox x:Name="Ema3Text">50</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Supertrend1CheckBox">Supertrend</CheckBox>
+                    <TextBox x:Name="Supertrend1PeriodText">20</TextBox>
+                    <TextBox x:Name="Supertrend1FactorText">2</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Supertrend2CheckBox">Supertrend</CheckBox>
+                    <TextBox x:Name="Supertrend2PeriodText">60</TextBox>
+                    <TextBox x:Name="Supertrend2FactorText">3</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="Supertrend3CheckBox">Supertrend</CheckBox>
+                    <TextBox x:Name="Supertrend3PeriodText">120</TextBox>
+                    <TextBox x:Name="Supertrend3FactorText">6</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="RSupertrend1CheckBox">R-Supertrend</CheckBox>
+                    <TextBox x:Name="RSupertrend1PeriodText">12</TextBox>
+                    <TextBox x:Name="RSupertrend1FactorText">3</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="HLBoxCheckBox">HL-Box</CheckBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="CustomCheckBox">Custom</CheckBox>
+                    <TextBox x:Name="CustomPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="TrendLineCheckBox">Trend Line</CheckBox>
+                    <TextBox x:Name="TrendLinePeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="TrendRiderCheckBox">Trend Rider</CheckBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="EmaAtrCheckBox">EMA+ATR</CheckBox>
+                    <TextBox x:Name="EmaAtrEmaPeriodText">20</TextBox>
+                    <TextBox x:Name="EmaAtrAtrPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="RsiCheckBox">RSI</CheckBox>
+                    <TextBox x:Name="RsiPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="CciCheckBox">CCI</CheckBox>
+                    <TextBox x:Name="CciPeriodText">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="VolatilityCheckBox">Volatility</CheckBox>
+                    <TextBox x:Name="VolatilityPeriodText">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="TrendStrengthCheckBox">TrendStrength</CheckBox>
+                    <TextBox x:Name="TrendStrengthPeriodText">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="AtrCheckBox">ATR</CheckBox>
+                    <TextBox x:Name="AtrPeriodText">14</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="BbCheckBox">Bollinger Band</CheckBox>
+                    <TextBox x:Name="BbPeriodText">20</TextBox>
+                    <TextBox x:Name="BbDeviationText">2</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="IcCheckBox">Ichimoku Cloud</CheckBox>
+                    <TextBox x:Name="IcConversionText">9</TextBox>
+                    <TextBox x:Name="IcBaseText">26</TextBox>
+                    <TextBox x:Name="IcLeadingSpanText">52</TextBox>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

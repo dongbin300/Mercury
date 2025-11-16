@@ -13,7 +13,7 @@ namespace Mercury.Extensions
         public static string ToSignedPercentString(this decimal value) => value >= 0 ? "+" + value + "%" : value + "%";
         public static double Round(this double value, int digit) => Math.Round(value, digit);
         public static decimal Round(this decimal value, int digit) => Math.Round(value, digit);
-        public static int ToInt(this string value) => int.Parse(value);
+        public static int ToInt(this string value) => string.IsNullOrEmpty(value) ? 0 : int.Parse(value);
         public static int ToInt(this object? value)
         {
             if (value == null)
@@ -33,8 +33,8 @@ namespace Mercury.Extensions
                 return 0;
 			}
 		}
-        public static double ToDouble(this string value) => double.Parse(value);
-        public static decimal ToDecimal(this string value) => decimal.Parse(value);
+        public static double ToDouble(this string value) => string.IsNullOrEmpty(value) ? 0 : double.Parse(value);
+        public static decimal ToDecimal(this string value) => string.IsNullOrEmpty(value) ? 0 : decimal.Parse(value);
         public static decimal ToDecimal(this object? value)
         {
 			if (value == null)

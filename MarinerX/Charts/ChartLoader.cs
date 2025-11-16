@@ -8,6 +8,7 @@ using MarinerX.Utils;
 using Mercury;
 using Mercury.Apis;
 using Mercury.Charts;
+using Mercury.Cryptos;
 using Mercury.Extensions;
 
 using System;
@@ -724,9 +725,9 @@ namespace MarinerX.Charts
 		{
 			try
 			{
-				var getStartTime = new DateTime(2024, 1, 4);
+				var getStartTime = new DateTime(2025, 3, 21);
 				//var symbols = LocalApi.SymbolNames;
-				var symbols = new List<string> { "ETHUSDC" };
+				var symbols = new List<string> { "SLPUSDT" };
 				var maxCount = 2000;
 				var csvFileCount = maxCount * symbols.Count;
 				worker.SetProgressBar(0, csvFileCount);
@@ -783,7 +784,7 @@ namespace MarinerX.Charts
 					var files = new DirectoryInfo(symbolPath).GetFiles("*.csv");
 					var exceptedFiles = files.Except(new List<FileInfo> { files.OrderBy(f => f.Name).First(), files.OrderByDescending(f => f.Name).First() }); // Except start date & end date
 					var fileSizeAverage = exceptedFiles.Average(f => f.Length);
-					var invalidFileNames = exceptedFiles.Where(x => Math.Abs(x.Length - fileSizeAverage) > fileSizeAverage * 0.2).Select(x => x.Name).ToList();
+					var invalidFileNames = exceptedFiles.Where(x => Math.Abs(x.Length - fileSizeAverage) > fileSizeAverage * 0.5).Select(x => x.Name).ToList();
 
 					result.AddRange(invalidFileNames);
 				}
@@ -795,6 +796,66 @@ namespace MarinerX.Charts
 
 			return result;
 		}
+
+		/// <summary>
+		/// 1분봉 데이터 수집이 안되서 파일이 없는 파일명 탐색
+		/// </summary>
+		/// <param name="startDate"></param>
+		/// <param name="endDate"></param>
+		/// <returns></returns>
+		public static List<string> GetMissingDataFileNames()
+		{
+			var missingFiles = new List<string>();
+
+			try
+			{
+				var symbols = LocalApi.SymbolNames;
+
+				foreach (var symbol in symbols)
+				{
+					var symbolPath = MercuryPath.BinanceFuturesData.Down("1m", symbol);
+					if (!Directory.Exists(symbolPath))
+					{
+						continue;
+					}
+
+					var files = new DirectoryInfo(symbolPath).GetFiles("*.csv");
+
+					var existingDates = new HashSet<DateTime>();
+					foreach (var file in files)
+					{
+						var fileNameWithoutExt = Path.GetFileNameWithoutExtension(file.Name);
+
+						var parts = fileNameWithoutExt.Split('_');
+						if (parts.Length == 2 && DateTime.TryParse(parts[1], out var date))
+						{
+							existingDates.Add(date.Date);
+						}
+
+					}
+
+					var startDate = CryptoSymbol.GetStartDate(symbol);
+					var endDate = CryptoSymbol.GetEndDate(symbol);
+					var currentDate = startDate.Date;
+					while (currentDate <= endDate.Date)
+					{
+						if (!existingDates.Contains(currentDate))
+						{
+							string missingFileName = $"{currentDate:yyyy-MM-dd}.csv";
+							missingFiles.Add($"{symbol}/{missingFileName}");
+						}
+						currentDate = currentDate.AddDays(1);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+
+			return missingFiles;
+		}
+
 
 		public static List<(string, KlineInterval)> GetLoadedSymbols => Charts.Select(x => (x.Symbol, x.Interval)).ToList();
 		public static ChartPack GetChartPack(string symbol, KlineInterval interval) => Charts.Find(x => x.Symbol.Equals(symbol) && x.Interval.Equals(interval)) ?? default!;

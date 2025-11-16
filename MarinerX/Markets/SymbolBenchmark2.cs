@@ -5,7 +5,7 @@ namespace MarinerX.Markets
 	public class SymbolBenchmark2(string symbol, DateTime listingDate, decimal priceTickSize, decimal currentPrice, decimal priceTickPer, int elapsedDays, int maxLeverage, string pass)
 	{
 		public string Symbol { get; set; } = symbol;
-		public DateTime ListingDate { get; set; } = listingDate;
+		public string ListingDate => listingDate.ToString("yyyy-MM-dd");
 		public decimal PriceTickSize { get; set; } = priceTickSize;
 		public decimal CurrentPrice { get; set; } = currentPrice;
 		public decimal PriceTickPer { get; set; } = priceTickPer;

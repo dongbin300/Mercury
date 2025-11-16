@@ -2,15 +2,9 @@
 
 namespace Albedo.Models
 {
-    public class IndicatorData
-    {
-        public DateTime Date { get; set; }
-        public double Value { get; set; }
-
-        public IndicatorData(DateTime date, double value)
-        {
-            Date = date;
-            Value = value;
-        }
-    }
+    public class IndicatorData(DateTime date, decimal? value)
+	{
+		public DateTime Date { get; set; } = date;
+		public decimal? Value { get; set; } = value;
+	}
 }

@@ -75,7 +75,7 @@ namespace Mercury.Apis
 		/// 모든 심볼의 24시간 변화 데이터
 		/// </summary>
 		/// <param name="obj"></param>
-		private static void AllMarketMiniTickersOnMessage(DataEvent<IEnumerable<IBinanceMiniTick>> obj)
+		private static void AllMarketMiniTickersOnMessage(DataEvent<IBinanceMiniTick[]> obj)
 		{
 			var data = obj.Data;
 			QuoteFactory.CurrentPrices = [.. data.Select(x => new CurrentPrice(x.Symbol, x.LastPrice))];

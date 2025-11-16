@@ -20,16 +20,16 @@ namespace Lab
 		public static readonly DependencyProperty TextProperty =
 			DependencyProperty.Register("Text", typeof(string), typeof(NumericPlusTextBox), new PropertyMetadata("0"));
 		public static readonly DependencyProperty CaretBrushProperty =
-			DependencyProperty.Register("CaretBrush", typeof(Brush), typeof(NumericPlusTextBox), new PropertyMetadata(Brushes.White));
+			DependencyProperty.Register("CaretBrush", typeof(System.Windows.Media.Brush), typeof(NumericPlusTextBox), new PropertyMetadata(System.Windows.Media.Brushes.White));
 
 		public string Text
 		{
 			get { return (string)GetValue(TextProperty); }
 			set { SetValue(TextProperty, value); }
 		}
-		public Brush CaretBrush
+		public System.Windows.Media.Brush CaretBrush
 		{
-			get { return (Brush)GetValue(CaretBrushProperty); }
+			get { return (System.Windows.Media.Brush)GetValue(CaretBrushProperty); }
 			set { SetValue(CaretBrushProperty, value); }
 		}
 

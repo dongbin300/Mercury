@@ -22,17 +22,43 @@ namespace Mercury.Backtests
         /// </summary>
         public decimal EntryAmount { get; set; }
         /// <summary>
+        /// Always (+) - 총 진입 금액 (부분 청산 시에도 보존)
+        /// </summary>
+        public decimal TotalEntryAmount { get; set; }
+        /// <summary>
         /// Always (+)
         /// </summary>
         public decimal ExitAmount { get; set; }
 
         public int EntryCount { get; set; } = 0;
+        public int DcaStep { get; set; } = 0;
 
 		public DateTime? ExitDateTime { get; set; } = null;
 
         public decimal? HighestPrice { get; set; }
         public decimal? LowestPrice { get; set; }
 
-		public decimal Income => Side == PositionSide.Long ? ExitAmount - EntryAmount : EntryAmount - ExitAmount;
+		/// <summary>
+		/// 실현 수익/손실 = 청산금액 - 실제 진입금액
+		/// </summary>
+		public decimal Income
+		{
+			get
+			{
+				if (ExitAmount == 0) return 0;
+
+				// 실제 진입금액 사용 (분할 진입 고려)
+				var actualEntryAmount = TotalEntryAmount > 0 ? TotalEntryAmount : EntryAmount;
+
+				return Side == PositionSide.Long ?
+					ExitAmount - actualEntryAmount :
+					actualEntryAmount - ExitAmount;
+			}
+		}
+
+		/// <summary>
+		/// 총 청산 수량
+		/// </summary>
+		public decimal ExitQuantity { get; set; }
 	}
 }

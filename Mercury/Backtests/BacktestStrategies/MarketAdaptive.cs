@@ -73,7 +73,7 @@ namespace Mercury.Backtests.BacktestStrategies
 			}
 		}
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseSma(50);
 			chartPack.UseEma(50, 200);

@@ -17,7 +17,7 @@ namespace Mercury.Backtests.BacktestStrategies
 	{
 		public decimal sltprate = 2.0m;
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseWilliamsVixFix();
 			chartPack.UseStochastic(10, 6, 6);

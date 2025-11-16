@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MarinerX.Views"
         mc:Ignorable="d"
-        Title="Symbol Benchmarking" Height="600" Width="750">
+        Title="Symbol Benchmarking" Height="600" Width="850">
     <Window.Resources>
         <Style TargetType="{x:Type DataGridCell}">
             <Setter Property="FontSize" Value="14" />
@@ -28,6 +28,7 @@
         <Style TargetType="{x:Type DataGridColumnHeader}">
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Height" Value="26" />
+            <Setter Property="Margin" Value="0 0 10 0" />
             <Setter Property="Foreground" Value="#F6F6F6" />
             <Setter Property="Background" Value="#00B0F0" />
         </Style>

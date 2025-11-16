@@ -22,7 +22,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		protected decimal tprate = 2.0m;           // TP: 손절폭의 몇 배로 익절할지 (RR 1:2)
 		protected decimal riskPerTrade = 0.02m;    // 한 트레이드당 자본의 몇 %만 리스크
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseEma(12, 26);
 			chartPack.UseAtr((int)atrPeriod);

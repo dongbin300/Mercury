@@ -1,4 +1,6 @@
-﻿using MarinerX.Utils;
+﻿using Binance.Net.Objects.Models.Spot;
+
+using MarinerX.Utils;
 
 using Mercury.Apis;
 using Mercury.Extensions;
@@ -6,6 +8,7 @@ using Mercury.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace MarinerX.Markets
 {
@@ -59,7 +62,7 @@ namespace MarinerX.Markets
 		public static void Init2()
 		{
 			var symbols = LocalApi.GetSymbols();
-			var currentPrices = BinanceRestApi.GetFuturesPrices();
+			var currentPrices = GetAllFuturesPricesWithRetry(2);
 			var maxLeverages = BinanceRestApi.GetMaxLeverages();
 
 			foreach (var symbol in symbols)
@@ -76,13 +79,28 @@ namespace MarinerX.Markets
 					maxLeverage = 0;
 				}
 
-				var maxDate = new DateTime(2021, 12, 1); // 백테스팅 시작 날짜보다 앞이어야함.
+				var maxDate = new DateTime(2023, 12, 30); // 백테스팅 시작 날짜보다 앞이어야함.
 				var dayThreshold = (int)(DateTime.Today - maxDate).TotalDays;
 				var tickPerThreshold = 0.0002m; // 한 호가 퍼센트 0.02% 미만
-				var pass = elapsedDays >= dayThreshold && tickPer < tickPerThreshold ? name : string.Empty;
+				var pass = elapsedDays >= dayThreshold && tickPer < tickPerThreshold && currentPrice != -1 ? name : string.Empty;
 
 				Benchmarks2.Add(new SymbolBenchmark2(name, listingDate, tickSize, currentPrice, tickPer, elapsedDays, maxLeverage, pass));
 			}
 		}
-	}
+
+        public static List<BinancePrice> GetAllFuturesPricesWithRetry(int retryCount = 3, int delayMs = 2000)
+        {
+            var allPricesDict = new Dictionary<string, BinancePrice>();
+            for (int i = 0; i < retryCount; i++)
+            {
+                var prices = BinanceRestApi.GetFuturesPrices();
+                foreach (var p in prices)
+                    allPricesDict[p.Symbol] = p;
+
+                Thread.Sleep(delayMs);
+            }
+            return [.. allPricesDict.Values];
+        }
+
+    }
 }

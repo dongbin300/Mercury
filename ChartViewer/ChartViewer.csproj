@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>chart2.ico</ApplicationIcon>
@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp.Views.WPF" Version="2.88.6" />
+    <PackageReference Include="SkiaSharp.Views.WPF" Version="3.119.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -24,7 +24,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		/// </summary>
 		public Dictionary<string, List<ChartInfo>> Charts2 { get; set; } = [];
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseSqueezeMomentum((int)p[0], (double)p[1], (int)p[2], (double)p[3], true);
 			chartPack.UseAdx();

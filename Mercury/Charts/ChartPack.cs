@@ -413,12 +413,49 @@ namespace Mercury.Charts
 			}
 		}
 
-		public void UseCci(int period)
+		public void UseCci(params int[] periods)
 		{
-			var cci = Charts.Select(x => x.Quote).GetCci(period).Select(x => x.Cci);
+			int count = Math.Min(periods.Length, 3);
+			for (int p = 0; p < count; p++)
+			{
+				var cci = Charts.Select(x => x.Quote).GetCci(periods[p]).Select(x => x.Cci);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					switch (p)
+					{
+						case 0: Charts[i].Cci = cci.ElementAt(i); break;
+						case 1: Charts[i].Cci2 = cci.ElementAt(i); break;
+						case 2: Charts[i].Cci3 = cci.ElementAt(i); break;
+					}
+				}
+			}
+		}
+
+		public void UseCciVolatilityThreshold(int cciPeriod = 20, int volatilityPeriod = 20, double stdevMultiplier = 2, double minThreshold = 50, double maxThreshold = 200)
+		{
+			var cciVolatilityThreshold = Charts.Select(x => x.Quote).GetCciVolatilityThreshold(cciPeriod, volatilityPeriod, stdevMultiplier, minThreshold, maxThreshold).Select(x => x.CciVolatilityThreshold);
 			for (int i = 0; i < Charts.Count; i++)
 			{
-				Charts[i].Cci = cci.ElementAt(i);
+				Charts[i].CciVolatilityThreshold = cciVolatilityThreshold.ElementAt(i);
+			}
+		}
+
+		public void UseIchimokuCloud(int conversionPeriod = 9, int basePeriod = 26, int leadingSpanPeriod = 52)
+		{
+			var ichimokuCloud = Charts.Select(x => x.Quote).GetIchimokuCloud(conversionPeriod, basePeriod, leadingSpanPeriod);
+			var conversion = ichimokuCloud.Select(x => x.Conversion);
+			var _base = ichimokuCloud.Select(x => x.Base);
+			var trailingSpan = ichimokuCloud.Select(x => x.TrailingSpan);
+			var leadingSpan1 = ichimokuCloud.Select(x => x.LeadingSpan1);
+			var leadingSpan2 = ichimokuCloud.Select(x => x.LeadingSpan2);
+
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].IcConversion = conversion.ElementAt(i);
+				Charts[i].IcBase = _base.ElementAt(i);
+				Charts[i].IcTrailingSpan = trailingSpan.ElementAt(i);
+				Charts[i].IcLeadingSpan1 = leadingSpan1.ElementAt(i);
+				Charts[i].IcLeadingSpan2 = leadingSpan2.ElementAt(i);
 			}
 		}
 
@@ -585,6 +622,42 @@ namespace Mercury.Charts
 			for (int i = 0; i < Charts.Count; i++)
 			{
 				Charts[i].VolumeSma = volumsSma.ElementAt(i);
+			}
+		}
+
+		public void UseVolumeEma(int period = 20)
+		{
+			var volumsEma = Charts.Select(x => x.Quote).GetVolumeEma(period).Select(x => x.Ema);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].VolumeEma = volumsEma.ElementAt(i);
+			}
+		}
+
+		public void UseDema(params int[] periods)
+		{
+			int count = Math.Min(periods.Length, 3);
+			for (int p = 0; p < count; p++)
+			{
+				var dema = Charts.Select(x => x.Quote).GetDema(periods[p]).Select(x => x.Dema);
+				for (int i = 0; i < Charts.Count; i++)
+				{
+					switch (p)
+					{
+						case 0: Charts[i].Dema1 = dema.ElementAt(i); break;
+						case 1: Charts[i].Dema2 = dema.ElementAt(i); break;
+						case 2: Charts[i].Dema3 = dema.ElementAt(i); break;
+					}
+				}
+			}
+		}
+
+		public void UseDemaSlope(int period = 20)
+		{
+			var demaSlope = Charts.Select(x => x.Quote).GetDemaSlope(period).Select(x => x.DemaSlope);
+			for (int i = 0; i < Charts.Count; i++)
+			{
+				Charts[i].DemaSlope = demaSlope.ElementAt(i);
 			}
 		}
 

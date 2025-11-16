@@ -30,8 +30,8 @@ namespace GeneticLab.Fitnesses
 		public double Evaluate(IChromosome chromosome)
 		{
 			var values = ((FloatingPointChromosome)chromosome).ToFloatingPoints();
-			var buySignalRsi = values[0];
-			var sellSignalRsi = values[1];
+			var buySignalRsi = (decimal)values[0];
+			var sellSignalRsi = (decimal)values[1];
 
 			var account = new RsiTradeFitness_Account();
 

@@ -199,7 +199,7 @@ namespace Albedo.Managers
 
                 binanceSocketClient.CoinFuturesApi
                     .UnsubscribeAsync(subId);
-                var klineUpdateResult = binanceSocketClient.CoinFuturesApi.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
+                var klineUpdateResult = binanceSocketClient.UsdFuturesApi.ExchangeData.SubscribeToKlineUpdatesAsync(symbol, interval, (obj) =>
                 {
                     DispatcherService.Invoke(() =>
                     {

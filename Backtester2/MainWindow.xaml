@@ -4,8 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Backtester2"
+        xmlns:converters="clr-namespace:Backtester2.Converters"
         mc:Ignorable="d"
-        Title="BACKTEST" Height="950" Width="1000" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+        Title="BACKTEST" Height="600" Width="1600" Background="{StaticResource Background}" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <converters:BarWidthConverter x:Key="BarWidthConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -18,69 +22,767 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid Grid.Column="0" Background="#1E1E1E">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="50"/>
+                </Grid.RowDefinitions>
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Background="#1E1E1E">
                     <StackPanel Orientation="Vertical" Margin="10,10,20,10">
-                        <TextBlock Style="{StaticResource Description}">SYMBOL</TextBlock>
-                        <TextBox x:Name="SymbolInputTextBox" CharacterCasing="Upper" PreviewKeyDown="SymbolInputTextBox_PreviewKeyDown" TextChanged="SymbolInputTextBox_TextChanged" />
-                        <ListBox x:Name="SymbolFilteredListBox" Height="200" Visibility="Collapsed" />
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC">SYMBOL</TextBlock>
+                        <TextBox x:Name="SymbolInputTextBox" CharacterCasing="Upper" PreviewKeyDown="SymbolInputTextBox_PreviewKeyDown" TextChanged="SymbolInputTextBox_TextChanged"
+                                 Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2"/>
+                        <DataGrid x:Name="SymbolFilteredDataGrid" Height="200" Visibility="Collapsed"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  CanUserReorderColumns="False"
+                                  CanUserResizeColumns="True"
+                                  CanUserSortColumns="True"
+                                  SelectionMode="Single"
+                                  GridLinesVisibility="Horizontal"
+                                  HeadersVisibility="Column"
+                                  Background="#2A2A2A"
+                                  Foreground="White"
+                                  RowBackground="#333"
+                                  AlternatingRowBackground="#2A2A2A"
+                                  BorderBrush="#555"
+                                  BorderThickness="1"
+                                  ScrollViewer.CanContentScroll="True"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  MouseDoubleClick="SymbolFilteredDataGrid_MouseDoubleClick">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="#444"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                    <Setter Property="FontSize" Value="10.5"/>
+                                    <Setter Property="Padding" Value="5,2"/>
+                                    <Setter Property="BorderBrush" Value="#666"/>
+                                    <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontSize" Value="10.5"/>
+                                    <Setter Property="Padding" Value="3,1"/>
+                                    <Setter Property="BorderBrush" Value="#555"/>
+                                    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="DataGridCell">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="80"/>
+                                <DataGridTextColumn Header="Start Date" Binding="{Binding StartDate}" Width="90">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="End Date" Binding="{Binding EndDate}" Width="90">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
                         <WrapPanel x:Name="SymbolTickerPanel" Margin="0,10,0,0" />
-                        <TextBlock x:Name="SymbolCountTextBlock" Margin="5,0,0,10" FontWeight="Bold" Text="0" Foreground="{StaticResource Long}"/>
-                        <CheckBox x:Name="SingleSymbolCheckBox">Single</CheckBox>
+                        <TextBlock x:Name="SymbolCountTextBlock" Margin="5,0,0,10" FontWeight="Bold" Text="0" Foreground="{StaticResource Long2}"/>
+                        <CheckBox x:Name="SingleSymbolCheckBox" Foreground="White" Margin="0,2">Single</CheckBox>
                         <StackPanel Orientation="Horizontal">
-                            <CheckBox x:Name="RandomSymbolCheckBox" Checked="RandomSymbolCheckBox_Checked">Random</CheckBox>
-                            <TextBox x:Name="RandomSymbolCountTextBox" Width="40" HorizontalContentAlignment="Right"/>
+                            <CheckBox x:Name="RandomSymbolCheckBox" Checked="RandomSymbolCheckBox_Checked" Foreground="White" Margin="0,2">Random</CheckBox>
+                            <TextBox x:Name="RandomSymbolCountTextBox" Width="40" HorizontalContentAlignment="Right"
+                                     Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="3,2" Margin="5,0,0,0"/>
                         </StackPanel>
 
-                        <TextBlock Style="{StaticResource Description}">DATE</TextBlock>
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">DATE</TextBlock>
                         <StackPanel Orientation="Horizontal">
-                            <TextBox x:Name="StartDateTextBox" Width="120" Text="2022-01-01" TextChanged="StartDateTextBox_TextChanged"/>
-                            <TextBox x:Name="EndDateTextBox" Width="120" Text="2022-12-31" TextChanged="EndDateTextBox_TextChanged"/>
+                            <TextBox x:Name="StartDateTextBox" Width="120" Text="2022-01-01" TextChanged="StartDateTextBox_TextChanged"
+                                     Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2" Margin="0,0,5,0"/>
+                            <TextBox x:Name="EndDateTextBox" Width="120" Text="2022-12-31" TextChanged="EndDateTextBox_TextChanged"
+                                     Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <CheckBox x:Name="RandomDateCheckBox" Checked="RandomDateCheckBox_Checked">Random</CheckBox>
-                            <TextBox x:Name="RandomDatePeriodTextBox" Width="40" HorizontalContentAlignment="Right"/>
-                        </StackPanel>
-
-                        <TextBlock Style="{StaticResource Description}">INTERVAL</TextBlock>
-                        <StackPanel Orientation="Horizontal">
-                            <ComboBox x:Name="Interval1ComboBox" Width="90"/>
-                            <ComboBox x:Name="Interval2ComboBox" Width="90"/>
-                            <ComboBox x:Name="Interval3ComboBox" Width="90"/>
+                            <CheckBox x:Name="RandomDateCheckBox" Checked="RandomDateCheckBox_Checked" Foreground="White" Margin="0,2">Random</CheckBox>
+                            <TextBox x:Name="RandomDatePeriodTextBox" Width="40" HorizontalContentAlignment="Right"
+                                     Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="3,2" Margin="5,0,0,0"/>
                         </StackPanel>
 
-                        <TextBlock Style="{StaticResource Description}">STRATEGY</TextBlock>
-                        <ComboBox x:Name="StrategyComboBox" SelectionChanged="StrategyComboBox_SelectionChanged"/>
-                        <CheckBox x:Name="LongEnableCheckBox" IsChecked="True">Long</CheckBox>
-                        <CheckBox x:Name="ShortEnableCheckBox" IsChecked="True">Short</CheckBox>
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">INTERVAL</TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <ComboBox x:Name="Interval1ComboBox" Width="90" Background="#2A2A2A" Foreground="White" BorderBrush="#555" Margin="0,0,2,0"/>
+                            <ComboBox x:Name="Interval2ComboBox" Width="90" Background="#2A2A2A" Foreground="White" BorderBrush="#555" Margin="0,0,2,0"/>
+                            <ComboBox x:Name="Interval3ComboBox" Width="90" Background="#2A2A2A" Foreground="White" BorderBrush="#555"/>
+                        </StackPanel>
+                        
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">STRATEGY</TextBlock>
+                        <ComboBox x:Name="StrategyComboBox" SelectionChanged="StrategyComboBox_SelectionChanged" FontWeight="Bold"
+                                  Background="#2A2A2A" Foreground="White" BorderBrush="#555"/>
+                        <CheckBox x:Name="LongEnableCheckBox" IsChecked="True" Foreground="White" Margin="0,2">Long</CheckBox>
+                        <CheckBox x:Name="ShortEnableCheckBox" IsChecked="True" Foreground="White" Margin="0,2">Short</CheckBox>
                         <StackPanel x:Name="StrategyParameterPanel" Orientation="Vertical" Margin="20,0,0,0"/>
 
-                        <TextBlock Style="{StaticResource Description}">SEED</TextBlock>
-                        <TextBox x:Name="SeedTextBox" HorizontalContentAlignment="Right" Text="123456789" PreviewTextInput="SeedTextBox_PreviewTextInput" TextChanged="SeedTextBox_TextChanged"/>
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">SEED</TextBlock>
+                        <TextBox x:Name="SeedTextBox" HorizontalContentAlignment="Right" Text="123456789" PreviewTextInput="SeedTextBox_PreviewTextInput" TextChanged="SeedTextBox_TextChanged"
+                                 Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2"/>
 
-                        <TextBlock Style="{StaticResource Description}">LEVERAGE</TextBlock>
-                        <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="10"/>
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">LEVERAGE</TextBlock>
+                        <TextBox x:Name="LeverageTextBox" HorizontalContentAlignment="Right" Text="10"
+                                 Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2"/>
 
-                        <TextBlock Style="{StaticResource Description}">MAX POSITIONS</TextBlock>
-                        <TextBox x:Name="MaxPositionsTextBox" HorizontalContentAlignment="Right" Text="20"/>
-                        <CheckBox x:Name="MaxPositionsEachCheckBox">Each</CheckBox>
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">MAX POSITIONS</TextBlock>
+                        <TextBox x:Name="MaxPositionsTextBox" HorizontalContentAlignment="Right" Text="20"
+                                 Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2"/>
+                        <CheckBox x:Name="MaxPositionsEachCheckBox" Foreground="White" Margin="0,2">Each</CheckBox>
 
-                        <TextBlock Style="{StaticResource Description}">FEE RATE(%)</TextBlock>
-                        <TextBox x:Name="FeeRateTextBox" HorizontalContentAlignment="Right" Text="0.02"/>
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">FEE RATE(%)</TextBlock>
+                        <TextBox x:Name="FeeRateTextBox" HorizontalContentAlignment="Right" Text="0.02"
+                                 Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2"/>
 
-                        <TextBlock Style="{StaticResource Description}">FILE NAME</TextBlock>
-                        <TextBox x:Name="FileNameTextBox"/>
-                        <CheckBox x:Name="ReportDailyHistoryCheckBox">Daily</CheckBox>
-                        <CheckBox x:Name="ReportPositionHistoryCheckBox">Position</CheckBox>
+                        <TextBlock Style="{StaticResource Description}" Foreground="#CCC" Margin="0,10,0,3">FILE NAME</TextBlock>
+                        <TextBox x:Name="FileNameTextBox" Background="#2A2A2A" Foreground="White" BorderBrush="#555" BorderThickness="1" Padding="5,2"/>
+                        <CheckBox x:Name="ReportDailyHistoryCheckBox" Foreground="White" Margin="0,2">Daily</CheckBox>
+                        <CheckBox x:Name="ReportPositionHistoryCheckBox" Foreground="White" Margin="0,2">Position</CheckBox>
+                        <CheckBox x:Name="ReportTradeHistoryCheckBox" Foreground="White" Margin="0,2">Trade</CheckBox>
 
-
-                        <Button x:Name="RunButton" Click="RunButton_Click">Run</Button>
                     </StackPanel>
                 </ScrollViewer>
+                <StackPanel Grid.Row="1" Orientation="Vertical" Background="#1E1E1E">
+                    <Button x:Name="RunButton" Height="35" Click="RunButton_Click" FontWeight="Bold" FontSize="14" Margin="10,5">Run</Button>
+                </StackPanel>
             </Grid>
 
             <Grid Grid.Column="1">
-                
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+
+                <!-- 상단 헤더 -->
+                <Grid Grid.Row="0" Background="#333">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="60"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="RESULTS" VerticalAlignment="Center" Margin="10,0" FontWeight="Bold" Foreground="White"/>
+                    <Button Grid.Column="1" x:Name="FirstPageButton" Click="FirstPageButton_Click" Background="Transparent" Foreground="White" BorderThickness="0" IsEnabled="True">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="Transparent">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <Path Data="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z M4.072 8.024L-0.285 3.667l.618-.62L5 7.716v.618L0.333 13l-.618-.619 4.357-4.357z" Fill="White" Stroke="White" StrokeThickness="1" Width="16" Height="16" Stretch="Uniform" RenderTransformOrigin="0.5,0.5">
+                            <Path.RenderTransform>
+                                <ScaleTransform ScaleX="-1"/>
+                            </Path.RenderTransform>
+                        </Path>
+                    </Button>
+                    <Button Grid.Column="2" x:Name="PrevPageButton" Click="PrevPageButton_Click" Background="Transparent" Foreground="White" BorderThickness="0" IsEnabled="True">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="Transparent">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <Path Data="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z" Fill="White" Stroke="White" StrokeThickness="1" Width="16" Height="16" Stretch="Uniform" RenderTransformOrigin="0.5,0.5">
+                            <Path.RenderTransform>
+                                <ScaleTransform ScaleX="-1"/>
+                            </Path.RenderTransform>
+                        </Path>
+                    </Button>
+                    <TextBlock Grid.Column="3" x:Name="PageInfoTextBlock" Text="0/0" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11" Foreground="White"/>
+                    <Button Grid.Column="4" x:Name="NextPageButton" Click="NextPageButton_Click" Background="Transparent" Foreground="White" BorderThickness="0" IsEnabled="True">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="Transparent">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <Path Data="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z" Fill="White" Stroke="White" StrokeThickness="1" Width="16" Height="16" Stretch="Uniform" >
+                        </Path>
+                    </Button>
+                    <Button Grid.Column="5" x:Name="LastPageButton" Click="LastPageButton_Click" Background="Transparent" Foreground="White" BorderThickness="0" IsEnabled="True">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="Transparent">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <Path Data="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z M4.072 8.024L-0.285 3.667l.618-.62L5 7.716v.618L0.333 13l-.618-.619 4.357-4.357z" Fill="White" Stroke="White" StrokeThickness="1" Width="16" Height="16" Stretch="Uniform">
+                        </Path>
+                    </Button>
+                    <Button Grid.Column="6" x:Name="LoadResultsButton" Height="22" Margin="2" Click="LoadResultsButton_Click" Background="Transparent" Foreground="White" BorderThickness="0">Load</Button>
+                    <Button Grid.Column="7" x:Name="ClearResultsButton" Height="22" Margin="2" Click="ClearResultsButton_Click" Background="Transparent" Foreground="White" BorderThickness="0">Clear</Button>
+                    <Button Grid.Column="8" x:Name="CopyResultsButton" Height="22" Margin="2" Click="CopyResultsButton_Click" Background="Transparent" Foreground="White" BorderThickness="0">Copy</Button>
+                </Grid>
+
+                <!-- 백테스트 실행 정보 헤더 -->
+                <Border Grid.Row="1" Background="#2A2A2A" BorderBrush="#555" BorderThickness="0,1" Padding="8,4" x:Name="RunInfoPanel" Visibility="Collapsed" Height="24">
+                    <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Symbol: " Style="{StaticResource MetadataKey}"/>
+                            <TextBlock x:Name="RunInfoSymbolText" Style="{StaticResource MetadataValue}" FontWeight="Bold" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Strategy: " Style="{StaticResource MetadataKey}"/>
+                            <TextBlock x:Name="RunInfoStrategyText" Style="{StaticResource MetadataValue}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Intervals: " Style="{StaticResource MetadataKey}"/>
+                            <TextBlock x:Name="RunInfoIntervalsText" Style="{StaticResource MetadataValue}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Period: " Style="{StaticResource MetadataKey}"/>
+                            <TextBlock x:Name="RunInfoPeriodText" Style="{StaticResource MetadataValue}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="MaxPosition: " Style="{StaticResource MetadataKey}"/>
+                            <TextBlock x:Name="RunInfoMaxPosText" Style="{StaticResource MetadataValue}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,15,0">
+                            <TextBlock Text="Leverage: " Style="{StaticResource MetadataKey}"/>
+                            <TextBlock x:Name="RunInfoLeverageText" Style="{StaticResource MetadataValue}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="RunTime: " Style="{StaticResource MetadataKey}"/>
+                            <TextBlock x:Name="RunInfoTimeText" Style="{StaticResource MetadataValue}" />
+                        </StackPanel>
+                    </WrapPanel>
+                </Border>
+
+                <!-- 파라미터 통계 정보 -->
+                <Border Grid.Row="2" Background="#1E1E1E" BorderBrush="#555" BorderThickness="0,1" x:Name="StatsPanel" Visibility="Collapsed">
+                    <Expander x:Name="StatsExpander" Header="Parameter Statistics" Foreground="White" Background="Transparent" BorderThickness="0">
+                        <Expander.Style>
+                            <Style TargetType="Expander">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Expander">
+                                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                                <DockPanel>
+                                                    <ToggleButton x:Name="HeaderSite"
+                                                                  DockPanel.Dock="Top"
+                                                                  IsChecked="{Binding Path=IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                  Background="Transparent"
+                                                                  BorderThickness="0"
+                                                                  Foreground="{TemplateBinding Foreground}"
+                                                                  HorizontalContentAlignment="Left"
+                                                                  Padding="5,3">
+                                                        <ToggleButton.Style>
+                                                            <Style TargetType="ToggleButton">
+                                                                <Setter Property="Background" Value="Transparent"/>
+                                                                <Setter Property="Template">
+                                                                    <Setter.Value>
+                                                                        <ControlTemplate TargetType="ToggleButton">
+                                                                            <Border Background="Transparent">
+                                                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                                                  VerticalAlignment="{TemplateBinding VerticalAlignment}"/>
+                                                                            </Border>
+                                                                        </ControlTemplate>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Style>
+                                                        </ToggleButton.Style>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Path x:Name="ExpandCollapseImage"
+                                                                  Data="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z"
+                                                                  Fill="{TemplateBinding Foreground}"
+                                                                  Width="14" Height="14"
+                                                                  Margin="0,0,5,0"
+                                                                  VerticalAlignment="Center"
+                                                                  Stretch="Uniform"/>
+                                                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+                                                    </ToggleButton>
+                                                    <ContentPresenter x:Name="ExpandSite"
+                                                                      DockPanel.Dock="Bottom"
+                                                                      Visibility="Collapsed"/>
+                                                </DockPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsExpanded" Value="true">
+                                                    <Setter TargetName="ExpandCollapseImage" Property="Data" Value="M7.976 10.072l4.357-4.357.62.618L8.284 11h-.618L3 6.333l.619-.618 4.357 4.357z" />
+                                                    <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
+                                                </Trigger>
+                                                <Trigger Property="IsExpanded" Value="false">
+                                                    <Setter TargetName="ExpandCollapseImage" Property="Data" Value="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z" />
+                                                    <Setter TargetName="ExpandSite" Property="Visibility" Value="Collapsed"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Expander.Style>
+                        <DataGrid x:Name="StatsDataGrid"
+                                  MaxHeight="300"
+                                  ScrollViewer.CanContentScroll="True"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      CanUserReorderColumns="False"
+                                      CanUserResizeColumns="True"
+                                      CanUserSortColumns="True"
+                                      SelectionMode="Single"
+                                      GridLinesVisibility="Horizontal"
+                                      HeadersVisibility="Column"
+                                      Background="#1E1E1E"
+                                      Foreground="White"
+                                      RowBackground="#252525"
+                                      AlternatingRowBackground="#1E1E1E"
+                                      BorderThickness="0">
+                                <DataGrid.ColumnHeaderStyle>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#333"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                        <Setter Property="FontSize" Value="11.5"/>
+                                        <Setter Property="Padding" Value="5,2"/>
+                                        <Setter Property="BorderBrush" Value="#555"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                    </Style>
+                                </DataGrid.ColumnHeaderStyle>
+                                <DataGrid.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="FontSize" Value="11.5"/>
+                                        <Setter Property="Padding" Value="3,1"/>
+                                        <Setter Property="BorderBrush" Value="#555"/>
+                                        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="DataGridCell">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </DataGrid.CellStyle>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Parameter" Binding="{Binding Parameter}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="Auto">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="TextAlignment" Value="Right"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="WinRate" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Rectangle Fill="{DynamicResource Long2}" Opacity="0.3"
+                                                               HorizontalAlignment="Left">
+                                                        <Rectangle.Width>
+                                                            <MultiBinding Converter="{StaticResource BarWidthConverter}">
+                                                                <Binding Path="WinRateBarWidth"/>
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                            </MultiBinding>
+                                                        </Rectangle.Width>
+                                                    </Rectangle>
+                                                    <TextBlock Text="{Binding WinRate}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" Margin="5,2" FontSize="10.5"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Money" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Rectangle Fill="{DynamicResource Long2}" Opacity="0.3"
+                                                               HorizontalAlignment="Left">
+                                                        <Rectangle.Width>
+                                                            <MultiBinding Converter="{StaticResource BarWidthConverter}">
+                                                                <Binding Path="MoneyBarWidth"/>
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                            </MultiBinding>
+                                                        </Rectangle.Width>
+                                                    </Rectangle>
+                                                    <TextBlock Text="{Binding Money}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" Margin="5,2" FontSize="10.5"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="MDD" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Rectangle Fill="{DynamicResource Long2}" Opacity="0.3"
+                                                               HorizontalAlignment="Left">
+                                                        <Rectangle.Width>
+                                                            <MultiBinding Converter="{StaticResource BarWidthConverter}">
+                                                                <Binding Path="MddBarWidth"/>
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                            </MultiBinding>
+                                                        </Rectangle.Width>
+                                                    </Rectangle>
+                                                    <TextBlock Text="{Binding Mdd}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" Margin="5,2" FontSize="10.5"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="RPR" Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <Rectangle Fill="{DynamicResource Long2}" Opacity="0.3"
+                                                               HorizontalAlignment="Left">
+                                                        <Rectangle.Width>
+                                                            <MultiBinding Converter="{StaticResource BarWidthConverter}">
+                                                                <Binding Path="RiskBarWidth"/>
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType=Grid}"/>
+                                                            </MultiBinding>
+                                                        </Rectangle.Width>
+                                                    </Rectangle>
+                                                    <TextBlock Text="{Binding Risk}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="White" Margin="5,2" FontSize="10.5"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                    </Expander>
+                </Border>
+
+                <!-- 백테스트 결과 테이블 -->
+                <Grid Grid.Row="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                <DataGrid Grid.Row="0" x:Name="BacktestResultsDataGrid"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          CanUserReorderColumns="True"
+                          CanUserResizeColumns="True"
+                          CanUserSortColumns="True"
+                          SelectionMode="Single"
+                          GridLinesVisibility="Horizontal"
+                          HeadersVisibility="Column"
+                          Background="#1E1E1E"
+                          Foreground="White"
+                          RowBackground="#2A2A2A"
+                          AlternatingRowBackground="#1E1E1E"
+                          SelectionChanged="BacktestResultsDataGrid_SelectionChanged"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#333"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="FontSize" Value="11.5"/>
+                            <Setter Property="Padding" Value="5,3"/>
+                            <Setter Property="BorderBrush" Value="#555"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontSize" Value="11.5"/>
+                            <Setter Property="Padding" Value="5,2"/>
+                            <Setter Property="BorderBrush" Value="#555"/>
+                            <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.CellStyle>
+                </DataGrid>
+
+                    <!-- Details Panel -->
+                    <Border Grid.Row="1" x:Name="DetailsPanel" Background="#1E1E1E" BorderBrush="#555" BorderThickness="0,1,0,0" Visibility="Collapsed">
+                        <Expander x:Name="DetailsExpander" Header="Row Details" Foreground="White" Background="Transparent" BorderThickness="0" IsExpanded="False">
+                            <Expander.Style>
+                                <Style TargetType="Expander">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Expander">
+                                                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <DockPanel>
+                                                        <ToggleButton x:Name="HeaderSite"
+                                                                      DockPanel.Dock="Top"
+                                                                      IsChecked="{Binding Path=IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                      Background="Transparent"
+                                                                      BorderThickness="0"
+                                                                      Foreground="{TemplateBinding Foreground}"
+                                                                      HorizontalContentAlignment="Left"
+                                                                      Padding="5,3">
+                                                            <ToggleButton.Style>
+                                                                <Style TargetType="ToggleButton">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Setter Property="Template">
+                                                                        <Setter.Value>
+                                                                            <ControlTemplate TargetType="ToggleButton">
+                                                                                <Border Background="Transparent">
+                                                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                                                      VerticalAlignment="{TemplateBinding VerticalAlignment}"/>
+                                                                                </Border>
+                                                                            </ControlTemplate>
+                                                                        </Setter.Value>
+                                                                    </Setter>
+                                                                </Style>
+                                                            </ToggleButton.Style>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Path x:Name="ExpandCollapseImage"
+                                                                      Data="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z"
+                                                                      Fill="{TemplateBinding Foreground}"
+                                                                      Width="14" Height="14"
+                                                                      Margin="0,0,5,0"
+                                                                      VerticalAlignment="Center"
+                                                                      Stretch="Uniform"/>
+                                                                <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
+                                                            </StackPanel>
+                                                        </ToggleButton>
+                                                        <ContentPresenter x:Name="ExpandSite"
+                                                                          DockPanel.Dock="Bottom"
+                                                                          Visibility="Collapsed"/>
+                                                    </DockPanel>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsExpanded" Value="true">
+                                                        <Setter TargetName="ExpandCollapseImage" Property="Data" Value="M7.976 10.072l4.357-4.357.62.618L8.284 11h-.618L3 6.333l.619-.618 4.357 4.357z" />
+                                                        <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsExpanded" Value="false">
+                                                        <Setter TargetName="ExpandCollapseImage" Property="Data" Value="M10.072 8.024L5.715 3.667l.618-.62L11 7.716v.618L6.333 13l-.618-.619 4.357-4.357z" />
+                                                        <Setter TargetName="ExpandSite" Property="Visibility" Value="Collapsed"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Expander.Style>
+                            <Grid Margin="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Daily Data -->
+                                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                                    <TextBlock Text="Daily Performance" FontWeight="Bold" Foreground="White" Margin="0,0,0,5"/>
+                                    <DataGrid x:Name="DailyDataGrid"
+                                              AutoGenerateColumns="False"
+                                              IsReadOnly="True"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              CanUserReorderColumns="False"
+                                              CanUserResizeColumns="True"
+                                              CanUserSortColumns="True"
+                                              SelectionMode="Single"
+                                              MaxHeight="200"
+                                              Background="#1E1E1E"
+                                              Foreground="White"
+                                              RowBackground="#252525"
+                                              AlternatingRowBackground="#1E1E1E"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              BorderThickness="0"
+                                              FontSize="11.5">
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="Background" Value="#333"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="FontSize" Value="11.5"/>
+                                                <Setter Property="Padding" Value="5,2"/>
+                                                <Setter Property="BorderBrush" Value="#555"/>
+                                                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
+                                        <DataGrid.CellStyle>
+                                            <Style TargetType="DataGridCell">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="FontSize" Value="11.5"/>
+                                                <Setter Property="Padding" Value="3,1"/>
+                                                <Setter Property="BorderBrush" Value="#555"/>
+                                                <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="DataGridCell">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                                    Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </DataGrid.CellStyle>
+                                    </DataGrid>
+                                </StackPanel>
+
+                                <!-- Position Data -->
+                                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                                    <TextBlock Text="Position History" FontWeight="Bold" Foreground="White" Margin="0,0,0,5"/>
+                                    <DataGrid x:Name="PositionDataGrid"
+                                              AutoGenerateColumns="False"
+                                              IsReadOnly="True"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              CanUserReorderColumns="False"
+                                              CanUserResizeColumns="True"
+                                              CanUserSortColumns="True"
+                                              SelectionMode="Single"
+                                              MaxHeight="200"
+                                              Background="#1E1E1E"
+                                              Foreground="White"
+                                              RowBackground="#252525"
+                                              AlternatingRowBackground="#1E1E1E"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="Horizontal"
+                                              ScrollViewer.ScrollChanged="PositionDataGrid_ScrollChanged"
+                                              BorderThickness="0"
+                                              FontSize="11.5">
+                                        <DataGrid.ColumnHeaderStyle>
+                                            <Style TargetType="DataGridColumnHeader">
+                                                <Setter Property="Background" Value="#333"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                <Setter Property="FontSize" Value="11.5"/>
+                                                <Setter Property="Padding" Value="5,2"/>
+                                                <Setter Property="BorderBrush" Value="#555"/>
+                                                <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                                            </Style>
+                                        </DataGrid.ColumnHeaderStyle>
+                                        <DataGrid.CellStyle>
+                                            <Style TargetType="DataGridCell">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="FontSize" Value="11.5"/>
+                                                <Setter Property="Padding" Value="3,1"/>
+                                                <Setter Property="BorderBrush" Value="#555"/>
+                                                <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="DataGridCell">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                                    Padding="{TemplateBinding Padding}">
+                                                                <ContentPresenter VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </DataGrid.CellStyle>
+                                    </DataGrid>
+                                </StackPanel>
+                            </Grid>
+                        </Expander>
+                    </Border>
+                </Grid>
+
+                <!-- 하단 상태바 -->
+                <Grid Grid.Row="4">
+                    <!-- Progress bar background -->
+                    <ProgressBar x:Name="BacktestProgressBar"
+                                 Height="30"
+                                 Background="Transparent"
+                                 Foreground="{StaticResource Long2}"
+                                 BorderThickness="0"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"
+                                 Visibility="Collapsed"/>
+
+                    <!-- Status text overlay -->
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+                        <TextBlock x:Name="TotalResultsTextBlock" Text="Total: 0" FontSize="11.5" Margin="0,0,15,0"/>
+                        <TextBlock x:Name="CurrentPageInfoTextBlock" Text="Page: 0" FontSize="11.5"/>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
 

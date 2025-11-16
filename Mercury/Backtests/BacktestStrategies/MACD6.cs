@@ -19,7 +19,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		public decimal tprate = 0.0045m;     // 익절: 진입가 기준 0.45% (RR 1:1.5)
 		public decimal divergenceThreshold = 0.0015m; // MACD 다이버전스 감지 임계값
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseEma(9, 12, 26);
 			chartPack.UseMacd(12, 26, 9);

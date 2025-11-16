@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
         mc:Ignorable="d"
-        Title="Mariner X Chart Viewer" Height="600" Width="850" Background="{StaticResource Background}"
+        Title="Mariner X Chart Viewer" Height="700" Width="850" Background="{StaticResource Background}"
         MouseMove="Window_MouseMove">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -140,6 +140,18 @@
                     <TextBox x:Name="RsiPeriodText">14</TextBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="CciCheckBox">CCI</CheckBox>
+                    <TextBox x:Name="CciPeriodText">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="VolatilityCheckBox">Volatility</CheckBox>
+                    <TextBox x:Name="VolatilityPeriodText">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="TrendStrengthCheckBox">TrendStrength</CheckBox>
+                    <TextBox x:Name="TrendStrengthPeriodText">10</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
                     <CheckBox x:Name="AtrCheckBox">ATR</CheckBox>
                     <TextBox x:Name="AtrPeriodText">14</TextBox>
                 </StackPanel>
@@ -147,6 +159,12 @@
                     <CheckBox x:Name="BbCheckBox">Bollinger Band</CheckBox>
                     <TextBox x:Name="BbPeriodText">20</TextBox>
                     <TextBox x:Name="BbDeviationText">2</TextBox>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="IcCheckBox">Ichimoku Cloud</CheckBox>
+                    <TextBox x:Name="IcConversionText">9</TextBox>
+                    <TextBox x:Name="IcBaseText">26</TextBox>
+                    <TextBox x:Name="IcLeadingSpanText">52</TextBox>
                 </StackPanel>
             </StackPanel>
         </Grid>

@@ -32,6 +32,12 @@ namespace Backtester
 	/// - 심볼 조회 기능 개선(현재 사용가능한 심볼 리스트, 상장일~끝일 등 심볼별 정보 조회)
 	/// - 백테스트 결과 시각화 개선(기본적으로 csv로 저장, csv파일 불러와서 시각화)
 	/// 
+	/// 
+	/// 
+	/// 
+	/// 2025-07-31 심볼리스트 저장 (2024-01-01 이전 상장된것들)
+	/// BTCUSDT;ETHUSDT;BCHUSDT;XRPUSDT;LTCUSDT;TRXUSDT;ETCUSDT;XLMUSDT;ADAUSDT;XMRUSDT;BNBUSDT;VETUSDT;NEOUSDT;THETAUSDT;DOGEUSDT;BANDUSDT;RLCUSDT;MKRUSDT;DEFIUSDT;YFIUSDT;TRBUSDT;SUSHIUSDT;EGLDUSDT;SOLUSDT;UNIUSDT;AVAXUSDT;ENJUSDT;KSMUSDT;AAVEUSDT;RSRUSDT;LRCUSDT;ZENUSDT;GRTUSDT;SANDUSDT;COTIUSDT;HBARUSDT;MTLUSDT;BTCDOMUSDT;MASKUSDT;ARUSDT;LPTUSDT;ENSUSDT;DUSKUSDT;IMXUSDT;API3USDT;APEUSDT;WOOUSDT;JASMYUSDT;OPUSDT;INJUSDT;LDOUSDT;ICPUSDT;APTUSDT;QNTUSDT;FETUSDT;FXSUSDT;HIGHUSDT;ASTRUSDT;PHBUSDT;GMXUSDT;CFXUSDT;STXUSDT;ACHUSDT;SSVUSDT;CKBUSDT;LQTYUSDT;USDCUSDT;IDUSDT;JOEUSDT;HFTUSDT;XVSUSDT;BLURUSDT;SUIUSDT;NMRUSDT;XVGUSDT;WLDUSDT;PENDLEUSDT;ARKMUSDT;AGLDUSDT;DODOXUSDT;BNTUSDT;OXTUSDT;BIGTIMEUSDT;RIFUSDT;POLYXUSDT;TIAUSDT;CAKEUSDT;TWTUSDT;ORDIUSDT;STEEMUSDT;ILVUSDT;KASUSDT;BEAMXUSDT;PYTHUSDT;SUPERUSDT;USTCUSDT;ONGUSDT;ETHWUSDT;JTOUSDT;AUCTIONUSDT;ACEUSDT;MOVRUSDT;NFPUSDT
+
 	/// </summary>
 	public partial class BacktesterWindow : Window
 	{
@@ -52,6 +58,7 @@ namespace Backtester
 		int leverage;
 		string strategyId = string.Empty;
 		string reportFileName = string.Empty;
+		KlineInterval forceInterval;
 
 		Random random = new Random();
 
@@ -71,17 +78,27 @@ namespace Backtester
 			MoneyTextBox.Text = Settings.Default.Money;
 			LeverageTextBox.Text = Settings.Default.Leverage;
 
+			var intervals = new List<string>() { "1m", "5m", "15m", "30m", "1h", "2h", "4h", "1D" };
+			IntervalComboBox.ItemsSource = intervals;
+			SubIntervalComboBox.ItemsSource = intervals;
+
 			// 강제 매크로3 클릭
 			WindowState = WindowState.Minimized;
-			SymbolTextBox.Text = "RLCUSDT;UNFIUSDT;LPTUSDT;QTUMUSDT;OMGUSDT;CHZUSDT;STORJUSDT;KNCUSDT;BALUSDT;COMPUSDT;GALUSDT;YFIUSDT;MTLUSDT;IMXUSDT;ENSUSDT;DASHUSDT;MANAUSDT;WAVESUSDT;MATICUSDT;BLZUSDT;ZENUSDT;SFPUSDT;SANDUSDT;BCHUSDT;LTCUSDT;TRXUSDT;ALPHAUSDT;ETCUSDT;ENJUSDT;ARUSDT;COTIUSDT;AVAXUSDT;SXPUSDT;AXSUSDT;BANDUSDT;NEOUSDT;OCEANUSDT;ZECUSDT;NKNUSDT;GRTUSDT;DOTUSDT;ATOMUSDT;FTMUSDT;UNIUSDT;BTCUSDT;KAVAUSDT;XRPUSDT;ADAUSDT;OPUSDT;CTKUSDT;AAVEUSDT;SUSHIUSDT;IOSTUSDT;XMRUSDT;DUSKUSDT;DOGEUSDT;HBARUSDT;JASMYUSDT;ANTUSDT;SKLUSDT;BELUSDT;BNBUSDT;TOMOUSDT;THETAUSDT;SOLUSDT;XLMUSDT;MASKUSDT;FILUSDT;WOOUSDT;EGLDUSDT;ROSEUSDT;ARPAUSDT;RENUSDT;ETHUSDT;MKRUSDT";
-			StartDateTextBox.Text = "2022-07-18";
-			EndDateTextBox.Text = "2023-07-07";
-			//IntervalComboBox.SelectedItem = "5m";
+			SymbolTextBox.Text = "BTCUSDT;ETHUSDT;BCHUSDT;XRPUSDT;LTCUSDT;TRXUSDT;ETCUSDT;XLMUSDT;ADAUSDT;XMRUSDT;BNBUSDT;VETUSDT;NEOUSDT;THETAUSDT;DOGEUSDT;BANDUSDT;RLCUSDT;MKRUSDT;DEFIUSDT";
+			StartDateTextBox.Text = "2025-01-01";
+			EndDateTextBox.Text = "2025-06-30";
+			forceInterval = KlineInterval.TwoHour;
 			//SymbolTextBox.Text = "BTCUSDT;XRPUSDT;LTCUSDT;TRXUSDT;ETCUSDT;XLMUSDT;XMRUSDT;BNBUSDT;DOGEUSDT;BANDUSDT;SUSHIUSDT;SOLUSDT";
 			//StartDateTextBox.Text = "2023-01-01";
 			//EndDateTextBox.Text = "2024-12-31";
-			//BacktestButton_Click(BacktestMacro3Button, new RoutedEventArgs());
+			BacktestButton_Click(BacktestMacro3Button, new RoutedEventArgs());
 			//BacktestButton_Click(BacktestMacroASButton, new RoutedEventArgs());
+
+
+			/*
+			 * 
+			;YFIUSDT;TRBUSDT;SUSHIUSDT;EGLDUSDT;SOLUSDT;UNIUSDT;AVAXUSDT;ENJUSDT;KSMUSDT;AAVEUSDT;RSRUSDT;LRCUSDT;ZENUSDT;GRTUSDT;SANDUSDT;COTIUSDT;HBARUSDT;MTLUSDT;BTCDOMUSDT;MASKUSDT;ARUSDT;LPTUSDT;ENSUSDT;DUSKUSDT;IMXUSDT;API3USDT;APEUSDT;WOOUSDT;JASMYUSDT;OPUSDT;INJUSDT;LDOUSDT;ICPUSDT;APTUSDT;QNTUSDT;FETUSDT;FXSUSDT;HIGHUSDT;ASTRUSDT;PHBUSDT;GMXUSDT;CFXUSDT;STXUSDT;ACHUSDT;SSVUSDT;CKBUSDT;LQTYUSDT;USDCUSDT;IDUSDT;JOEUSDT;HFTUSDT;XVSUSDT;BLURUSDT;SUIUSDT;NMRUSDT;XVGUSDT;WLDUSDT;PENDLEUSDT;ARKMUSDT;AGLDUSDT;DODOXUSDT;BNTUSDT;OXTUSDT;BIGTIMEUSDT;RIFUSDT;POLYXUSDT;TIAUSDT;CAKEUSDT;TWTUSDT;ORDIUSDT;STEEMUSDT;ILVUSDT;KASUSDT;BEAMXUSDT;PYTHUSDT;SUPERUSDT;USTCUSDT;ONGUSDT;ETHWUSDT;JTOUSDT;AUCTIONUSDT;ACEUSDT;MOVRUSDT;NFPUSDT
+			 * */
 		}
 
 		public record SequenceSet(string EntrySequence, string ExitSequence);
@@ -168,7 +185,8 @@ namespace Backtester
 				Settings.Default.Save();
 
 				symbols = SymbolTextBox.Text.Split(';');
-				interval = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m").ToKlineInterval();
+				interval = forceInterval;
+				//interval = ((IntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "5m").ToKlineInterval();
 				subInterval = ((SubIntervalComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "1m").ToKlineInterval();
 				strategyId = (StrategyComboBox.SelectedItem as ComboBoxItem)?.Content.ToString() ?? "macd2";
 				startDate = StartDateTextBox.Text.ToDateTime();
@@ -402,30 +420,30 @@ namespace Backtester
 						//for (var bodyLengthMin = 0.05m; bodyLengthMin <= 0.05m; bodyLengthMin += 0.05m)
 						{
 							/* Symbol Eval */
-							//var symbolResults = new Dictionary<string, decimal>();
-							//for (int i = 0; i < symbols.Length; i++)
-							//{
-							//	int[] leverages = [leverage, leverage, leverage, leverage, leverage, leverage, leverage];
-							//	//var backtester = new EasyBacktester(strategyId, [symbols[i]], interval, maxActiveDealsType, maxActiveDeals, money, leverages, lossPer, banHour, bodyLengthMin)
-							//	var backtester = new EasyBacktester(strategyId, [symbols[i]], interval, maxActiveDealsType, maxActiveDeals, money, leverages)
-							//	{
-							//		IsGeneratePositionHistory = false,
-							//		StrategyId = entryStrategy,
-							//		ExitStrategyId = exitStrategy,
-							//		FeeRate = 0.0004m
-							//	};
-							//	backtester.InitIndicators();
-							//	(var symbol, var est) = backtester.Run(BacktestType.BySymbol, Common.ReportProgress, reportFileName, 200);
-							//	symbolResults.Add(symbol, est);
-							//}
-							//var bestSymbols = symbolResults.OrderByDescending(x => x.Value).Take(25).Select(x => x.Key).ToArray();
-							////File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-							////	$"({lossPer.Round(1)}/{banHour}/{bodyLengthMin.Round(3)}) Best 25 Symbols: {string.Join(';', bestSymbols)}" + Environment.NewLine);
-							//File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
-							//	$"Best 25 Symbols: {string.Join(';', bestSymbols)}" + Environment.NewLine);
+			//var symbolResults = new Dictionary<string, decimal>();
+			//for (int i = 0; i < symbols.Length; i++)
+			//{
+			//	int[] leverages = [leverage, leverage, leverage, leverage, leverage, leverage, leverage];
+			//	//var backtester = new EasyBacktester(strategyId, [symbols[i]], interval, maxActiveDealsType, maxActiveDeals, money, leverages, lossPer, banHour, bodyLengthMin)
+			//	var backtester = new EasyBacktester(strategyId, [symbols[i]], interval, maxActiveDealsType, maxActiveDeals, money, leverages)
+			//	{
+			//		IsGeneratePositionHistory = false,
+			//		StrategyId = entryStrategy,
+			//		ExitStrategyId = exitStrategy,
+			//		FeeRate = 0.0004m
+			//	};
+			//	backtester.InitIndicators();
+			//	(var symbol, var est) = backtester.Run(BacktestType.BySymbol, Common.ReportProgress, reportFileName, 200);
+			//	symbolResults.Add(symbol, est);
+			//}
+			//var bestSymbols = symbolResults.OrderByDescending(x => x.Value).Take(25).Select(x => x.Key).ToArray();
+			////File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+			////	$"({lossPer.Round(1)}/{banHour}/{bodyLengthMin.Round(3)}) Best 25 Symbols: {string.Join(';', bestSymbols)}" + Environment.NewLine);
+			//File.AppendAllText(MercuryPath.Desktop.Down($"{reportFileName}_Macro.csv"),
+			//	$"Best 25 Symbols: {string.Join(';', bestSymbols)}" + Environment.NewLine);
 
-							/* Macro Eval */
-							for (var maxActiveDeals = 5; maxActiveDeals <= 30; maxActiveDeals++)
+			/* Macro Eval */
+			for (var maxActiveDeals = 5; maxActiveDeals <= 30; maxActiveDeals++)
 							{
 								for (var leverage = 5; leverage <= 5; leverage++)
 								{
@@ -702,22 +720,23 @@ namespace Backtester
 				//var entrySeqs = GenerateSequences(6);
 				//var exitSeqs = GenerateSequences(6);
 
-
 				//Parallel.ForEach(combos, combo =>
 				//{
 				try
 				{
 					maxActiveDealsType = MaxActiveDealsType.Total;
 					var leverage = 1;
-					var maxActiveDeals = 20;
+					var maxActiveDeals = 10;
 
 					var backtester = new Cci2(reportFileName, money, leverage, maxActiveDealsType, maxActiveDeals)
 					{
 						IsGeneratePositionHistory = true,
 						IsGenerateDailyHistory = true,
+						IsEnableLongPosition = true,
+						IsEnableShortPosition = true,
 						FeeRate = 0.0003m,
 						CciPeriod = 64,
-						Deviation = 2.8
+						Deviation = 2.8m
 					};
 
 					backtester.Init(chartPacks, interval);
@@ -940,9 +959,11 @@ namespace Backtester
 								{
 									IsGeneratePositionHistory = false,
 									IsGenerateDailyHistory = false,
+									IsEnableLongPosition = true,
+									IsEnableShortPosition = true,
 									FeeRate = 0.0003m,
 									CciPeriod = p,
-									Deviation = (double)d
+									Deviation = d
 								};
 
 								backtester.Init([chartPack], interval);

@@ -32,7 +32,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		/// </summary>
 		public Dictionary<string, List<ChartInfo>> Charts2 { get; set; } = [];
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseRsi(14);
 		}

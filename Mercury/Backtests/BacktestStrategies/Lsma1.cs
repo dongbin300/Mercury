@@ -22,7 +22,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		public decimal th = 4m;
 		public decimal rsith = 40;
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseLsma(10, 30);
 			chartPack.UseRsi(14);

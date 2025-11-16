@@ -208,7 +208,7 @@ namespace TradeBot.Bots
 			{
 				foreach (var symbol in MonitorSymbols)
 				{
-					await BinanceClients.Socket.UsdFuturesApi.SubscribeToKlineUpdatesAsync(symbol, Common.BaseInterval, (obj) =>
+					await BinanceClients.Socket.UsdFuturesApi.ExchangeData.SubscribeToKlineUpdatesAsync(symbol, Common.BaseInterval, (obj) =>
 					{
 						var data = obj.Data.Data;
 						var pairQuote = Common.PairQuotes.Find(x => x.Symbol.Equals(symbol));

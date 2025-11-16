@@ -63,7 +63,7 @@ namespace Lab
 			var startTime = new DateTime(2010, 1, 1);
 			var endTime = new DateTime(2025, 3, 1);
 			var symbol = "BTCUSDT";
-			var interval = KlineInterval.OneDay;
+			var interval = KlineInterval.OneMonth;
 
 			//LocalApi.Init();
 			//var quotes = LocalApi.GetOneDayQuotes(symbol);
@@ -79,6 +79,8 @@ namespace Lab
 			//var rvwap = ArrayCalculator.RollingVwap(high.ToNullable(), low.ToNullable(), close.ToNullable(), volume.ToNullable(), 20);
 			//var stoch = ArrayCalculator.StochasticRsi(close, 3, 3, 14, 14);
 
+			var dema = ArrayCalculator.Dema(close.ToNullable(), 20);
+			var ema = ArrayCalculator.Ema(close.ToNullable(), 20);
 			var cci = ArrayCalculator.Cci(high, low, close, 20);
 			var atr = ArrayCalculator.Atr(high, low, close, 14);
 			var atrv = ArrayCalculator.AtrVolume(high, low, close, volume, 14);
@@ -96,6 +98,7 @@ namespace Lab
 			}
 			for (int i = 0; i < chartPacks.Count; i++)
 			{
+				chartPacks[i].UseIchimokuCloud();
 				chartPacks[i].UseRsi(14);
 				chartPacks[i].UseSma(20, 50);
 				chartPacks[i].UseBollingerBands(20, 2, QuoteType.Close);
@@ -104,11 +107,11 @@ namespace Lab
 				chartPacks[i].UseAtr(14);
 				chartPacks[i].UseVwap();
 				chartPacks[i].UseRollingVwap(20);
-				chartPacks[i].UseEvwap(13);
+				//chartPacks[i].UseEvwap(13);
 				chartPacks[i].UseElderRayPower(13);
 			}
 			//var model = new Correlation();
-			//model.Init(chartPacks);
+			//model.Init(chartPacks);^
 			//var result = model.Run();
 
 			var model2 = new CandleVolume1();

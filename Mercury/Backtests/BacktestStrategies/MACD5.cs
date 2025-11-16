@@ -11,7 +11,7 @@ namespace Mercury.Backtests.BacktestStrategies
 	{
 		public int AdxThreshold;
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			var macd1 = MacdTable.GetValues((int)p[0]);
 			var macd2 = MacdTable.GetValues((int)p[1]);

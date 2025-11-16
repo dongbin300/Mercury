@@ -120,6 +120,7 @@ namespace MarinerX
 			menu1.DropDownItems.Add("Binance 1일봉 데이터 추출", null, new EventHandler(Extract1DCandleEvent));
 			menu1.DropDownItems.Add(new ToolStripSeparator());
 			menu1.DropDownItems.Add("Binance 1분봉 데이터 체크", null, new EventHandler(GetBinanceCandleDataCheckEvent));
+			menu1.DropDownItems.Add("Binance 1분봉 파일 체크", null, new EventHandler(GetBinanceCandleFileCheckEvent));
 			menu1.DropDownItems.Add("Binance 1분봉 매뉴얼 데이터 수집", null, new EventHandler(GetBinanceCandleDataManualEvent));
 			menu1.DropDownItems.Add(new ToolStripSeparator());
 			menu1.DropDownItems.Add("Binance 가격 데이터 추출", null, new EventHandler(ExtractPriceEvent));
@@ -329,6 +330,24 @@ namespace MarinerX
 			try
 			{
 				var fileNames = ChartLoader.GetInvalidDataFileNames();
+				if (fileNames == null)
+				{
+					return;
+				}
+
+				MessageBox.Show(fileNames.Count + "건\n" + string.Join("\n", fileNames));
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message);
+			}
+		}
+
+		public static void GetBinanceCandleFileCheckEvent(object? sender, EventArgs e)
+		{
+			try
+			{
+				var fileNames = ChartLoader.GetMissingDataFileNames();
 				if (fileNames == null)
 				{
 					return;

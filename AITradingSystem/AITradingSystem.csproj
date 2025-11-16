@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <StartupObject>Mercury.AITradingSystem.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mercury\Mercury.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AITradingSystem\Backtests\" />
+    <Folder Include="AITradingSystem\Improvements\" />
+    <Folder Include="AITradingSystem\Results\" />
+    <Folder Include="AITradingSystem\Strategies\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+
+</Project>

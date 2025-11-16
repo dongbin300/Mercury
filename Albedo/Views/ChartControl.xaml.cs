@@ -235,7 +235,7 @@ namespace Albedo.Views
                 switch (ma.Type.Type)
                 {
                     case MaType.Sma:
-                        ma.Data = Quotes.GetSma(period).Select(r => new IndicatorData(r.Date, r.Sma)).ToList();
+                        ma.Data = [.. Quotes.GetSma(period).Select(r => new IndicatorData(r.Date, r.Sma))];
                         break;
 
                     case MaType.Wma:
@@ -248,7 +248,7 @@ namespace Albedo.Views
                         break;
 
                     case MaType.Ema:
-                        ma.Data = Quotes.GetEma(period).Select(r => new IndicatorData(r.Date, r.Ema)).ToList();
+                        ma.Data = [.. Quotes.GetEma(period).Select(r => new IndicatorData(r.Date, r.Ema))];
                         break;
                 }
             }
@@ -260,27 +260,27 @@ namespace Albedo.Views
                 }
 
                 var bbResult = Quotes.GetBollingerBands(bb.Period, bb.Deviation);
-                bb.SmaData = bbResult.Select(r => new IndicatorData(r.Date, r.Sma)).ToList();
-                bb.UpperData = bbResult.Select(r => new IndicatorData(r.Date, r.Upper)).ToList();
-                bb.LowerData = bbResult.Select(r => new IndicatorData(r.Date, r.Lower)).ToList();
+                bb.SmaData = [.. bbResult.Select(r => new IndicatorData(r.Date, r.Sma))];
+                bb.UpperData = [.. bbResult.Select(r => new IndicatorData(r.Date, r.Upper))];
+                bb.LowerData = [.. bbResult.Select(r => new IndicatorData(r.Date, r.Lower))];
             }
 
             var ic = SettingsMan.Indicators.Ic;
             if (ic.Enable)
             {
                 var icResult = Quotes.GetIchimokuCloud(ic.ShortPeriod, ic.MidPeriod, ic.LongPeriod);
-                ic.TenkanData = icResult.Select(r => new IndicatorData(r.Date, r.Conversion)).ToList();
-                ic.KijunData = icResult.Select(r => new IndicatorData(r.Date, r.Base)).ToList();
-                ic.ChikouData = icResult.Select(r => new IndicatorData(r.Date, r.TrailingSpan)).ToList();
-                ic.Senkou1Data = icResult.Select(r => new IndicatorData(r.Date, r.LeadingSpan1)).ToList();
-                ic.Senkou2Data = icResult.Select(r => new IndicatorData(r.Date, r.LeadingSpan2)).ToList();
+                ic.TenkanData = [.. icResult.Select(r => new IndicatorData(r.Date, r.Conversion))];
+                ic.KijunData = [.. icResult.Select(r => new IndicatorData(r.Date, r.Base))];
+                ic.ChikouData = [.. icResult.Select(r => new IndicatorData(r.Date, r.TrailingSpan))];
+                ic.Senkou1Data = [.. icResult.Select(r => new IndicatorData(r.Date, r.LeadingSpan1))];
+                ic.Senkou2Data = [.. icResult.Select(r => new IndicatorData(r.Date, r.LeadingSpan2))];
             }
 
             var rsi = SettingsMan.Indicators.Rsi;
             if (rsi.Enable)
             {
                 var rsiResult = Quotes.GetRsi(rsi.Period);
-                rsi.Data = rsiResult.Select(r => new IndicatorData(r.Date, r.Rsi)).ToList();
+                rsi.Data = [.. rsiResult.Select(r => new IndicatorData(r.Date, r.Rsi))];
             }
         }
         #endregion
@@ -425,32 +425,32 @@ namespace Albedo.Views
         #endregion
 
         #region Chart Content Render
-        private double GetIndicatorMax(List<IndicatorData> data)
+        private decimal GetIndicatorMax(List<IndicatorData> data)
         {
             var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
             if (values == null || !values.Any())
             {
                 return 0;
             }
-            return values.Max(x => x.Value);
+            return values.Max(x => x.Value).GetValueOrDefault();
         }
 
-        private double GetIndicatorMin(List<IndicatorData> data)
+        private decimal GetIndicatorMin(List<IndicatorData> data)
         {
             var values = data.Skip(StartItemIndex).Take(ViewItemCount).Where(x => x.Value != 0);
             if (values == null || !values.Any())
             {
                 return 0;
             }
-            return values.Min(x => x.Value);
+            return values.Min(x => x.Value).GetValueOrDefault();
         }
 
-        private (double, double) GetYMaxMin()
+        private (decimal, decimal) GetYMaxMin()
         {
-            var priceMax = (double)Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
-            var priceMin = (double)Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
-            double indicatorMax = 0;
-            double indicatorMin = 99999999;
+            var priceMax = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Max(x => x.High);
+            var priceMin = Quotes.Skip(StartItemIndex).Take(ViewItemCount).Min(x => x.Low);
+            decimal indicatorMax = 0;
+            decimal indicatorMin = 99999999;
             foreach (var ma in SettingsMan.Indicators.Mas)
             {
                 var max = GetIndicatorMax(ma.Data);
@@ -485,17 +485,17 @@ namespace Albedo.Views
             return (yMax, yMin);
         }
 
-        private void DrawIndicatorLine(SKCanvas canvas, IndicatorData preIndicator, IndicatorData indicator, int viewIndex, float actualItemFullWidth, float actualHeight, double yMax, double yMin, SKPaint paint)
+        private void DrawIndicatorLine(SKCanvas canvas, IndicatorData preIndicator, IndicatorData indicator, int viewIndex, float actualItemFullWidth, float actualHeight, decimal yMax, decimal yMin, SKPaint paint)
         {
             if (preIndicator != null && indicator != null && preIndicator.Value != 0 && indicator.Value != 0)
             {
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex - 0.5f),
-                        actualHeight * (float)(1.0 - (preIndicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (preIndicator.Value.GetValueOrDefault() - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - (indicator.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (indicator.Value.GetValueOrDefault() - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     paint
                     );
             }
@@ -547,7 +547,7 @@ namespace Albedo.Views
                     if (firstSenkou.Value != 0)
                     {
                         isFirstSenkou = false;
-                        senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0 - (firstSenkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                        senkouPath.MoveTo(actualItemFullWidth * 0.5f, actualHeight * (float)(1.0m - (firstSenkou.Value.GetValueOrDefault() - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                     }
                     for (int i = StartItemIndex; i < EndItemIndex; i++)
                     {
@@ -560,11 +560,11 @@ namespace Albedo.Views
                         if (isFirstSenkou)
                         {
                             isFirstSenkou = false;
-                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value.GetValueOrDefault() - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
                         else
                         {
-                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value.GetValueOrDefault() - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
 
                     }
@@ -579,11 +579,11 @@ namespace Albedo.Views
                         if (isFirstSenkou)
                         {
                             isFirstSenkou = false;
-                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.MoveTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value.GetValueOrDefault() - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
                         else
                         {
-                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0 - (senkou.Value - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
+                            senkouPath.LineTo(actualItemFullWidth * (viewIndex + 0.5f), actualHeight * (float)(1.0m - (senkou.Value.GetValueOrDefault() - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin);
                         }
                     }
                     canvas.DrawPath(senkouPath, new SKPaint()
@@ -676,17 +676,17 @@ namespace Albedo.Views
                 canvas.DrawLine(
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - ((double)quote.High - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (quote.High - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     new SKPoint(
                         actualItemFullWidth * (viewIndex + 0.5f),
-                        actualHeight * (float)(1.0 - ((double)quote.Low - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
+                        actualHeight * (float)(1.0m - (quote.Low - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint);
                 canvas.DrawRect(
                     new SKRect(
                         actualItemFullWidth * viewIndex + actualItemMargin / 2,
-                        actualHeight * (float)(1.0 - ((double)quote.Open - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
+                        actualHeight * (float)(1.0m - (quote.Open - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
                         actualItemFullWidth * (viewIndex + 1) - actualItemMargin / 2,
-                        actualHeight * (float)(1.0 - ((double)quote.Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin
+                        actualHeight * (float)(1.0m - (quote.Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin
                         ),
                     quote.Open < quote.Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                     );
@@ -741,7 +741,7 @@ namespace Albedo.Views
                     indicatorInfoText.Add(new SKColoredText($"{ma.Type.Type.ToString().ToUpper()} {ma.Period}", DrawingTools.BaseColor));
                     if (pointingIndicator.Value != 0)
                     {
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), ma.LineColor.Color.ToSKColor()));
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value.GetValueOrDefault(), significantDigit).ToString(), ma.LineColor.Color.ToSKColor()));
                     }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
@@ -759,15 +759,15 @@ namespace Albedo.Views
                     indicatorInfoText.Add(new SKColoredText($"BB {bb.Period},{bb.Deviation}", DrawingTools.BaseColor));
                     if (pointingIndicatorSma.Value != 0)
                     {
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorLower.Value, significantDigit).ToString(), bb.LowerLineColor.Color.ToSKColor(), -4));
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorLower.Value.GetValueOrDefault(), significantDigit).ToString(), bb.LowerLineColor.Color.ToSKColor(), -4));
                     }
                     if (pointingIndicatorUpper.Value != 0)
                     {
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSma.Value, significantDigit).ToString(), bb.SmaLineColor.Color.ToSKColor(), -4));
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSma.Value.GetValueOrDefault(), significantDigit).ToString(), bb.SmaLineColor.Color.ToSKColor(), -4));
                     }
                     if (pointingIndicatorLower.Value != 0)
                     {
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorUpper.Value, significantDigit).ToString(), bb.UpperLineColor.Color.ToSKColor(), -4));
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorUpper.Value.GetValueOrDefault(), significantDigit).ToString(), bb.UpperLineColor.Color.ToSKColor(), -4));
                     }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
@@ -782,15 +782,15 @@ namespace Albedo.Views
 
                         if (pointingIndicatorTenkan.Value != 0)
                         {
-                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorTenkan.Value, significantDigit).ToString(), ic.TenkanLineColor.Color.ToSKColor(), -4));
+                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorTenkan.Value.GetValueOrDefault(), significantDigit).ToString(), ic.TenkanLineColor.Color.ToSKColor(), -4));
                         }
                         if (pointingIndicatorKijun.Value != 0)
                         {
-                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorKijun.Value, significantDigit).ToString(), ic.KijunLineColor.Color.ToSKColor(), -4));
+                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorKijun.Value.GetValueOrDefault(), significantDigit).ToString(), ic.KijunLineColor.Color.ToSKColor(), -4));
                         }
                         if (pointingIndicatorChikou.Value != 0)
                         {
-                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorChikou.Value, significantDigit).ToString(), ic.ChikouLineColor.Color.ToSKColor(), -4));
+                            indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorChikou.Value.GetValueOrDefault(), significantDigit).ToString(), ic.ChikouLineColor.Color.ToSKColor(), -4));
                         }
                     }
 
@@ -799,11 +799,11 @@ namespace Albedo.Views
 
                     if (pointingIndicatorSenkou1.Value != 0)
                     {
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou1.Value, significantDigit).ToString(), ic.Senkou1LineColor.Color.ToSKColor(), -4));
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou1.Value.GetValueOrDefault(), significantDigit).ToString(), ic.Senkou1LineColor.Color.ToSKColor(), -4));
                     }
                     if (pointingIndicatorSenkou2.Value != 0)
                     {
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou2.Value, significantDigit).ToString(), ic.Senkou2LineColor.Color.ToSKColor(), -4));
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicatorSenkou2.Value.GetValueOrDefault(), significantDigit).ToString(), ic.Senkou2LineColor.Color.ToSKColor(), -4));
                     }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
@@ -814,7 +814,7 @@ namespace Albedo.Views
                     indicatorInfoText.Add(new SKColoredText($"RSI {rsi.Period}", DrawingTools.BaseColor));
                     if (pointingIndicator.Value != 0)
                     {
-                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value, significantDigit).ToString(), rsi.LineColor.Color.ToSKColor(), -4));
+                        indicatorInfoText.Add(new SKColoredText(Math.Round(pointingIndicator.Value.GetValueOrDefault(), significantDigit).ToString(), rsi.LineColor.Color.ToSKColor(), -4));
                     }
                     indicatorInfoText.Add(SKColoredText.NewLine);
                 }
@@ -858,7 +858,7 @@ namespace Albedo.Views
             canvas.DrawText(
                 NumberUtil.ToRoundedValueString(Quotes[EndItemIndex - 1].Close),
                 5,
-                actualHeight * (float)(1.0 - ((double)Quotes[EndItemIndex - 1].Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
+                actualHeight * (float)(1.0m - (Quotes[EndItemIndex - 1].Close - yMin) / (yMax - yMin)) + Common.CandleTopBottomMargin,
                 DrawingTools.CurrentTickerFont,
                 Quotes[EndItemIndex - 1].Open < Quotes[EndItemIndex - 1].Close ? DrawingTools.LongPaint : DrawingTools.ShortPaint
                 );

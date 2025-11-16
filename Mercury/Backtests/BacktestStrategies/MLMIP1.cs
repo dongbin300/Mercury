@@ -18,7 +18,7 @@ namespace Mercury.Backtests.BacktestStrategies
 	{
 		public decimal ProfitRatio;
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseMlmip((int)p[0], (int)p[1], (int)p[2], (int)p[3], (int)p[4]);
 			chartPack.UseSupertrend(10, 1.5);

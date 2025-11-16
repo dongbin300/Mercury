@@ -95,7 +95,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		public decimal TakeProfitRatio = 1.06m; // +6%
 
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseSma(5, 15, 30);
 		}

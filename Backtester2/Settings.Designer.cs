@@ -286,5 +286,17 @@ namespace Backtester2 {
                 this["MaxPositionsEach"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool TradeHistory {
+            get {
+                return ((bool)(this["TradeHistory"]));
+            }
+            set {
+                this["TradeHistory"] = value;
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@ namespace Mercury.Backtests.BacktestStrategies
 	/// <param name="maxActiveDeals"></param>
 	public class TrendRiderTest(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseTrendRider((int)p[0], (double)p[1], (int)p[2], (int)p[3], (int)p[4], (int)p[5]);
 		}

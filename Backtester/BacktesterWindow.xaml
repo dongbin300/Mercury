@@ -32,29 +32,9 @@
                 <TextBlock Style="{StaticResource Description}">End Date</TextBlock>
                 <TextBox x:Name="EndDateTextBox" Margin="100 0 0 0" HorizontalContentAlignment="Right" Text="2023-06-07"/>
                 <TextBlock Style="{StaticResource Description}">Interval</TextBlock>
-                <ComboBox x:Name="IntervalComboBox" SelectedIndex="2" SelectionChanged="IntervalComboBox_SelectionChanged">
-                    <ComboBoxItem>1m</ComboBoxItem>
-                    <ComboBoxItem>3m</ComboBoxItem>
-                    <ComboBoxItem>5m</ComboBoxItem>
-                    <ComboBoxItem>15m</ComboBoxItem>
-                    <ComboBoxItem>30m</ComboBoxItem>
-                    <ComboBoxItem>1h</ComboBoxItem>
-                    <ComboBoxItem>2h</ComboBoxItem>
-                    <ComboBoxItem>4h</ComboBoxItem>
-                    <ComboBoxItem>1D</ComboBoxItem>
-                </ComboBox>
-                <ComboBox x:Name="SubIntervalComboBox" SelectedIndex="0">
-                    <ComboBoxItem>1m</ComboBoxItem>
-                    <ComboBoxItem>3m</ComboBoxItem>
-                    <ComboBoxItem>5m</ComboBoxItem>
-                    <ComboBoxItem>15m</ComboBoxItem>
-                    <ComboBoxItem>30m</ComboBoxItem>
-                    <ComboBoxItem>1h</ComboBoxItem>
-                    <ComboBoxItem>2h</ComboBoxItem>
-                    <ComboBoxItem>4h</ComboBoxItem>
-                    <ComboBoxItem>1D</ComboBoxItem>
-                </ComboBox>
-                <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
+                <ComboBox x:Name="IntervalComboBox" SelectedIndex="2" SelectionChanged="IntervalComboBox_SelectionChanged"/>
+                <ComboBox x:Name="SubIntervalComboBox" SelectedIndex="0"/>
+                    <TextBlock Style="{StaticResource Description}">Strategy</TextBlock>
                 <ComboBox x:Name="StrategyComboBox" SelectedIndex="0">
                     <ComboBoxItem>MACD2</ComboBoxItem>
                     <ComboBoxItem>MACD4.1.14.2</ComboBoxItem>

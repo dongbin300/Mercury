@@ -77,15 +77,20 @@ namespace Mercury.Apis
 		{
 			return [.. BinanceClient.UsdFuturesApi.ExchangeData.GetPricesAsync().Result.Data.Where(s => s.Symbol.EndsWith("USDT") && !s.Symbol.Equals("LINKUSDT") && !s.Symbol.StartsWith('1'))];
 		}
-		#endregion
 
-		#region Chart API
-		/// <summary>
-		/// 하루 동안의 차트 데이터 가져오기
-		/// </summary>
-		/// <param name="symbol"></param>
-		/// <param name="startTime"></param>
-		public static void GetCandleDataForOneDay(string symbol, DateTime startTime)
+		public static BinancePrice GetFuturesPrice(string symbol)
+		{
+			return BinanceClient.UsdFuturesApi.ExchangeData.GetPriceAsync(symbol).Result.Data;
+        }
+        #endregion
+
+        #region Chart API
+        /// <summary>
+        /// 하루 동안의 차트 데이터 가져오기
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <param name="startTime"></param>
+        public static void GetCandleDataForOneDay(string symbol, DateTime startTime)
 		{
 			var result = BinanceClient.UsdFuturesApi.ExchangeData.GetKlinesAsync(
 				symbol,

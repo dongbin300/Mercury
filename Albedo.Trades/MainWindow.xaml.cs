@@ -57,7 +57,7 @@ namespace Albedo.Trades
 			socketClient.UsdFuturesApi.UnsubscribeAllAsync();
 			socketClient2.UsdFuturesApi.UnsubscribeAllAsync();
 
-			socketClient.UsdFuturesApi.SubscribeToTradeUpdatesAsync(symbol, (obj) =>
+			socketClient.UsdFuturesApi.ExchangeData.SubscribeToTradeUpdatesAsync(symbol, (obj) =>
 			{
 				var price = obj.Data.Price;
 				var quantity = obj.Data.Quantity;
@@ -85,16 +85,16 @@ namespace Albedo.Trades
 				});
 			});
 
-			socketClient2.UsdFuturesApi.SubscribeToAllBookTickerUpdatesAsync((obj) =>
+			socketClient2.UsdFuturesApi.ExchangeData.SubscribeToAllBookTickerUpdatesAsync((obj) =>
 			{
 			});
-			socketClient2.UsdFuturesApi.SubscribeToBookTickerUpdatesAsync(symbol, (obj) =>
+			socketClient2.UsdFuturesApi.ExchangeData.SubscribeToBookTickerUpdatesAsync(symbol, (obj) =>
 			{
 			});
-			socketClient2.UsdFuturesApi.SubscribeToOrderBookUpdatesAsync(symbol, 10, (obj) =>
+			socketClient2.UsdFuturesApi.ExchangeData.SubscribeToOrderBookUpdatesAsync(symbol, 10, (obj) =>
 			{
 			});
-			socketClient2.UsdFuturesApi.SubscribeToPartialOrderBookUpdatesAsync(symbol, 10, 250, (obj) =>
+			socketClient2.UsdFuturesApi.ExchangeData.SubscribeToPartialOrderBookUpdatesAsync(symbol, 10, 250, (obj) =>
 			{
 				Invoke(() =>
 				{

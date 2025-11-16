@@ -524,24 +524,103 @@ namespace Mercury.Maths
 		{
 			var result = new double?[values.Length];
 			double alpha = 2.0 / (period + 1);
+
+			int first = -1;
 			for (int i = startIndex; i < values.Length; i++)
 			{
-				if (i < startIndex + period - 1)
+				if (values[i] != null)
+				{
+					first = i;
+					break;
+				}
+			}
+			if (first == -1) return result;
+
+			int seed = first + period - 1;
+			if (seed >= values.Length) return result;
+
+			double sum = 0;
+			int count = 0;
+			for (int i = first; i <= seed; i++)
+			{
+				sum += values[i]!.Value;
+				count++;
+			}
+			if (count < period) return result;
+
+			result[seed] = sum / period;
+
+			for (int i = seed + 1; i < values.Length; i++)
+			{
+				if (values[i] == null)
+				{
+					result[i] = result[i - 1];
+				}
+				else
+				{
+					result[i] = alpha * values[i]!.Value + (1 - alpha) * result[i - 1]!.Value;
+				}
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Recommend values is Quote.Close
+		/// </summary>
+		/// <param name="values"></param>
+		/// <param name="period"></param>
+		/// <param name="startIndex"></param>
+		/// <returns></returns>
+		public static double?[] Dema(double?[] values, int period, int startIndex = 0)
+		{
+			var result = new double?[values.Length];
+
+			var ema1 = Ema(values, period, startIndex);
+			var ema2 = Ema(ema1, period, startIndex);
+
+			for (int i = 0; i < values.Length; i++)
+			{
+				if (ema1[i] == null || ema2[i] == null)
 				{
 					result[i] = null;
 					continue;
 				}
 
-				if (i == startIndex + period - 1)
-				{
-					result[i] = SAverage(values, period, startIndex);
-					continue;
-				}
-
-				result[i] = alpha * values[i] + (1 - alpha) * result[i - 1];
+				result[i] = 2 * ema1[i]!.Value - ema2[i]!.Value;
 			}
 
 			return result;
+		}
+
+		/// <summary>
+		/// Double Exponential Moving Average Slope
+		/// </summary>
+		/// <param name="dema"></param>
+		/// <returns></returns>
+		public static double?[] DemaSlope(double?[] values, int period, int startIndex = 0)
+		{
+			var dema = Dema(values, period, startIndex);
+			var slope = new double?[values.Length];
+
+			for (int i = startIndex; i < values.Length; i++)
+			{
+				if (i == startIndex)
+				{
+					slope[i] = null;
+					continue;
+				}
+
+				if (dema[i] == null || dema[i - 1] == null)
+				{
+					slope[i] = null;
+					continue;
+				}
+
+				slope[i] = dema[i]!.Value - dema[i - 1]!.Value;
+			}
+
+			return slope;
 		}
 
 		/// <summary>
@@ -978,21 +1057,20 @@ namespace Mercury.Maths
 		/// <param name="period"></param>
 		/// <param name="deviation"></param>
 		/// <returns></returns>
-		public static (double?[] Sma, double?[] Upper, double?[] Lower) BollingerBands(double?[] values, int period, double deviation)
-		{
-			var sma = Sma(values, period);
-			var upper = new double?[values.Length];
-			var lower = new double?[values.Length];
-			var stdev = Stdev(values, period);
-			for (int i = 0; i < values.Length; i++)
-			{
-				var dev = deviation * stdev[i];
-				upper[i] = sma[i] + dev;
-				lower[i] = sma[i] - dev;
-			}
-			return (sma, upper, lower);
-		}
-
+		        public static (double?[] Sma, double?[] Upper, double?[] Lower) BollingerBands(double?[] values, int period, double deviation)
+				{
+					var sma = Sma(values, period);
+					var upper = new double?[values.Length];
+					var lower = new double?[values.Length];
+					var stdev = Stdev(values, period);
+					for (int i = 0; i < values.Length; i++)
+					{
+						var dev = deviation * stdev[i];
+						upper[i] = sma[i] + dev;
+						lower[i] = sma[i] - dev;
+					}
+					return (sma, upper, lower);
+				}
 		/// <summary>
 		/// EMA based Moving Average Convergence Divergence(MACD)
 		/// </summary>
@@ -1837,7 +1915,7 @@ namespace Mercury.Maths
 		}
 
 		/// <summary>
-		/// Commodity Channel Index (TODO)
+		/// Commodity Channel Index
 		/// </summary>
 		/// <param name="high"></param>
 		/// <param name="low"></param>
@@ -1879,6 +1957,62 @@ namespace Mercury.Maths
 			return result;
 		}
 
+		/// <summary>
+		/// Computes adaptive CCI threshold based on historical CCI volatility (standard deviation).
+		/// Calculates CCI internally, then uses a lookback period to calculate the standard deviation 
+		/// of CCI values, multiplies by a factor and clamps between min/max thresholds. 
+		/// Higher volatility results in higher thresholds.
+		/// </summary>
+		/// <param name="high">High prices</param>
+		/// <param name="low">Low prices</param>
+		/// <param name="close">Close prices</param>
+		/// <param name="cciPeriod">Period for CCI calculation (default: 20)</param>
+		/// <param name="volatilityPeriod">Number of periods to calculate standard deviation (default: 20)</param>
+		/// <param name="stdevMultiplier">Multiplier for standard deviation (default: 2.0)</param>
+		/// <param name="minThreshold">Minimum threshold value (default: 50)</param>
+		/// <param name="maxThreshold">Maximum threshold value (default: 200)</param>
+		/// <returns>Array of adaptive threshold values</returns>
+		public static double?[] CciVolatilityThreshold(double[] high, double[] low, double[] close, int cciPeriod = 20, int volatilityPeriod = 20, double stdevMultiplier = 2.0, double minThreshold = 50, double maxThreshold = 200)
+		{
+			var cci = Cci(high, low, close, cciPeriod);
+			var result = new double?[cci.Length];
+
+			for (int i = 0; i < cci.Length; i++)
+			{
+				if (i < volatilityPeriod)
+				{
+					result[i] = null;
+					continue;
+				}
+
+				int endIndex = i - 1;
+				int startIndex = endIndex - volatilityPeriod + 1;
+				var sample = new List<double>();
+
+				for (int idx = startIndex; idx <= endIndex; idx++)
+				{
+					if (cci[idx] != null)
+						sample.Add(cci[idx]!.Value);
+				}
+
+				if (sample.Count < 5)
+				{
+					result[i] = (minThreshold + maxThreshold) / 2.0;
+					continue;
+				}
+
+				double avg = sample.Average();
+				double sumsq = sample.Select(x => (x - avg) * (x - avg)).Sum();
+				double std = Math.Sqrt(sumsq / sample.Count);
+				double threshold = std * stdevMultiplier;
+				if (threshold < minThreshold) threshold = minThreshold;
+				if (threshold > maxThreshold) threshold = maxThreshold;
+
+				result[i] = threshold;
+			}
+
+			return result;
+		}
 
 		/// <summary>
 		/// on test

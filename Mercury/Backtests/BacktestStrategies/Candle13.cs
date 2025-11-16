@@ -15,7 +15,7 @@ namespace Mercury.Backtests.BacktestStrategies
 	/// <param name="maxActiveDeals"></param>
 	public class Candle13(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseRsi();
 		}

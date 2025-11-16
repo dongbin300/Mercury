@@ -20,7 +20,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		public int ExitCci = 200;
 
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseCci(20);
 			chartPack.UseEma(8);

@@ -17,13 +17,13 @@ namespace Mercury.Backtests.BacktestStrategies
 	public class Cci2(string reportFileName, decimal startMoney, int leverage, MaxActiveDealsType maxActiveDealsType, int maxActiveDeals) : Backtester(reportFileName, startMoney, leverage, maxActiveDealsType, maxActiveDeals)
 	{
 		public int CciPeriod = 32;
-		public double Deviation = 2.8;
+		public decimal Deviation = 2.8m;
 
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseCci(CciPeriod);
-			chartPack.UseBollingerBands(CciPeriod, Deviation, Extensions.IndicatorType.Cci);
+			chartPack.UseBollingerBands(CciPeriod, (double)Deviation, Extensions.IndicatorType.Cci);
 		}
 
 		protected override void LongEntry(string symbol, List<ChartInfo> charts, int i)

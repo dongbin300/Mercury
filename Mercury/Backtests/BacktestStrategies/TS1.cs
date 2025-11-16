@@ -9,7 +9,7 @@ namespace Mercury.Backtests.BacktestStrategies
 	{
 		public decimal ProfitRatio;
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseTripleSupertrend((int)p[0], (double)p[1], (int)p[2], (double)p[3], (int)p[4], (double)p[5]);
 		}

@@ -1,0 +1,65 @@
+{
+  "DefaultSymbol": "BTCUSDT",
+  "DefaultInterval": "OneWeek",
+  "ChartTheme": "Dark",
+  "AutoRefresh": false,
+  "RefreshInterval": 5,
+  "WindowWidth": 1200,
+  "WindowHeight": 800,
+  "Indicators": [
+    {
+      "Name": "SMA",
+      "Period": 20,
+      "Color": "#FF6347",
+      "IsVisible": true,
+      "Parameters": {}
+    },
+    {
+      "Name": "EMA",
+      "Period": 20,
+      "Color": "#FF69B4",
+      "IsVisible": false,
+      "Parameters": {}
+    },
+    {
+      "Name": "RSI",
+      "Period": 14,
+      "Color": "#FFD700",
+      "IsVisible": false,
+      "Parameters": {}
+    },
+    {
+      "Name": "MACD",
+      "Period": 12,
+      "Color": "#00CED1",
+      "IsVisible": false,
+      "Parameters": {}
+    },
+    {
+      "Name": "CCI",
+      "Period": 14,
+      "Color": "#FFB6C1",
+      "IsVisible": false,
+      "Parameters": {}
+    },
+    {
+      "Name": "ATR",
+      "Period": 14,
+      "Color": "#98FB98",
+      "IsVisible": false,
+      "Parameters": {}
+    },
+    {
+      "Name": "Volume",
+      "Period": 0,
+      "Color": "#DDA0DD",
+      "IsVisible": true,
+      "Parameters": {}
+    }
+  ],
+  "LastSaved": "2025-10-13T20:04:39.0006363+09:00",
+  "UserSettings": {
+    "WindowWidth": "1400",
+    "WindowHeight": "900"
+  }
+}

@@ -26,7 +26,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		public int Ema3Period = 200;
 
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseEma(Ema1Period, Ema2Period, Ema3Period);
 			chartPack.UseMaAngles();

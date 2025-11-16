@@ -1,18 +1,15 @@
-﻿using Mercury.Enums;
+﻿using Mercury.Assets;
+using Mercury.Cues;
+using Mercury.Elements;
+using Mercury.Enums;
+using Mercury.Extensions;
 using Mercury.Formulae;
 using Mercury.Interfaces;
 using Mercury.Orders;
+using Mercury.Signals;
 using Mercury.TradingModels;
 
 using MercuryEditor.Editor;
-
-using MercuryTradingModel.Assets;
-using MercuryTradingModel.Cues;
-using MercuryTradingModel.Elements;
-using MercuryTradingModel.Extensions;
-using MercuryTradingModel.Formulae;
-using MercuryTradingModel.Intervals;
-using MercuryTradingModel.Signals;
 
 using System;
 using System.Collections.Generic;
@@ -542,7 +539,7 @@ namespace MercuryEditor.Inspection.V1
                 if (positionSide == MtmPositionSide.Open || positionSide == MtmPositionSide.Close)
                 {
                     var _value = decimal.Parse(segments[1]);
-                    return new BackTestOrder(MtmOrderType.Market, positionSide, new OrderAmount(MtmOrderAmountType.None, _value));
+                    return new BacktestOrder(MtmOrderType.Market, positionSide, new OrderAmount(MtmOrderAmountType.None, _value));
                 }
 
                 MtmOrderType orderType = MtmOrderType.None;
@@ -612,7 +609,7 @@ namespace MercuryEditor.Inspection.V1
                 }
 
                 var orderAmount = new OrderAmount(orderAmountType, value);
-                return new BackTestOrder(orderType, positionSide, orderAmount, price);
+                return new BacktestOrder(orderType, positionSide, orderAmount, price);
             }
             catch
             {

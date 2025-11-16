@@ -19,7 +19,7 @@ namespace Mercury.Backtests.BacktestStrategies
 		public decimal sltprate = 2.0m;
 		public decimal th = 4m;
 
-		protected override void InitIndicator(ChartPack chartPack, params decimal[] p)
+		protected override void InitIndicator(ChartPack chartPack, int intervalIndex, params decimal[] p)
 		{
 			chartPack.UseEma(12, 26);
 			chartPack.UseMaAngles();

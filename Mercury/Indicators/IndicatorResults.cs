@@ -9,7 +9,10 @@
 	public record BbResult(DateTime Date, decimal? Sma, decimal? Upper, decimal? Lower);
     public record CandleScoreResult(DateTime Date, decimal? CandleScore);
     public record CciResult(DateTime Date, decimal? Cci);
+    public record CciVolatilityThresholdResult(DateTime Date, decimal? CciVolatilityThreshold);
 	public record CustomResult(DateTime Date, decimal? Upper, decimal? Lower, decimal? Pioneer, decimal? Player);
+	public record DemaResult(DateTime Date, decimal? Dema);
+	public record DemaSlopeResult(DateTime Date, decimal? DemaSlope);
 	public record DonchianChannelResult(DateTime Date, decimal? Basis, decimal? Upper, decimal? Lower);
 	public record EatrResult(DateTime Date, decimal? Eatr);
 	public record ElderRayPowerResult(DateTime Date, decimal? BullPower, decimal? BearPower);

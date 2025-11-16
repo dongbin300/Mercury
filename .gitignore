@@ -396,4 +396,10 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+#claude
+/.claude
+
+# misc
 Albedo/차트프로그램.txt
+*.csv
