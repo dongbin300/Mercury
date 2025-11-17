@@ -1,16 +1,20 @@
 ﻿using Binance.Net.Enums;
 
-namespace Vectoris.Trading.Positions
+namespace Vectoris.Trading.Orders
 {
 	/// <summary>
 	/// 개별 거래 이벤트
 	/// </summary>
-	public class Transaction(string positionId, OrderSide side, DateTime time, decimal price, decimal quantity)
+	public class Transaction(string positionId, string symbol, OrderSide side, DateTime time, decimal price, decimal quantity)
 	{
 		/// <summary>
 		/// 관련 Position ID
 		/// </summary>
 		public string PositionId { get; init; } = positionId;
+		/// <summary>
+		/// 심볼
+		/// </summary>
+		public string Symbol { get; init; } = symbol;
 		/// <summary>
 		/// 거래 타입: Buy / Sell
 		/// </summary>

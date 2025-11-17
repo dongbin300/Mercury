@@ -10,9 +10,4 @@
     <PackageReference Include="Binance.Net" Version="11.11.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Trading\Accounts\" />
-    <Folder Include="Trading\Orders\" />
-  </ItemGroup>
-
 </Project>

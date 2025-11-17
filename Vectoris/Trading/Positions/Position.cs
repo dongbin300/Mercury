@@ -1,5 +1,7 @@
 ﻿using Binance.Net.Enums;
 
+using Vectoris.Trading.Orders;
+
 namespace Vectoris.Trading.Positions
 {
 	/// <summary>
