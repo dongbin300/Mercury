@@ -64,10 +64,12 @@ public class Account(string name, decimal initialBalance)
 		ArgumentNullException.ThrowIfNull(t);
 		_transactions.Add(t);
 
-		var position = _positions.FirstOrDefault(p => p.Id == t.PositionId);
+		var side = t.Side == OrderSide.Buy ? PositionSide.Long : PositionSide.Short;
+
+		var position = _positions.FirstOrDefault(p => p.Symbol == t.Symbol && p.Side == side && p.OpenQuantity > 0);
 		if (position == null)
 		{
-			_positions.Add(new Position(t.Symbol, t.Side == OrderSide.Buy ? PositionSide.Long : PositionSide.Short, t.Time, _transactions));
+			_positions.Add(new Position(t.Symbol, side, t.Time, _transactions));
 		}
 	}
 
