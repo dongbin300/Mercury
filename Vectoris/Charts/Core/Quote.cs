@@ -1,4 +1,4 @@
-﻿namespace Vectoris.Charts;
+﻿namespace Vectoris.Charts.Core;
 
 public class Quote(DateTime time, decimal open, decimal high, decimal low, decimal close, decimal volume = 0)
 {
