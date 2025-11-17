@@ -71,6 +71,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChartViewer2", "ChartViewer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KiwoomTrade", "KiwoomTrade\KiwoomTrade.csproj", "{89A2E588-89F7-42E7-AE88-1BA9220E83BC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vectoris", "Vectoris\Vectoris.csproj", "{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -453,6 +455,18 @@ Global
 		{89A2E588-89F7-42E7-AE88-1BA9220E83BC}.Release|x64.Build.0 = Release|Any CPU
 		{89A2E588-89F7-42E7-AE88-1BA9220E83BC}.Release|x86.ActiveCfg = Release|Any CPU
 		{89A2E588-89F7-42E7-AE88-1BA9220E83BC}.Release|x86.Build.0 = Release|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Debug|x64.Build.0 = Debug|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Debug|x86.Build.0 = Debug|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Release|x64.ActiveCfg = Release|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Release|x64.Build.0 = Release|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Release|x86.ActiveCfg = Release|Any CPU
+		{0D3C659B-8632-4AC7-8ACD-16E01BBB681D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
