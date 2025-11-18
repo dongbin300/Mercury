@@ -27,7 +27,8 @@ public class PriceSeries : TimeSeries<Quote>
 	/// <summary>
 	/// 캔들 추가 (별칭 메서드)
 	/// </summary>
-	public void AddQuote(Quote quote) => Add(quote);
+	public void AddQuote(Quote quote) =>
+		Add(quote);
 
 	/// <summary>
 	/// 여러 캔들 한번에 추가
@@ -43,32 +44,38 @@ public class PriceSeries : TimeSeries<Quote>
 	/// <summary>
 	/// 특정 시간의 캔들 조회 (별칭 메서드)
 	/// </summary>
-	public Quote? GetQuote(DateTime time) => GetByTime(time);
+	public Quote? GetQuote(DateTime time) =>
+		GetByTime(time);
 
 	/// <summary>
 	/// 특정 시간 범위의 캔들들 조회 (별칭 메서드)
 	/// </summary>
-	public IEnumerable<Quote> GetQuotes(DateTime from, DateTime to) => GetRange(from, to);
+	public IEnumerable<Quote> GetQuotes(DateTime from, DateTime to) =>
+		GetRange(from, to);
 
 	/// <summary>
 	/// 가장 최근 종가
 	/// </summary>
-	public decimal? LastClose => Last?.Close;
+	public decimal? LastClose =>
+		Last?.Close;
 
 	/// <summary>
 	/// 가장 최근 시가
 	/// </summary>
-	public decimal? LastOpen => Last?.Open;
+	public decimal? LastOpen =>
+		Last?.Open;
 
 	/// <summary>
 	/// 가장 최근 고가
 	/// </summary>
-	public decimal? LastHigh => Last?.High;
+	public decimal? LastHigh =>
+		Last?.High;
 
 	/// <summary>
 	/// 가장 최근 저가
 	/// </summary>
-	public decimal? LastLow => Last?.Low;
+	public decimal? LastLow =>
+		Last?.Low;
 
 	/// <summary>
 	/// N개 최근 캔들 조회

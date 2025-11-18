@@ -18,4 +18,9 @@ public class Quote(DateTime time, decimal open, decimal high, decimal low, decim
 	/// 거래량
 	/// </summary>
 	public decimal Volume { get; init; } = volume;
+
+    public override string ToString()
+    {
+        return $"{Time} | {Open} | {High} | {Low} | {Close} | {Volume}";
+    }
 }

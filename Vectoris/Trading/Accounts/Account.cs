@@ -21,37 +21,41 @@ public class Account(string name, decimal initialBalance)
 	/// 거래 기록 컬렉션
 	/// </summary>
 	private readonly List<Transaction> _transactions = [];
-	public IEnumerable<Transaction> Transactions => _transactions;
+	public IEnumerable<Transaction> Transactions => 
+		_transactions;
 
 	/// <summary>
 	/// Position 컬렉션
 	/// </summary>
 	private readonly List<Position> _positions = [];
-	public IEnumerable<Position> Positions => _positions;
+	public IEnumerable<Position> Positions => 
+		_positions;
 
 	#region 계산 속성
 
 	/// <summary>
 	/// 현재 가용 자산 (잔액 + 실현 손익)
 	/// </summary>
-	public decimal Balance => InitialBalance + RealizedPnL;
+	public decimal Balance => 
+		InitialBalance + RealizedPnL;
 
 	/// <summary>
 	/// 총 실현 손익 (자동 계산)
 	/// </summary>
-	public decimal RealizedPnL => _positions.Sum(p => p.RealizedPnl);
+	public decimal RealizedPnL => 
+		_positions.Sum(p => p.RealizedPnl);
 
 	/// <summary>
 	/// 총 미실현 손익 (자동 계산)
 	/// </summary>
-	public decimal UnrealizedPnL => _positions.Sum(p =>
-	{
-		var lastPrice = p.MaxPrice ?? p.OpenPrice; // 간단 예시: 최고가 기준
-		return p.Side == PositionSide.Long
-			? (lastPrice - p.OpenPrice) * p.OpenQuantity
-			: (p.OpenPrice - lastPrice) * p.OpenQuantity;
-	});
-
+	public decimal UnrealizedPnL => 
+		_positions.Sum(p =>
+		{
+			var lastPrice = p.MaxPrice ?? p.OpenPrice; // 간단 예시: 최고가 기준
+			return p.Side == PositionSide.Long
+				? (lastPrice - p.OpenPrice) * p.OpenQuantity
+				: (p.OpenPrice - lastPrice) * p.OpenQuantity;
+		});
 	#endregion
 
 	#region 거래/포지션 관리

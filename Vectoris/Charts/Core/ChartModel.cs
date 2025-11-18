@@ -1,5 +1,4 @@
 ﻿using Vectoris.Charts.Series;
-using Vectoris.Enums;
 
 namespace Vectoris.Charts.Core;
 
@@ -27,10 +26,8 @@ public class ChartModel
 	/// <summary>
 	/// 초기 가격 데이터로 차트 모델 생성
 	/// </summary>
-	public ChartModel(IEnumerable<Quote> quotes)
-	{
+	public ChartModel(IEnumerable<Quote> quotes) =>
 		PriceSeries.AddQuotes(quotes);
-	}
 
 	/// <summary>
 	/// 차트에 새로운 캔들 추가
@@ -51,26 +48,20 @@ public class ChartModel
 	/// <summary>
 	/// 여러 캔들 한번에 추가
 	/// </summary>
-	public void AddQuotes(IEnumerable<Quote> quotes)
-	{
+	public void AddQuotes(IEnumerable<Quote> quotes) =>
 		PriceSeries.AddQuotes(quotes);
-	}
 
 	/// <summary>
 	/// 지표 시리즈 추가
 	/// </summary>
-	public void AddIndicator(ValueSeries indicator)
-	{
+	public void AddIndicator(ValueSeries indicator) =>
 		Indicators.Add(indicator);
-	}
 
 	/// <summary>
 	/// 이름으로 지표 시리즈 생성 및 추가
 	/// </summary>
-	public ValueSeries CreateIndicator(string name)
-	{
-		return Indicators.CreateSeries(name);
-	}
+	public ValueSeries CreateIndicator(string name) =>
+		Indicators.CreateSeries(name);
 
 	/// <summary>
 	/// 특정 시간 범위에 대한 가격 데이터 조회

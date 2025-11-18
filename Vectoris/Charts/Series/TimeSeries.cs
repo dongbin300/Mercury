@@ -11,22 +11,26 @@ public class TimeSeries<T> : ITimeSeries<T> where T : class, ITimeSeriesPoint
 	/// <summary>
 	/// 시계열 데이터 포인트들을 읽기 전용으로 조회
 	/// </summary>
-	public IReadOnlyList<T> Values => _values;
+	public IReadOnlyList<T> Values =>
+		_values;
 
 	/// <summary>
 	/// 시계열의 데이터 포인트 수
 	/// </summary>
-	public int Count => _values.Count;
+	public int Count =>
+		_values.Count;
 
 	/// <summary>
 	/// 가장 최근 데이터 포인트
 	/// </summary>
-	public T? Last => _values.Count > 0 ? _values[^1] : null;
+	public T? Last =>
+		_values.Count > 0 ? _values[^1] : null;
 
 	/// <summary>
 	/// 가장 오래된 데이터 포인트
 	/// </summary>
-	public T? First => _values.Count > 0 ? _values[0] : null;
+	public T? First =>
+		_values.Count > 0 ? _values[0] : null;
 
 	/// <summary>
 	/// 시계열에 새로운 데이터 포인트 추가
@@ -58,46 +62,12 @@ public class TimeSeries<T> : ITimeSeries<T> where T : class, ITimeSeriesPoint
 	/// <summary>
 	/// 인덱스로 데이터 포인트 조회
 	/// </summary>
-	public T? GetByIndex(int index)
-	{
-		return index >= 0 && index < _values.Count ? _values[index] : null;
-	}
+	public T? GetByIndex(int index) =>
+		index >= 0 && index < _values.Count ? _values[index] : null;
 
 	/// <summary>
 	/// 시계열 데이터 모두 제거
 	/// </summary>
-	public void Clear()
-	{
+	public void Clear() =>
 		_values.Clear();
-	}
-}
-
-/// <summary>
-/// 하위 호환성을 위한 추상 클래스 (향후 제거 권장)
-/// </summary>
-[Obsolete("Use TimeSeries<T> instead. This class will be removed in future versions.")]
-public abstract class Series<T> where T : class, ITimeSeriesPoint
-{
-	protected readonly List<T> _values = [];
-
-	public IReadOnlyList<T> Values =>
-		_values;
-
-	public void Add(T value)
-	{
-		if (_values.Count > 0)
-		{
-			var last = _values[^1];
-			if (value.Time <= last.Time)
-				throw new ArgumentException("New value time must be greater than the last value.");
-		}
-
-		_values.Add(value);
-	}
-
-	public T? GetByTime(DateTime time) =>
-		_values.FirstOrDefault(v => v.Time == time);
-
-	public IEnumerable<T> GetRange(DateTime from, DateTime to) =>
-		_values.Where(v => v.Time >= from && v.Time <= to);
 }

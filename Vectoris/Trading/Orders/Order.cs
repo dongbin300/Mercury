@@ -68,7 +68,7 @@ public class Order
 	/// 실계좌: 실제 체결 기록
 	/// 백테스트: 가상 체결 기록
 	/// </summary>
-	public List<Transaction> Transactions { get; } = new();
+	public List<Transaction> Transactions { get; } = [];
 
 	public Order(
 		string symbol,

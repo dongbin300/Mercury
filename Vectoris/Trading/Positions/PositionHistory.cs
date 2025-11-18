@@ -54,5 +54,6 @@ public class PositionHistory(Position position)
 	/// <summary>
 	/// 결과
 	/// </summary>
-	public PositionResult Result => RealizedPnl > 0 ? PositionResult.Win : PositionResult.Lose;
+	public PositionResult Result => 
+		RealizedPnl > 0 ? PositionResult.Win : PositionResult.Lose;
 }

@@ -9,7 +9,7 @@ public static class DateTimeExtensions
 	/// <remarks>
 	/// 포맷이 명확할 경우 <c>DateTime.ParseExact</c> 사용을 권장합니다.
 	/// </remarks>
-	public static DateTime ParseToDateTime(this string value)
+	public static DateTime ToDateTime(this string value)
 		=> DateTime.Parse(value);
 
 	/// <summary>

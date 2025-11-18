@@ -7,8 +7,6 @@ public interface ITimeSeriesPoint
 {
 	DateTime Time { get; }
 
-	public string ToString()
-	{
-		return $"{Time:yyyy-MM-dd HH:mm:ss}";
-	}
+	public string ToString() =>
+		$"{Time:yyyy-MM-dd HH:mm:ss}";
 }

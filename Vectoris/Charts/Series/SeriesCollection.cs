@@ -8,22 +8,25 @@ namespace Vectoris.Charts.Series;
 /// </summary>
 public class SeriesCollection
 {
-	private readonly Dictionary<string, ValueSeries> _series = new();
+	private readonly Dictionary<string, ValueSeries> _series = [];
 
 	/// <summary>
 	/// 관리 중인 모든 시리즈 조회
 	/// </summary>
-	public IReadOnlyCollection<ValueSeries> Series => _series.Values;
+	public IReadOnlyCollection<ValueSeries> Series =>
+		_series.Values;
 
 	/// <summary>
 	/// 관리 중인 모든 시리즈 이름 조회
 	/// </summary>
-	public IReadOnlyCollection<string> Names => _series.Keys;
+	public IReadOnlyCollection<string> Names =>
+		_series.Keys;
 
 	/// <summary>
 	/// 시리즈 수
 	/// </summary>
-	public int Count => _series.Count;
+	public int Count =>
+		_series.Count;
 
 	/// <summary>
 	/// 새 시리즈 컬렉션 생성
@@ -46,8 +49,7 @@ public class SeriesCollection
 	/// </summary>
 	public void Add(ValueSeries series)
 	{
-		if (series == null)
-			throw new ArgumentNullException(nameof(series));
+		ArgumentNullException.ThrowIfNull(series);
 
 		if (_series.ContainsKey(series.Name))
 			throw new ArgumentException($"Series with name '{series.Name}' already exists.");
@@ -68,18 +70,14 @@ public class SeriesCollection
 	/// <summary>
 	/// 시리즈 제거
 	/// </summary>
-	public bool Remove(string name)
-	{
-		return _series.Remove(name);
-	}
+	public bool Remove(string name) =>
+		_series.Remove(name);
 
 	/// <summary>
 	/// 이름으로 시리즈 조회
 	/// </summary>
-	public ValueSeries? GetSeries(string name)
-	{
-		return _series.TryGetValue(name, out var series) ? series : null;
-	}
+	public ValueSeries? GetSeries(string name) =>
+		_series.TryGetValue(name, out var series) ? series : null;
 
 	/// <summary>
 	/// 이름으로 시리즈 조회 (별칭)
@@ -147,19 +145,19 @@ public class SeriesCollection
 	/// <summary>
 	/// 모든 시리즈 제거
 	/// </summary>
-	public void ClearSeries()
-	{
+	public void ClearSeries() =>
 		_series.Clear();
-	}
 
 	/// <summary>
 	/// 시리즈 이름이 존재하는지 확인
 	/// </summary>
-	public bool Contains(string name) => _series.ContainsKey(name);
+	public bool Contains(string name) =>
+		_series.ContainsKey(name);
 
 	/// <summary>
 	/// 시리즈가 존재하는지 확인
 	/// </summary>
-	public bool Contains(ValueSeries series) => series != null && _series.ContainsKey(series.Name);
+	public bool Contains(ValueSeries series) =>
+		series != null && _series.ContainsKey(series.Name);
 }
 

@@ -16,10 +16,8 @@ public class ValueSeries : TimeSeries<IndicatorValue>
 	/// <summary>
 	/// 새 값 시리즈 생성
 	/// </summary>
-	public ValueSeries(string name) : base()
-	{
+	public ValueSeries(string name) : base() =>
 		Name = name ?? throw new ArgumentNullException(nameof(name));
-	}
 
 	/// <summary>
 	/// 초기 데이터로 값 시리즈 생성
@@ -36,12 +34,14 @@ public class ValueSeries : TimeSeries<IndicatorValue>
 	/// <summary>
 	/// 값 추가 (별칭 메서드)
 	/// </summary>
-	public void AddValue(IndicatorValue value) => Add(value);
+	public void AddValue(IndicatorValue value) =>
+		Add(value);
 
 	/// <summary>
 	/// 값 추가 (간편 메서드)
 	/// </summary>
-	public void AddValue(DateTime time, decimal? value) => Add(new IndicatorValue(time, value));
+	public void AddValue(DateTime time, decimal? value) =>
+		Add(new IndicatorValue(time, value));
 
 	/// <summary>
 	/// 여러 값 한번에 추가
@@ -57,12 +57,14 @@ public class ValueSeries : TimeSeries<IndicatorValue>
 	/// <summary>
 	/// 특정 시간의 값 조회 (별칭 메서드)
 	/// </summary>
-	public IndicatorValue? GetValue(DateTime time) => GetByTime(time);
+	public IndicatorValue? GetValue(DateTime time) =>
+		GetByTime(time);
 
 	/// <summary>
 	/// 가장 최근 값
 	/// </summary>
-	public decimal? LastValue => Last?.Value;
+	public decimal? LastValue =>
+		Last?.Value;
 
 	/// <summary>
 	/// N개 최근 값 조회
@@ -79,10 +81,8 @@ public class ValueSeries : TimeSeries<IndicatorValue>
 	/// <summary>
 	/// 특정 시간 이전의 마지막 값 조회
 	/// </summary>
-	public IndicatorValue? GetLastValueBefore(DateTime time)
-	{
-		return _values.LastOrDefault(v => v.Time < time);
-	}
+	public IndicatorValue? GetLastValueBefore(DateTime time) =>
+		_values.LastOrDefault(v => v.Time < time);
 
 	/// <summary>
 	/// 값들의 단순 이동 평균 계산

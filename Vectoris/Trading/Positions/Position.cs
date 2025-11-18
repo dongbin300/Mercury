@@ -77,23 +77,26 @@ public class Position(string symbol, PositionSide side, DateTime openTime, IEnum
 	/// <summary>
 	/// 총 진입 금액 (자동 갱신)
 	/// </summary>
-	public decimal OpenAmount => OpenPrice * OpenQuantity;
+	public decimal OpenAmount => 
+		OpenPrice * OpenQuantity;
 	#endregion
 
 	#region Close
 	/// <summary>
 	/// 청산 시각 (마지막 청산 Transaction)
 	/// </summary>
-	public DateTime? CloseTime => RelatedTransactions
-		.Where(t => (Side == PositionSide.Long && t.Side == OrderSide.Sell) ||
-					(Side == PositionSide.Short && t.Side == OrderSide.Buy))
-		.OrderByDescending(t => t.Time)
-		.FirstOrDefault()?.Time;
+	public DateTime? CloseTime => 
+		RelatedTransactions
+			.Where(t => (Side == PositionSide.Long && t.Side == OrderSide.Sell) ||
+						(Side == PositionSide.Short && t.Side == OrderSide.Buy))
+			.OrderByDescending(t => t.Time)
+			.FirstOrDefault()?.Time;
 
 	/// <summary>
 	/// 평균 청산 가격 (자동 계산, ClosePrice)
 	/// </summary>
-	public decimal ClosePrice => CloseQuantity > 0 ? CloseAmount / CloseQuantity : 0;
+	public decimal ClosePrice =>
+		CloseQuantity > 0 ? CloseAmount / CloseQuantity : 0;
 
 	/// <summary>
 	/// 총 청산 수량 (자동 갱신)
@@ -123,10 +126,12 @@ public class Position(string symbol, PositionSide side, DateTime openTime, IEnum
 	/// <summary>
 	/// 최고 가격
 	/// </summary>
-	public decimal? MaxPrice => RelatedTransactions.Any() ? RelatedTransactions.Max(t => t.Price) : null;
+	public decimal? MaxPrice => 
+		RelatedTransactions.Any() ? RelatedTransactions.Max(t => t.Price) : null;
 
 	/// <summary>
 	/// 최저 가격
 	/// </summary>
-	public decimal? MinPrice => RelatedTransactions.Any() ? RelatedTransactions.Min(t => t.Price) : null;
+	public decimal? MinPrice => 
+		RelatedTransactions.Any() ? RelatedTransactions.Min(t => t.Price) : null;
 }

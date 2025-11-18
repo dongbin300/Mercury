@@ -3,7 +3,7 @@
 public abstract class IndicatorBase : IIndicator
 {
 	protected readonly List<decimal?> _values = [];
-	public IReadOnlyList<decimal?> Values => 
+	public IReadOnlyList<decimal?> Values =>
 		_values.AsReadOnly();
 	public abstract string Name { get; }
 	public abstract decimal? Current { get; }

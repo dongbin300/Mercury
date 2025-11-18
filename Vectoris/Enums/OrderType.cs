@@ -1,14 +1,13 @@
-﻿namespace Vectoris.Enums
+﻿namespace Vectoris.Enums;
+
+public enum OrderType
 {
-	public enum OrderType
-	{
-		Limit,
-		Market,
-		StopLoss,
-		StopLossMarket,
-		TakeProfit,
-		TakeProfitMarket,
-		TrailingStopLoss,
-		Liquidation
-	}
+	Limit,
+	Market,
+	StopLoss,
+	StopLossMarket,
+	TakeProfit,
+	TakeProfitMarket,
+	TrailingStopLoss,
+	Liquidation
 }

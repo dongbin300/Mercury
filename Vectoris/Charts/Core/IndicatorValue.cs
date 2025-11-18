@@ -10,7 +10,7 @@ public class IndicatorValue(DateTime time, decimal? value) : ITimeSeriesPoint
 	public override string ToString()
 	{
 		return Value.HasValue
-			? $"{Time:yyyy-MM-dd HH:mm:ss} : {Value.Value}"
-			: $"{Time:yyyy-MM-dd HH:mm:ss} : -";
+			? $"{Time:yyyy-MM-dd HH:mm:ss} | {Value.Value}"
+			: $"{Time:yyyy-MM-dd HH:mm:ss} | -";
 	}
 }
