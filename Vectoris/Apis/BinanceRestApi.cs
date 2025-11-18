@@ -6,7 +6,6 @@ using Binance.Net.Objects.Models.Spot;
 using CryptoExchange.Net.Authentication;
 using CryptoExchange.Net.Objects;
 
-using System.Net.Http.Json;
 using System.Text;
 
 using Vectoris.Charts.Core;
