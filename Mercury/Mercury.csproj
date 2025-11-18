@@ -11,8 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Binance.Net" Version="11.7.0" />
+    <PackageReference Include="Binance.Net" Version="11.11.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vectoris\Vectoris.csproj" />
   </ItemGroup>
 
 </Project>

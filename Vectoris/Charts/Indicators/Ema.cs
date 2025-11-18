@@ -1,47 +1,43 @@
 ﻿using Vectoris.Charts.Core;
 
-namespace Vectoris.Charts.Indicators
+namespace Vectoris.Charts.Indicators;
+
+/// <summary>
+/// Exponential Moving Average
+/// </summary>
+/// <param name="period"></param>
+[Indicator("EMA")]
+public class Ema(int period) : IndicatorBase
 {
-	/// <summary>
-	/// Exponential Moving Average
-	/// </summary>
-	/// <param name="period"></param>
-	public class Ema(int period) : IndicatorBase
+	private decimal? _lastEma;
+	private int _count = 0;
+	private decimal _seedSum = 0;
+	private readonly decimal _alpha = 2m / (period + 1);
+
+	public override string Name => $"EMA({period})";
+	public override decimal? Current => _lastEma;
+
+	public override void AddQuote(Quote quote)
 	{
-		private decimal? _lastEma = null;
-		private int _quotesCount = 0;
-		private Queue<decimal> _seedQueue = new();
+		decimal price = quote.Close;
+		_count++;
 
-		public override string Name => $"EMA({period})";
-		public override decimal? Current => _lastEma;
-
-		private decimal Alpha => 2m / (period + 1);
-
-		public override void AddQuote(Quote quote)
+		if (_count <= period)
 		{
-			decimal price = quote.Close;
+			_seedSum += price;
 
-			_quotesCount++;
-
-			if (_quotesCount <= period)
+			if (_count < period)
 			{
-				_seedQueue.Enqueue(price);
-
-				if (_quotesCount == period)
-				{
-					_lastEma = _seedQueue.Average();
-					_values.Add(_lastEma);
-				}
-				else
-				{
-					_values.Add(null);
-				}
-
+				_values.Add(null);
 				return;
 			}
 
-			_lastEma = Alpha * price + (1 - Alpha) * _lastEma!.Value;
+			_lastEma = _seedSum / period;
 			_values.Add(_lastEma);
+			return;
 		}
+
+		_lastEma = _alpha * price + (1m - _alpha) * _lastEma!.Value;
+		_values.Add(_lastEma);
 	}
 }

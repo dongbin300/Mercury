@@ -25,9 +25,5 @@ public interface IIndicator
 	/// <summary>
 	/// 배치용 캔들 추가
 	/// </summary>
-	void AddQuotes(IEnumerable<Quote> quotes)
-	{
-		foreach (var q in quotes)
-			AddQuote(q);
-	}
+	void AddQuotes(IEnumerable<Quote> quotes);
 }

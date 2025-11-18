@@ -13,6 +13,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 
+using Vectoris.Charts.IO;
+
 namespace Lab
 {
 	/// <summary>
@@ -63,7 +65,7 @@ namespace Lab
 			var startTime = new DateTime(2010, 1, 1);
 			var endTime = new DateTime(2025, 3, 1);
 			var symbol = "BTCUSDT";
-			var interval = KlineInterval.OneMonth;
+			var interval = KlineInterval.FifteenMinutes;
 
 			//LocalApi.Init();
 			//var quotes = LocalApi.GetOneDayQuotes(symbol);
@@ -79,8 +81,12 @@ namespace Lab
 			//var rvwap = ArrayCalculator.RollingVwap(high.ToNullable(), low.ToNullable(), close.ToNullable(), volume.ToNullable(), 20);
 			//var stoch = ArrayCalculator.StochasticRsi(close, 3, 3, 14, 14);
 
-			var dema = ArrayCalculator.Dema(close.ToNullable(), 20);
 			var ema = ArrayCalculator.Ema(close.ToNullable(), 20);
+
+			//ChartLoader.GetChartPack(symbol, interval).UseEma(20);
+
+
+			var dema = ArrayCalculator.Dema(close.ToNullable(), 20);
 			var cci = ArrayCalculator.Cci(high, low, close, 20);
 			var atr = ArrayCalculator.Atr(high, low, close, 14);
 			var atrv = ArrayCalculator.AtrVolume(high, low, close, volume, 14);

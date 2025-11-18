@@ -1,6 +1,8 @@
-﻿namespace Vectoris.Charts.Core;
+﻿using Vectoris.Charts.Series;
 
-public class Quote(DateTime time, decimal open, decimal high, decimal low, decimal close, decimal volume = 0)
+namespace Vectoris.Charts.Core;
+
+public class Quote(DateTime time, decimal open, decimal high, decimal low, decimal close, decimal volume = 0) : ITimeSeriesPoint
 {
 	/// <summary>
 	/// 캔들의 시작 시점

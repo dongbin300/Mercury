@@ -3,25 +3,13 @@
 namespace Vectoris.Charts.Series;
 
 /// <summary>
-/// 단일 지표 선 시리즈
+/// 하위 호환성을 위한 LineSeries (향후 제거 권장)
 /// </summary>
-public class LineSeries(string name)
+[Obsolete("Use ValueSeries instead. This class will be removed in future versions.")]
+public class LineSeries(string name) : Series<IndicatorValue>
 {
-	private readonly List<IndicatorValue> _values = [];
-
-	public string Name { get; init; } = name;
-
-	public IReadOnlyList<IndicatorValue> Values =>
-		_values;
-
-	public void AddValue(IndicatorValue value)
-	{
-		if (_values.Count > 0 && value.Time <= _values.Last().Time)
-			throw new ArgumentException("New value time must be greater than the last value.");
-
-		_values.Add(value);
-	}
+	public string Name { get; } = name;
 
 	public IndicatorValue? GetValue(DateTime time) =>
-		_values.FirstOrDefault(v => v.Time == time);
+		GetByTime(time);
 }
